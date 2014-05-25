@@ -21,6 +21,11 @@
 
 `include "constants.sv"
 
+/*	Module ALU: All arithmatic and logic tasks
+*
+*	Operands A and B use ALU OP Code to output result and flags
+*	Address result gives 16-bit output with A and B concatenated
+*/
 module alu
 	(input logic [7:0]	op_A,
 	input logic [7:0]	op_B,
@@ -34,21 +39,28 @@ module alu
 		
 		unique case (op_code)
 			
+			// No operation
 			alu_NOP: begin
 				alu_result = 8'bx;
 				addr_result = 16'bx;
 				next_flags = curr_flags;
 			end
+			
+			// Pass concatenation of A, B to address
 			alu_AB: begin
 				alu_result = 8'bx;
 				addr_result = {op_A, op_B};
 				next_flags = curr_flags;
 			end
+			
+			// Pass B
 			alu_B: begin
 				alu_result = op_B;
 				addr_result = 16'bx;
 				next_flags = curr_flags;
-			end				
+			end
+
+			// A + B
 			alu_ADD: begin
 				{next_flags[0], alu_result} = op_A + op_B;
 				next_flags[3] = (alu_result == 8'b0);
@@ -56,6 +68,8 @@ module alu
 				addr_result = 16'bx;
 				next_flags[2] = 1'b0;
 			end
+			
+			// A + B + CY
 			alu_ADC: begin
 				{next_flags[0], alu_result} = op_A + op_B + curr_flags[0];
 				next_flags[3] = (alu_result == 8'b0);
@@ -63,6 +77,8 @@ module alu
 				addr_result = 16'bx;
 				next_flags[2] = 1'b0;
 			end
+			
+			// A - B
 			alu_SUB: begin
 				{next_flags[0], alu_result} = op_A - op_B;
 				next_flags[3] = (alu_result == 8'b0);
@@ -70,6 +86,8 @@ module alu
 				addr_result = 16'bx;
 				next_flags[2] = 1'b1;
 			end
+			
+			// A - B - CY
 			alu_SBC: begin
 				{next_flags[0], alu_result} = op_A - op_B - curr_flags[0];
 				next_flags[3] = (alu_result == 8'b0);
@@ -77,46 +95,60 @@ module alu
 				addr_result = 16'bx;
 				next_flags[2] = 1'b1;
 			end
+			
+			// A & B
 			alu_AND: begin
 				alu_result = op_A & op_B;
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:0] = 3'b010;
 			end
+			
+			// A | B
 			alu_OR: begin
 				alu_result = op_A | op_B;
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:0] = 3'b000;
 			end
+			
+			// A ^ B
 			alu_XOR: begin
 				alu_result = op_A ^ op_B;
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:0] = 3'b000;
 			end
+			
+			// A + 1
 			alu_INC: begin
-				alu_result = 7'h01 + op_B;
+				alu_result = 7'h01 + op_A;
 				next_flags[3] = (alu_result == 8'b0);
-				next_flags[1] = {{1'b0, 4'h1} + {1'b0, op_B[3:0]}}[4];
+				next_flags[1] = {{1'b0, 4'h1} + {1'b0, op_A[3:0]}}[4];
 				addr_result = 16'bx;
 				next_flags[2] = 1'b0;
 				next_flags[0] = curr_flags[0];
 			end
+			
+			// A - 1
 			alu_DEC: begin
-				alu_result = op_B - 7'h01;
+				alu_result = op_A - 7'h01;
 				next_flags[3] = (alu_result == 8'b0);
-				next_flags[1] = {{1'b0, op_B[3:0]} - {1'b0, 4'h1}}[4];
+				next_flags[1] = {{1'b0, op_A[3:0]} - {1'b0, 4'h1}}[4];
 				addr_result = 16'bx;
 				next_flags[2] = 1'b1;
 				next_flags[0] = curr_flags[0];
 			end
+			
+			// Swaps high and low nibbles of B
 			alu_SWAP: begin
 				alu_result = {op_B[3:0], op_B[7:4]};
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:0] = 3'b0;
 			end
+			
+			// Adjusts result of arithmetic for BCD depending on Half-carry and Carry
 			alu_DAA: begin
 				if (curr_flags[2]) begin
 					unique case(curr_flags[1:0])
@@ -139,48 +171,64 @@ module alu
 				next_flags[2] = curr_flags[2];
 				next_flags[1] = 1'b0;
 			end
+			
+			// Complements B
 			alu_CPL: begin 
 				alu_result = ~op_B;
 				addr_result = 16'bx;
 				next_flags = curr_flags;
 				next_flags[2:1] = 2'b11;
 			end
+			
+			// Rotate left with carry
 			alu_RLC: begin 
 				{next_flags[0], alu_result} = {op_B[7], op_B[6:0], op_B[7]};
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
 			end
+			
+			// Rotate left through carry
 			alu_RL: begin
 				{next_flags[0], alu_result} = {op_B[7], op_B[6:0], curr_flags[0]};
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
 			end
+			
+			// Rotate right with carry
 			alu_RRC: begin
 				{next_flags[0], alu_result} = {op_B[0], op_B[0], op_B[7:1]};
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
 			end
+			
+			// Rotate right through carry
 			alu_RR: begin
 				{next_flags[0], alu_result} = {op_B[0], curr_flags[0], op_B[7:1]};
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
 			end
+			
+			// Arithmetic shift left
 			alu_SLA: begin
 				{next_flags[0], alu_result} = {op_B[7], op_B << 1};
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
 			end
+			
+			// Arithmetic shift right
 			alu_SRA: begin
 				{next_flags[0], alu_result} = {op_B[0], op_B[7], op_B[7:1]};
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
 			end
+			
+			// Logical shift right
 			alu_SRL: begin
 				{next_flags[0], alu_result} = {op_B[0], 1'b0, op_B[7:1]};
 				next_flags[3] = (alu_result == 8'b0);
@@ -188,6 +236,7 @@ module alu
 				next_flags[2:1] = 2'b00;
 			end
 	
+			// Unknown OP Code
 			alu_UNK: begin
 				alu_result = 8'bx;
 				addr_result = 16'bx;

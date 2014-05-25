@@ -20,3 +20,9 @@
 **************************************************************************/
 
 `include "datapath.sv"
+
+/* Module ChipInterface: Connects Cyclone V board ports to datapath
+*
+*	WIP
+*
+*/

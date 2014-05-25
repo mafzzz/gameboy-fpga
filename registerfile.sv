@@ -21,6 +21,13 @@
 
 `include "constants.sv"
 
+/* 	Module RegisterFile: Contains registers of processor
+*
+*  	Registers:
+*	A, B, C, D, E, H, L --> GPRs
+*	F --> Flags
+*	A --> Accumulator
+*/
 module register_file
 	(input logic [7:0] 	reg_input,
 	input logic 		load_en,
@@ -40,6 +47,7 @@ module register_file
 	assign flags = F;
 	
 	always_ff @(posedge clk, posedge rst) begin
+		// Reset all registers to 0
 		if (rst) begin
 			A <= 8'b0;
 			B <= 8'b0;
@@ -50,7 +58,9 @@ module register_file
 			H <= 8'b0;
 			L <= 8'b0;
 		end
+		
 		else begin
+			// Load flags and register based on load signals
 			if (load_flags)
 				F <= flags_in;
 			if (load_en) 
@@ -69,6 +79,7 @@ module register_file
 		end
 	end
 
+	// Output reg A, B output based on A, B select lines
 	always_comb begin
 		case(reg_selA)
 			3'b000: reg_outA = A;

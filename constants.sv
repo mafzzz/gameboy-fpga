@@ -25,6 +25,14 @@
 `ifndef CONSTANTS
 `define CONSTANTS
 
+/*	Constants file
+*
+*	Contains typedefs, macro definitions, and enumerations for readability
+*/
+
+/*
+*	Register enumeration
+*/
 typedef enum logic [2:0] {
 	reg_A		= 3'b000,
 	reg_B		= 3'b001,
@@ -37,6 +45,9 @@ typedef enum logic [2:0] {
 	reg_UNK		= 3'bxxx
 } reg_sel_t;
 
+/*
+*	ALU Op Code enumeration
+*/
 typedef enum logic [4:0] {
 	alu_NOP 	= 5'b0_0000,
 	alu_B 		= 5'b0_0001, 
@@ -64,6 +75,9 @@ typedef enum logic [4:0] {
 	alu_UNK 	= 5'bx_xxxx
 } alu_op_t;
 
+/*
+*	ALU sources enumeration
+*/
 typedef enum logic [3:0] {
 	src_NONE 	= 4'b0_000,
 	src_REGA 	= 4'b0_001,
@@ -78,6 +92,9 @@ typedef enum logic [3:0] {
 	src_UNK 	= 4'bxxxx
 } alu_src_t;
 
+/*
+*	ALU destination enumeration
+*/
 typedef enum logic [3:0] {
 	dest_NONE 	= 4'b0_000,
 	dest_REG  	= 4'b0_001,
@@ -91,6 +108,9 @@ typedef enum logic [3:0] {
 	dest_UNK 	= 4'bxxxx
 } dest_t;
 
+/*
+*	FSM State enumeration
+*/
 typedef enum logic [1:0] {
 	s_FETCH		= 2'b00,
 	s_DECODE	= 2'b01,
@@ -100,8 +120,12 @@ typedef enum logic [1:0] {
 	s_UNK		= 2'bxx
 } control_state_t;
 
+/*
+*	OP Code enumeration
+*/
 typedef logic [7:0] op_code_t;
 
+// Standard OP Codes
 typedef enum op_code_t {
 	NOP 		= 8'h00, LD_BC_N16	= 8'h01, LD_BCA_A 	= 8'h02, INC_BC 	= 8'h03, INC_B 			= 8'h04, DEC_B 		= 8'h05, LD_B_N8 	= 8'h06, RLCA 		= 8'h07,
 	LD_N16A_SP	= 8'h08, ADD_HL_BC 	= 8'h09, LD_A_BCA 	= 8'h0A, DEC_BC 	= 8'h0B, INC_C 			= 8'h0C, DEC_C 		= 8'h0D, LD_C_N8 	= 8'h0E, RRCA 		= 8'h0F,
@@ -139,6 +163,7 @@ typedef enum op_code_t {
 	UNK_OP		= 8'bxxxx_xxxx
 } std_instruction_t;
 
+// CB Prefix OP Codes
 typedef enum op_code_t {
 	RLC_B 		= 8'h00, RLC_C 		= 8'h01, RLC_D 		= 8'h02, RLC_E 		= 8'h03, RLC_H 			= 8'h04, RLC_L 		= 8'h05, RLC_HLA 	= 8'h06, RLC_A 		= 8'h07,
 	RRC_B 		= 8'h08, RRC_C 		= 8'h09, RRC_D 		= 8'h0A, RRC_E		= 8'h0B, RRC_H 			= 8'h0C, RRC_L 		= 8'h0D, RRC_HLA 	= 8'h0E, RRC_A 		= 8'h0F,
@@ -174,8 +199,11 @@ typedef enum op_code_t {
 	SET_7_B 	= 8'hF8, SET_7_C 	= 8'hF9, SET_7_D 	= 8'hFA, SET_7_E 	= 8'hFB, SET_7_H 		= 8'hFC, SET_7_L 	= 8'hFD, SET_7_HLA 	= 8'hFE, SET_7_A 	= 8'hFF,
 
 	UNK_OP_SP = 8'bxxxx_xxxx
-} spc_instruction_t;
+} cb_instruction_t;
 
+/*
+*	Controlpath control code output for Datapath
+*/
 typedef struct packed {
 	reg_sel_t	reg_selA;
 	reg_sel_t	reg_selB;

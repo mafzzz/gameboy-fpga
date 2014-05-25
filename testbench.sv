@@ -20,3 +20,9 @@
 **************************************************************************/
 
 `include "datapath.sv"
+
+/* 	Module Testbench: Testing environment for the design on completion
+*
+*	WIP
+*
+*/
