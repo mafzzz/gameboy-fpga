@@ -106,6 +106,7 @@ typedef enum logic [3:0] {
 	dest_PC_h 	= 4'b0_101,
 	dest_MEMD 	= 4'b0_110,
 	dest_MEMA 	= 4'b0_111,
+	dest_PCIN	= 4'b1_000,
 	
 	dest_UNK 	= 4'bxxxx
 } dest_t;

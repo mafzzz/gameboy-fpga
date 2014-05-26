@@ -43,8 +43,17 @@ module testbench();
 	initial
 		forever #5 clk <= ~clk;
 	
+	std_instruction_t	instruc;
+	initial
+		forever #1 $cast(instruc, DUT.IR);
+	
 	initial begin
-		$monitor("State: %s 			| 	PC: %h 	IR: %h		|	Reset: %b", DUT.cp.curr_state.name, DUT.PC, DUT.IR, rst);
+		$monitor("State: %s 			| 	PC: %h 	IR: %s			SP:	%h	|	Reset: %b \
+				Registers {A B C D E H L} : {%h %h %h %h %h %h %h} \
+				Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+				DUT.cp.curr_state.name, DUT.PC, instruc.name, DUT.SP, rst,
+				DUT.rf.A, DUT.rf.B, DUT.rf.C, DUT.rf.D, DUT.rf.E, DUT.rf.H, DUT.rf.L,
+				DUT.rf.F[3], DUT.rf.F[2], DUT.rf.F[1], DUT.rf.F[0]);
 		#500;
 		$stop;
 	end

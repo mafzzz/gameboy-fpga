@@ -77,7 +77,9 @@ module control_path
 			*	Does nothing if not first iteration. 
 			*/
 			s_FETCH: begin
-				fetch_op_code 			= `TRUE;
+				if (iteration == 3'b0)
+					fetch_op_code 			= `TRUE;
+				
 				control.reg_selA 		= reg_UNK;
 				control.reg_selB 		= reg_UNK;
 				control.alu_op   		= alu_UNK;
@@ -108,7 +110,1158 @@ module control_path
 				control.write_en		= `FALSE;
 				control.ld_flags		= `FALSE;
 				
-				next_state = s_EXECUTE;
+				case (op_code)
+					// REGISTER LOAD OPERATIONS
+					LD_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_B_A: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_A;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_B_B: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_B;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_B_C: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_C;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_B_D: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_D;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_B_E: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_E;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_B_H: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_H;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_B_L: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_L;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_C_A: begin
+						control.reg_selA = reg_C;
+						control.reg_selB = reg_A;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_C_B: begin
+						control.reg_selA = reg_C;
+						control.reg_selB = reg_B;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_C_C: begin
+						control.reg_selA = reg_C;
+						control.reg_selB = reg_C;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_C_D: begin
+						control.reg_selA = reg_C;
+						control.reg_selB = reg_D;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_C_E: begin
+						control.reg_selA = reg_C;
+						control.reg_selB = reg_E;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_C_H: begin
+						control.reg_selA = reg_C;
+						control.reg_selB = reg_H;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_C_L: begin
+						control.reg_selA = reg_C;
+						control.reg_selB = reg_L;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_D_A: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_A;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_D_B: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_B;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_D_C: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_C;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_D_D: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_D;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_D_E: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_E;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_D_H: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_H;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_D_L: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_L;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_E_A: begin
+						control.reg_selA = reg_E;
+						control.reg_selB = reg_A;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_E_B: begin
+						control.reg_selA = reg_E;
+						control.reg_selB = reg_B;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_E_C: begin
+						control.reg_selA = reg_E;
+						control.reg_selB = reg_C;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_E_D: begin
+						control.reg_selA = reg_E;
+						control.reg_selB = reg_D;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_E_E: begin
+						control.reg_selA = reg_E;
+						control.reg_selB = reg_E;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_E_H: begin
+						control.reg_selA = reg_E;
+						control.reg_selB = reg_H;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_E_L: begin
+						control.reg_selA = reg_E;
+						control.reg_selB = reg_L;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_H_A: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_A;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_H_B: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_B;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_H_C: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_C;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_H_D: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_D;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_H_E: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_E;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_H_H: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_H;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_H_L: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_L_A: begin
+						control.reg_selA = reg_L;
+						control.reg_selB = reg_A;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_L_B: begin
+						control.reg_selA = reg_L;
+						control.reg_selB = reg_B;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_L_C: begin
+						control.reg_selA = reg_L;
+						control.reg_selB = reg_C;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_L_D: begin
+						control.reg_selA = reg_L;
+						control.reg_selB = reg_D;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_L_E: begin
+						control.reg_selA = reg_L;
+						control.reg_selB = reg_E;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_L_H: begin
+						control.reg_selA = reg_L;
+						control.reg_selB = reg_H;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_L_L: begin
+						control.reg_selA = reg_L;
+						control.reg_selB = reg_L;
+						control.alu_op   = alu_B;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					
+					
+					// LOAD REGISTER IMMEDIATE
+					LD_A_N8: begin
+						control.alu_op	 = alu_AB;
+						control.alu_srcA = src_PC_h;
+						control.alu_srcB = src_PC_l;
+						control.alu_dest = dest_MEMA;
+						next_state		 = s_EXECUTE;
+					end
+					LD_B_N8: begin
+						control.alu_op	 = alu_AB;
+						control.alu_srcA = src_PC_h;
+						control.alu_srcB = src_PC_l;
+						control.alu_dest = dest_MEMA;
+						next_state		 = s_EXECUTE;
+					end
+					LD_C_N8: begin
+						control.alu_op	 = alu_AB;
+						control.alu_srcA = src_PC_h;
+						control.alu_srcB = src_PC_l;
+						control.alu_dest = dest_MEMA;
+						next_state		 = s_EXECUTE;
+					end
+					LD_D_N8: begin
+						control.alu_op	 = alu_AB;
+						control.alu_srcA = src_PC_h;
+						control.alu_srcB = src_PC_l;
+						control.alu_dest = dest_MEMA;
+						next_state		 = s_EXECUTE;
+					end
+					LD_E_N8: begin
+						control.alu_op	 = alu_AB;
+						control.alu_srcA = src_PC_h;
+						control.alu_srcB = src_PC_l;
+						control.alu_dest = dest_MEMA;
+						next_state		 = s_EXECUTE;
+					end
+					LD_H_N8: begin
+						control.alu_op	 = alu_AB;
+						control.alu_srcA = src_PC_h;
+						control.alu_srcB = src_PC_l;
+						control.alu_dest = dest_MEMA;
+						next_state		 = s_EXECUTE;
+					end
+					LD_L_N8: begin
+						control.alu_op	 = alu_AB;
+						control.alu_srcA = src_PC_h;
+						control.alu_srcB = src_PC_l;
+						control.alu_dest = dest_MEMA;
+						next_state		 = s_EXECUTE;
+					end
+					
+					// ADD INSTRUCTIONS
+					ADD_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op	 = alu_ADD;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADD_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op	 = alu_ADD;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADD_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_ADD;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADD_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op	 = alu_ADD;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADD_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_ADD;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADD_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op	 = alu_ADD;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADD_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_ADD;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// ADD CARRY
+					ADC_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op	 = alu_ADC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADC_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op	 = alu_ADC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADC_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_ADC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADC_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op	 = alu_ADC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADC_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_ADC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADC_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op	 = alu_ADC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					ADC_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_ADC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// SUBTRACT
+					SUB_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SUB_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SUB_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SUB_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SUB_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SUB_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SUB_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// SUBTRACT CARRY
+					SBC_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op	 = alu_SBC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SBC_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op	 = alu_SBC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SBC_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_SBC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SBC_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op	 = alu_SBC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SBC_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_SBC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SBC_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op	 = alu_SBC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					SBC_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_SBC;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// AND OPERATIONS
+					AND_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op	 = alu_AND;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					AND_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op	 = alu_AND;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					AND_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_AND;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					AND_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op	 = alu_AND;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					AND_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_AND;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					AND_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op	 = alu_AND;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					AND_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_AND;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// OR OPERATIONS
+					OR_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op	 = alu_OR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					OR_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op	 = alu_OR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					OR_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_OR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					OR_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op	 = alu_OR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					OR_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_OR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					OR_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op	 = alu_OR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					OR_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_OR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// XOR OPERATIONS
+					XOR_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op	 = alu_XOR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					XOR_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op	 = alu_XOR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					XOR_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_XOR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					XOR_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op	 = alu_XOR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					XOR_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_XOR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					XOR_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op	 = alu_XOR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					XOR_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_XOR;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// COMPARE OPERATIONS
+					CP_A_A: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_A;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_NONE;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					CP_A_B: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_B;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_NONE;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					CP_A_C: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_NONE;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					CP_A_D: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_D;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_NONE;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					CP_A_E: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_NONE;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					CP_A_H: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_H;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_NONE;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					CP_A_L: begin
+						control.reg_selA = reg_A;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_SUB;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_NONE;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// INCREMENT OPERATIONS
+					INC_A: begin
+						control.reg_selA = reg_A;
+						control.alu_op	 = alu_INC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					INC_B: begin
+						control.reg_selA = reg_B;
+						control.alu_op	 = alu_INC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					INC_C: begin
+						control.reg_selA = reg_C;
+						control.alu_op	 = alu_INC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					INC_D: begin
+						control.reg_selA = reg_D;
+						control.alu_op	 = alu_INC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					INC_E: begin
+						control.reg_selA = reg_E;
+						control.alu_op	 = alu_INC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					INC_H: begin
+						control.reg_selA = reg_H;
+						control.alu_op	 = alu_INC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					INC_L: begin
+						control.reg_selA = reg_L;
+						control.alu_op	 = alu_INC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// DECREMENT OPERATIONS
+					DEC_A: begin
+						control.reg_selA = reg_A;
+						control.alu_op	 = alu_DEC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					DEC_B: begin
+						control.reg_selA = reg_B;
+						control.alu_op	 = alu_DEC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					DEC_C: begin
+						control.reg_selA = reg_C;
+						control.alu_op	 = alu_DEC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					DEC_D: begin
+						control.reg_selA = reg_D;
+						control.alu_op	 = alu_DEC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					DEC_E: begin
+						control.reg_selA = reg_E;
+						control.alu_op	 = alu_DEC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					DEC_H: begin
+						control.reg_selA = reg_H;
+						control.alu_op	 = alu_DEC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					DEC_L: begin
+						control.reg_selA = reg_L;
+						control.alu_op	 = alu_DEC;
+						control.alu_srcB = src_REGA;
+						control.alu_dest = dest_REG;
+						control.ld_flags = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					
+					STOP: begin
+						$stop;
+					end
+					NOP: begin
+						next_state = s_FETCH;
+					end
+					
+					default: begin
+						next_state = s_EXECUTE;
+					end
+				endcase
+				
 			end
 			
 			/*	State = EXECUTE
@@ -127,10 +1280,53 @@ module control_path
 				control.ld_flags		= `FALSE;
 				
 				case (op_code)
-					default: ;
+					// LOAD REGISTER IMMEDIATE
+					LD_A_N8: begin
+						control.alu_dest = dest_PCIN;
+					
+						control.read_en  = `TRUE;
+						next_state 		 = s_WRITE;
+					end
+					LD_B_N8: begin
+						control.alu_dest = dest_PCIN;
+					
+						control.read_en  = `TRUE;
+						next_state 		 = s_WRITE;
+					end
+					LD_C_N8: begin
+						control.alu_dest = dest_PCIN;
+					
+						control.read_en  = `TRUE;
+						next_state 		 = s_WRITE;
+					end
+					LD_D_N8: begin
+						control.alu_dest = dest_PCIN;
+					
+						control.read_en  = `TRUE;
+						next_state 		 = s_WRITE;
+					end
+					LD_E_N8: begin
+						control.alu_dest = dest_PCIN;
+					
+						control.read_en  = `TRUE;
+						next_state 		 = s_WRITE;
+					end
+					LD_H_N8: begin
+						control.alu_dest = dest_PCIN;
+					
+						control.read_en  = `TRUE;
+						next_state 		 = s_WRITE;
+					end
+					LD_L_N8: begin
+						control.alu_dest = dest_PCIN;
+					
+						control.read_en  = `TRUE;
+						next_state 		 = s_WRITE;
+					end
+					default: begin
+						next_state = s_WRITE;
+					end
 				endcase
-				
-				next_state = s_WRITE;
 			end
 				
 			/*	State = WRITE
@@ -149,7 +1345,61 @@ module control_path
 				control.write_en		= `FALSE;
 				control.ld_flags		= `FALSE;
 				
-				next_state = s_FETCH;
+				case (op_code)
+					// LOAD REGISTER IMMEDIATE
+					LD_A_N8: begin
+						control.alu_op 	 = alu_B;
+						control.reg_selA = reg_A;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_B_N8: begin
+						control.alu_op 	 = alu_B;
+						control.reg_selA = reg_B;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_C_N8: begin
+						control.alu_op 	 = alu_B;
+						control.reg_selA = reg_C;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_D_N8: begin
+						control.alu_op 	 = alu_B;
+						control.reg_selA = reg_D;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_E_N8: begin
+						control.alu_op 	 = alu_B;
+						control.reg_selA = reg_E;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_H_N8: begin
+						control.alu_op 	 = alu_B;
+						control.reg_selA = reg_H;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					LD_L_N8: begin
+						control.alu_op 	 = alu_B;
+						control.reg_selA = reg_L;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						next_state 		 = s_FETCH;
+					end
+					default: begin
+						next_state = s_FETCH;
+					end
+				endcase
 			end
 		endcase
 	

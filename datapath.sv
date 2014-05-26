@@ -68,20 +68,21 @@ module datapath
 	logic 				fetch;
 	logic [7:0]			outA, outB;
 
-	// {MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
-	logic [6:0]			dest_en;
+	// {PCIN, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
+	logic [7:0]			dest_en;
 	
 	always_comb begin
 		case (controls.alu_dest)
-			dest_NONE:  dest_en = 7'b000_0000;
-			dest_REG:   dest_en = 7'b000_0001;
-			dest_SP_l:  dest_en = 7'b000_0010;
-			dest_SP_h:  dest_en = 7'b000_0100;
-			dest_PC_l:  dest_en = 7'b000_1000;
-			dest_PC_h:  dest_en = 7'b001_0000;
-			dest_MEMD:  dest_en = 7'b010_0000;
-			dest_MEMA:  dest_en = 7'b100_0000;
-			default:	dest_en = 7'bxxx_xxxx;
+			dest_NONE:  dest_en = 8'b0000_0000;
+			dest_REG:   dest_en = 8'b0000_0001;
+			dest_SP_l:  dest_en = 8'b0000_0010;
+			dest_SP_h:  dest_en = 8'b0000_0100;
+			dest_PC_l:  dest_en = 8'b0000_1000;
+			dest_PC_h:  dest_en = 8'b0001_0000;
+			dest_MEMD:  dest_en = 8'b0010_0000;
+			dest_MEMA:  dest_en = 8'b0100_0000;
+			dest_PCIN:	dest_en = 8'b1000_0000;
+			default:	dest_en = 8'bxxx_xxxx;
 		endcase
 	end
 	
@@ -94,7 +95,7 @@ module datapath
 	assign SP_next[15:8]	= (dest_en[2]) ? alu_output : SP[15:8];
 	
 	always_comb begin
-		if (fetch)
+		if (fetch | dest_en[7])
 			PC_next = PC + 1;
 		else begin
 			PC_next[7:0] 	= (dest_en[3]) ? alu_output : PC[7:0];
@@ -102,7 +103,7 @@ module datapath
 		end
 	end
 	
-	assign MDR_next		 	= (dest_en[5]) ? alu_output : MDR;
+	assign MDR_next		 	= (controls.read_en) ? databus : ((dest_en[5]) ? alu_output : MDR);
 	
 	register_file	rf 	(.reg_input (alu_output), .reg_selA (controls.reg_selA), .reg_selB (controls.reg_selB), .rst (rst), 
 		.clk (clk), .load_en (dest_en[0]), .flags_in (flags_in), .reg_outA (outA), .reg_outB (outB), .flags (flags_out));
