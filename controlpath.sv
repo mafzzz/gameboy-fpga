@@ -16,7 +16,7 @@
 *   You should have received a copy of the GNU General Public License
 *   along with this program.
 *	
-*	Contact Sohil Shah at sohils@cmu.edu for information or questions. 
+*	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
 `include "constants.sv"
@@ -86,10 +86,9 @@ module control_path
 				control.alu_srcA		= src_UNK;
 				control.alu_srcB		= src_UNK;	
 				control.alu_dest		= dest_UNK;
-				control.reg_ld			= `FALSE;
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
-				control.flags_loaded	= {`FALSE, `FALSE, `FALSE, `FALSE};
+				control.ld_flags		= `FALSE;
 			end
 			
 			/*	State = DECODE
@@ -104,10 +103,9 @@ module control_path
 				control.alu_srcA		= src_UNK;
 				control.alu_srcB		= src_UNK;	
 				control.alu_dest		= dest_UNK;
-				control.reg_ld			= `FALSE;
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
-				control.flags_loaded	= {`FALSE, `FALSE, `FALSE, `FALSE};
+				control.ld_flags		= `FALSE;
 			end
 			
 			/*	State = EXECUTE
@@ -121,10 +119,9 @@ module control_path
 				control.alu_srcA		= src_UNK;
 				control.alu_srcB		= src_UNK;	
 				control.alu_dest		= dest_UNK;
-				control.reg_ld			= `FALSE;
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
-				control.flags_loaded	= {`FALSE, `FALSE, `FALSE, `FALSE};
+				control.ld_flags		= `FALSE;
 				
 				case (op_code)
 					default: ;
@@ -144,10 +141,9 @@ module control_path
 				control.alu_srcA		= src_UNK;
 				control.alu_srcB		= src_UNK;	
 				control.alu_dest		= dest_UNK;
-				control.reg_ld			= `FALSE;
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
-				control.flags_loaded	= {`FALSE, `FALSE, `FALSE, `FALSE};
+				control.ld_flags		= `FALSE;
 			end
 		endcase
 	

@@ -16,7 +16,7 @@
 *   You should have received a copy of the GNU General Public License
 *   along with this program.
 *	
-*	Contact Sohil Shah at sohils@cmu.edu for information or questions. 
+*	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
 `include "constants.sv"
@@ -31,12 +31,11 @@
 module register_file
 	(input logic [7:0] 	reg_input,
 	input logic 		load_en,
-	input logic [2:0]	reg_selA,
-	input logic [2:0]	reg_selB,
+	input reg_sel_t		reg_selA,
+	input reg_sel_t		reg_selB,
 	input logic 		rst,
 	input logic 		clk, 
 	input logic			flags_in,
-	input logic			load_flags,
 	output logic [7:0]	reg_outA,
 	output logic [7:0]	reg_outB,
 	output logic [3:0]	flags);
@@ -60,18 +59,18 @@ module register_file
 		end
 		
 		else begin
-			// Load flags and register based on load signals
-			if (load_flags)
-				F <= flags_in;
+
+			F <= flags_in;
+
 			if (load_en) 
 				case (reg_selA)
-					3'b000:	A <= reg_input;
-					3'b001: B <= reg_input;
-					3'b010: C <= reg_input;
-					3'b011: D <= reg_input;
-					3'b100: E <= reg_input;
-					3'b101: H <= reg_input;
-					3'b110: L <= reg_input;
+					reg_A: A <= reg_input;
+					reg_B: B <= reg_input;
+					reg_C: C <= reg_input;
+					reg_D: D <= reg_input;
+					reg_E: E <= reg_input;
+					reg_H: H <= reg_input;
+					reg_L: L <= reg_input;
 					default: /* Do Nothing */;
 				endcase
 			else
@@ -82,23 +81,23 @@ module register_file
 	// Output reg A, B output based on A, B select lines
 	always_comb begin
 		case(reg_selA)
-			3'b000: reg_outA = A;
-			3'b001: reg_outA = B;
-			3'b010: reg_outA = C;
-			3'b011: reg_outA = D;
-			3'b100:	reg_outA = E;
-			3'b101: reg_outA = H;
-			3'b110: reg_outA = L;
+			reg_A: reg_outA = A;
+			reg_B: reg_outA = B;
+			reg_C: reg_outA = C;
+			reg_D: reg_outA = D;
+			reg_E: reg_outA = E;
+			reg_H: reg_outA = H;
+			reg_L: reg_outA = L;
 		endcase
 		
 		case(reg_selB)
-			3'b000: reg_outB = A;
-			3'b001: reg_outB = B;
-			3'b010: reg_outB = C;
-			3'b011: reg_outB = D;
-			3'b100: reg_outB = E;
-			3'b101: reg_outB = H;
-			3'b110: reg_outB = L;
+			reg_A: reg_outB = A;
+			reg_B: reg_outB = B;
+			reg_C: reg_outB = C;
+			reg_D: reg_outB = D;
+			reg_E: reg_outB = E;
+			reg_H: reg_outB = H;
+			reg_L: reg_outB = L;
 		endcase
 	end
 	

@@ -16,7 +16,7 @@
 *   You should have received a copy of the GNU General Public License
 *   along with this program.
 *	
-*	Contact Sohil Shah at sohils@cmu.edu for information or questions. 
+*	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
 `include "constants.sv"

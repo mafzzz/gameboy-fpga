@@ -16,7 +16,7 @@
 *   You should have received a copy of the GNU General Public License
 *   along with this program.
 *	
-*	Contact Sohil Shah at sohils@cmu.edu for information or questions. 
+*	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
 `define TRUE 	1'b1
@@ -211,10 +211,9 @@ typedef struct packed {
 	alu_src_t 	alu_srcA;
 	alu_src_t 	alu_srcB;
 	dest_t 		alu_dest;
-	logic		reg_ld;
 	logic 		read_en;
 	logic 		write_en;
-	logic [3:0]	flags_loaded;
+	logic		ld_flags;
 } control_code_t;
 
 `endif
