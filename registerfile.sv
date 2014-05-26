@@ -35,7 +35,7 @@ module register_file
 	input reg_sel_t		reg_selB,
 	input logic 		rst,
 	input logic 		clk, 
-	input logic			flags_in,
+	input logic	[3:0]	flags_in,
 	output logic [7:0]	reg_outA,
 	output logic [7:0]	reg_outB,
 	output logic [3:0]	flags);

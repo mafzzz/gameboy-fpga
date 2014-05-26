@@ -19,7 +19,7 @@
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
-`include "constants.h"
+`include "constants.sv"
 
 /* 	Module sram: simulation model of memory
 *
@@ -27,7 +27,7 @@
 *
 */
 module sram
-	(inout tri 	[7:0]	databus,
+	(inout	 	[7:0]	databus,
 	input logic [15:0]	address,
 	input logic			RE,
 	input logic			WE,

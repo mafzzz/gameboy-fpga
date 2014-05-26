@@ -28,52 +28,25 @@
 */
 module testbench();
 
-	tri 	[7:0]	databus;
-	logic 	[15:0]	address;
-	logic			RE;
-	logic			WE;
-	logic			clk;
+	logic	clk;
+	logic	rst;
 	
-	sram	mem(.*);
+	datapath DUT (.*);
 	
 	initial begin
-		clk <= '0
-		forever #2 clk = ~clk;
+		rst <= '1;
+		clk <= '0;
+		#10;
+		rst <= '0;
 	end
 
+	initial
+		forever #5 clk <= ~clk;
+	
 	initial begin
-		$monitor("Address: %h  |  Databus: %h  |  RE: %b  WE: %b", address, databus, RE, WE);
-		
-		address <= '0;
-		databus <= 'z;
-		RE <= '0;
-		WE <= '0
-		#10;
-		
-		RE <= '1;
-		#10;
-		address <= 16'h01;
-		#10;
-		address <= 16'h02;
-		#10;
-		address <= 16'h03;
-		#10;
-		address <= 16'h04;
-		#10;
-		address <= 16'h05;
-		#10;
-		address <= 16'h06;
-		#10;
-		address <= 16'h07;
-		#10;
-		address <= 16'h08;
-		#10;
-		address <= 16'h09;
-		#10;
-		address <= 16'h0A;
-		#10;
+		$monitor("State: %s 			| 	PC: %h 	IR: %h		|	Reset: %b", DUT.cp.curr_state.name, DUT.PC, DUT.IR, rst);
+		#500;
 		$stop;
-		
 	end
 	
 endmodule: testbench

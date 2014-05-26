@@ -34,8 +34,11 @@ module datapath
 	(input logic		clk,
 	input logic			rst);
 	
-	logic [15:0] 		SP, PC, MAR, SP_next, PC_next, MAR_next;
-	logic [7:0]  		IR, MDR, IR_next, MDR_next;
+	reg [15:0] 			SP, PC, MAR;
+	reg [7:0]  			IR, MDR;
+	
+	logic [15:0]		SP_next, PC_next, MAR_next;
+	logic [7:0]			IR_next, MDR_next;
 	
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
@@ -61,11 +64,12 @@ module datapath
 	
 	logic [3:0]			alu_flags, flags_in, flags_out;
 	assign flags_in = 	(controls.ld_flags) ? alu_flags : flags_out;
-	
+		
+	logic 				fetch;
 	logic [7:0]			outA, outB;
 
 	// {MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
-	logic [6:0]		dest_en;
+	logic [6:0]			dest_en;
 	
 	always_comb begin
 		case (controls.alu_dest)
@@ -81,14 +85,24 @@ module datapath
 		endcase
 	end
 	
+	tri [7:0] 			databus;
+	assign databus = (controls.write_en) ? MDR : 8'bz;
+	
+	assign IR_next			= (fetch) ? databus : IR;
+	
 	assign SP_next[7:0] 	= (dest_en[1]) ? alu_output : SP[7:0];
 	assign SP_next[15:8]	= (dest_en[2]) ? alu_output : SP[15:8];
 	
-	assign PC_next[7:0] 	= (dest_en[3]) ? alu_output : PC[7:0];
-	assign PC_next[15:8]	= (dest_en[4]) ? alu_output : PC[15:8];
+	always_comb begin
+		if (fetch)
+			PC_next = PC + 1;
+		else begin
+			PC_next[7:0] 	= (dest_en[3]) ? alu_output : PC[7:0];
+			PC_next[15:8]	= (dest_en[4]) ? alu_output : PC[15:8];
+		end
+	end
 	
 	assign MDR_next		 	= (dest_en[5]) ? alu_output : MDR;
-	assign MAR_next			= (dest_en[6]) ? alu_output : MAR;
 	
 	register_file	rf 	(.reg_input (alu_output), .reg_selA (controls.reg_selA), .reg_selB (controls.reg_selB), .rst (rst), 
 		.clk (clk), .load_en (dest_en[0]), .flags_in (flags_in), .reg_outA (outA), .reg_outB (outB), .flags (flags_out));
@@ -128,8 +142,11 @@ module datapath
 	alu				al	(.op_A (inA), .op_B (inB), .op_code (controls.alu_op), .curr_flags (flags_out), .next_flags (alu_flags), .alu_result (alu_output),
 		.addr_result (MAR_next));
 	
-	logic 				fetch;
+	control_path		cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls), .fetch_op_code (fetch));
 	
-	controlpath		cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .controls (control), .fetch_op_code (fetch));
+	logic [15:0]	address;
+	assign address = (fetch) ? PC : MAR;
+	
+	sram			mu	(.clk (clk), .address (address), .databus (databus), .RE (controls.read_en | fetch), .WE (controls.write_en));
 	
 endmodule: datapath

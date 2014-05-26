@@ -77,18 +77,18 @@ module control_path
 			*	Does nothing if not first iteration. 
 			*/
 			s_FETCH: begin
-				if (iteration == 3'b000)
-					fetch_op_code 		= `TRUE;
-			
+				fetch_op_code 			= `TRUE;
 				control.reg_selA 		= reg_UNK;
 				control.reg_selB 		= reg_UNK;
 				control.alu_op   		= alu_UNK;
 				control.alu_srcA		= src_UNK;
 				control.alu_srcB		= src_UNK;	
-				control.alu_dest		= dest_UNK;
+				control.alu_dest		= dest_NONE;
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
 				control.ld_flags		= `FALSE;
+				
+				next_state = s_DECODE;
 			end
 			
 			/*	State = DECODE
@@ -97,15 +97,18 @@ module control_path
 			*
 			*/
 			s_DECODE: begin
+				fetch_op_code			= `FALSE;
 				control.reg_selA 		= reg_UNK;
 				control.reg_selB 		= reg_UNK;
 				control.alu_op   		= alu_UNK;
 				control.alu_srcA		= src_UNK;
 				control.alu_srcB		= src_UNK;	
-				control.alu_dest		= dest_UNK;
+				control.alu_dest		= dest_NONE;
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
 				control.ld_flags		= `FALSE;
+				
+				next_state = s_EXECUTE;
 			end
 			
 			/*	State = EXECUTE
@@ -118,7 +121,7 @@ module control_path
 				control.alu_op   		= alu_UNK;
 				control.alu_srcA		= src_UNK;
 				control.alu_srcB		= src_UNK;	
-				control.alu_dest		= dest_UNK;
+				control.alu_dest		= dest_NONE;
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
 				control.ld_flags		= `FALSE;
@@ -127,6 +130,7 @@ module control_path
 					default: ;
 				endcase
 				
+				next_state = s_WRITE;
 			end
 				
 			/*	State = WRITE
@@ -140,10 +144,12 @@ module control_path
 				control.alu_op   		= alu_UNK;
 				control.alu_srcA		= src_UNK;
 				control.alu_srcB		= src_UNK;	
-				control.alu_dest		= dest_UNK;
+				control.alu_dest		= dest_NONE;
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
 				control.ld_flags		= `FALSE;
+				
+				next_state = s_FETCH;
 			end
 		endcase
 	
