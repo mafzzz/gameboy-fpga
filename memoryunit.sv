@@ -19,61 +19,28 @@
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
-`include "datapath.sv"
+`include "constants.h"
 
-/* 	Module Testbench: Testing environment for the design on completion
+/* 	Module sram: simulation model of memory
 *
 *	WIP
 *
 */
-module testbench();
-
-	tri 	[7:0]	databus;
-	logic 	[15:0]	address;
-	logic			RE;
-	logic			WE;
-	logic			clk;
+module sram
+	(inout tri 	[7:0]	databus,
+	input logic [15:0]	address,
+	input logic			RE,
+	input logic			WE,
+	input logic			clk);
 	
-	sram	mem(.*);
+	reg [7:0]			mem [16'hFFFF : 16'h0000];
 	
-	initial begin
-		clk <= '0
-		forever #2 clk = ~clk;
-	end
-
-	initial begin
-		$monitor("Address: %h  |  Databus: %h  |  RE: %b  WE: %b", address, databus, RE, WE);
-		
-		address <= '0;
-		databus <= 'z;
-		RE <= '0;
-		WE <= '0
-		#10;
-		
-		RE <= '1;
-		#10;
-		address <= 16'h01;
-		#10;
-		address <= 16'h02;
-		#10;
-		address <= 16'h03;
-		#10;
-		address <= 16'h04;
-		#10;
-		address <= 16'h05;
-		#10;
-		address <= 16'h06;
-		#10;
-		address <= 16'h07;
-		#10;
-		address <= 16'h08;
-		#10;
-		address <= 16'h09;
-		#10;
-		address <= 16'h0A;
-		#10;
-		$stop;
-		
-	end
+	always_ff @(posedge clk)
+		if (WE)
+			mem[address] <= databus;
 	
-endmodule: testbench
+	assign databus = (RE) ? mem[address] : 8'bz;
+	
+	initial $readmemh("memory.hex", mem);
+	
+endmodule: sram

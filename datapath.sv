@@ -23,6 +23,7 @@
 `include "registerfile.sv"
 `include "alu.sv"
 `include "controlpath.sv"
+`include "memoryunit.sv"
 
 /* Module Datapath: Connects RegisterFile, ALU, Controlpath, and Memory units together.
 *
