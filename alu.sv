@@ -37,7 +37,7 @@ module alu
 	
 	always_comb begin 
 		
-		unique case (op_code)
+		case (op_code)
 			
 			// No operation
 			alu_NOP: begin
@@ -64,7 +64,7 @@ module alu
 			alu_ADD: begin
 				{next_flags[0], alu_result} = op_A + op_B;
 				next_flags[3] = (alu_result == 8'b0);
-				next_flags[1] = {{1'b0, op_A[3:0]} + {1'b0, op_B[3:0]}}[4];
+				next_flags[1] = alu_result[4] ^ (op_A[4] ^ op_B[4]);
 				addr_result = 16'bx;
 				next_flags[2] = 1'b0;
 			end
@@ -73,7 +73,7 @@ module alu
 			alu_ADC: begin
 				{next_flags[0], alu_result} = op_A + op_B + curr_flags[0];
 				next_flags[3] = (alu_result == 8'b0);
-				next_flags[1] = {{1'b0, op_A[3:0]} + {1'b0, op_B[3:0]}}[4];
+				next_flags[1] = alu_result[4] ^ (op_A[4] ^ op_B[4]);
 				addr_result = 16'bx;
 				next_flags[2] = 1'b0;
 			end
@@ -82,7 +82,7 @@ module alu
 			alu_SUB: begin
 				{next_flags[0], alu_result} = op_A - op_B;
 				next_flags[3] = (alu_result == 8'b0);
-				next_flags[1] = {{1'b0, op_A[3:0]} - {1'b0, op_B[3:0]}}[4];
+				next_flags[1] = alu_result[4] ^ (op_A[4] ^ op_B[4]);
 				addr_result = 16'bx;
 				next_flags[2] = 1'b1;
 			end
@@ -91,7 +91,7 @@ module alu
 			alu_SBC: begin
 				{next_flags[0], alu_result} = op_A - op_B - curr_flags[0];
 				next_flags[3] = (alu_result == 8'b0);
-				next_flags[1] = {{1'b0, op_A[3:0]} - {1'b0, op_B[3:0]}}[4];
+				next_flags[1] = alu_result[4] ^ (op_A[4] ^ op_B[4]);
 				addr_result = 16'bx;
 				next_flags[2] = 1'b1;
 			end
@@ -122,9 +122,9 @@ module alu
 			
 			// A + 1
 			alu_INC: begin
-				alu_result = 7'h01 + op_A;
+				alu_result = 8'h01 + op_B;
 				next_flags[3] = (alu_result == 8'b0);
-				next_flags[1] = {{1'b0, 4'h1} + {1'b0, op_A[3:0]}}[4];
+				next_flags[1] = alu_result[4] ^ op_B[4];
 				addr_result = 16'bx;
 				next_flags[2] = 1'b0;
 				next_flags[0] = curr_flags[0];
@@ -132,9 +132,9 @@ module alu
 			
 			// A - 1
 			alu_DEC: begin
-				alu_result = op_A - 7'h01;
+				alu_result = op_B - 8'h01;
 				next_flags[3] = (alu_result == 8'b0);
-				next_flags[1] = {{1'b0, op_A[3:0]} - {1'b0, 4'h1}}[4];
+				next_flags[1] = alu_result[4] ^ op_B[4];
 				addr_result = 16'bx;
 				next_flags[2] = 1'b1;
 				next_flags[0] = curr_flags[0];
@@ -236,8 +236,15 @@ module alu
 				next_flags[2:1] = 2'b00;
 			end
 	
+			// Increment a 16-bit value
+			alu_INCL: begin
+				alu_result = 8'bx;
+				addr_result = {op_A, op_B} + 1;
+				next_flags = curr_flags;
+			end
+	
 			// Unknown OP Code
-			alu_UNK: begin
+			default: begin
 				alu_result = 8'bx;
 				addr_result = 16'bx;
 				next_flags = 16'bx;

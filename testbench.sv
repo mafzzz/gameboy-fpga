@@ -31,6 +31,8 @@ module testbench();
 	logic	clk;
 	logic	rst;
 	
+	logic [7:0] regA, regB;
+	
 	datapath DUT (.*);
 	
 	initial begin
@@ -54,7 +56,7 @@ module testbench();
 				DUT.cp.curr_state.name, DUT.PC, instruc.name, DUT.SP, rst,
 				DUT.rf.A, DUT.rf.B, DUT.rf.C, DUT.rf.D, DUT.rf.E, DUT.rf.H, DUT.rf.L,
 				DUT.rf.F[3], DUT.rf.F[2], DUT.rf.F[1], DUT.rf.F[0]);
-		#500;
+		#100000;
 		$stop;
 	end
 	

@@ -73,6 +73,7 @@ typedef enum logic [4:0] {
 	alu_SRA 	= 5'b1_0011,
 	alu_SRL 	= 5'b1_0100,
 	alu_AB 		= 5'b1_0101,
+	alu_INCL	= 5'b1_0110,
 	
 	alu_UNK 	= 5'bx_xxxx
 } alu_op_t;
@@ -106,7 +107,7 @@ typedef enum logic [3:0] {
 	dest_PC_h 	= 4'b0_101,
 	dest_MEMD 	= 4'b0_110,
 	dest_MEMA 	= 4'b0_111,
-	dest_PCIN	= 4'b1_000,
+	dest_PC 	= 4'b1_000,
 	
 	dest_UNK 	= 4'bxxxx
 } dest_t;

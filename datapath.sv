@@ -19,11 +19,14 @@
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
+/*
 `include "constants.sv"
-`include "registerfile.sv"
-`include "alu.sv"
 `include "controlpath.sv"
 `include "memoryunit.sv"
+`include "registerfile.sv"
+`include "alu.sv"
+*/
+`include "constants.sv"
 
 /* Module Datapath: Connects RegisterFile, ALU, Controlpath, and Memory units together.
 *
@@ -32,7 +35,9 @@
 */
 module datapath
 	(input logic		clk,
-	input logic			rst);
+	input logic			rst,
+	output logic [7:0]	regA,
+	output logic [7:0]	regB);
 	
 	reg [15:0] 			SP, PC, MAR;
 	reg [7:0]  			IR, MDR;
@@ -58,17 +63,14 @@ module datapath
 
 	logic [7:0]			alu_output;
 	control_code_t		controls;
-	
-	logic				reg_ld;
-	assign reg_ld = 	(controls.alu_dest == dest_REG);
-	
+		
 	logic [3:0]			alu_flags, flags_in, flags_out;
 	assign flags_in = 	(controls.ld_flags) ? alu_flags : flags_out;
 		
 	logic 				fetch;
 	logic [7:0]			outA, outB;
 
-	// {PCIN, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
+	// {PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
 	logic [7:0]			dest_en;
 	
 	always_comb begin
@@ -81,7 +83,7 @@ module datapath
 			dest_PC_h:  dest_en = 8'b0001_0000;
 			dest_MEMD:  dest_en = 8'b0010_0000;
 			dest_MEMA:  dest_en = 8'b0100_0000;
-			dest_PCIN:	dest_en = 8'b1000_0000;
+			dest_PC:	dest_en = 8'b1000_0000;
 			default:	dest_en = 8'bxxx_xxxx;
 		endcase
 	end
@@ -95,8 +97,10 @@ module datapath
 	assign SP_next[15:8]	= (dest_en[2]) ? alu_output : SP[15:8];
 	
 	always_comb begin
-		if (fetch | dest_en[7])
+		if (fetch)
 			PC_next = PC + 1;
+		else if (dest_en[7])
+			PC_next = MAR_next;
 		else begin
 			PC_next[7:0] 	= (dest_en[3]) ? alu_output : PC[7:0];
 			PC_next[15:8]	= (dest_en[4]) ? alu_output : PC[15:8];
@@ -105,8 +109,13 @@ module datapath
 	
 	assign MDR_next		 	= (controls.read_en) ? databus : ((dest_en[5]) ? alu_output : MDR);
 	
+	logic [63:0]			window;
+	
 	register_file	rf 	(.reg_input (alu_output), .reg_selA (controls.reg_selA), .reg_selB (controls.reg_selB), .rst (rst), 
-		.clk (clk), .load_en (dest_en[0]), .flags_in (flags_in), .reg_outA (outA), .reg_outB (outB), .flags (flags_out));
+		.clk (clk), .load_en (dest_en[0]), .flags_in (flags_in), .reg_outA (outA), .reg_outB (outB), .flags (flags_out), .window (window));
+	
+	assign regA = window[7:0];
+	assign regB = window[15:8];
 	
 	logic [7:0] 		inA, inB;
 	

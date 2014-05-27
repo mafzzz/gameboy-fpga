@@ -36,6 +36,7 @@ module register_file
 	input logic 		rst,
 	input logic 		clk, 
 	input logic	[3:0]	flags_in,
+	output logic [63:0] window,
 	output logic [7:0]	reg_outA,
 	output logic [7:0]	reg_outB,
 	output logic [3:0]	flags);
@@ -44,6 +45,8 @@ module register_file
 	
 	reg [3:0]	F;
 	assign flags = F;
+	
+	assign window = {L, H, F, E, B, D, C, A};
 	
 	always_ff @(posedge clk, posedge rst) begin
 		// Reset all registers to 0
@@ -88,6 +91,7 @@ module register_file
 			reg_E: reg_outA = E;
 			reg_H: reg_outA = H;
 			reg_L: reg_outA = L;
+			default:	reg_outA = 'x;
 		endcase
 		
 		case(reg_selB)
@@ -98,6 +102,7 @@ module register_file
 			reg_E: reg_outB = E;
 			reg_H: reg_outB = H;
 			reg_L: reg_outB = L;
+			default:	reg_outB = 'x;
 		endcase
 	end
 	
