@@ -242,6 +242,13 @@ module alu
 				addr_result = {op_A, op_B} + 1;
 				next_flags = curr_flags;
 			end
+			
+			// Increment a 16-bit value
+			alu_DECL: begin
+				alu_result = 8'bx;
+				addr_result = {op_A, op_B} - 1;
+				next_flags = curr_flags;
+			end
 	
 			// Unknown OP Code
 			default: begin

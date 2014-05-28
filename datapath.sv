@@ -19,14 +19,11 @@
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
-/*
 `include "constants.sv"
 `include "controlpath.sv"
 `include "memoryunit.sv"
 `include "registerfile.sv"
 `include "alu.sv"
-*/
-`include "constants.sv"
 
 /* Module Datapath: Connects RegisterFile, ALU, Controlpath, and Memory units together.
 *
@@ -70,21 +67,22 @@ module datapath
 	logic 				fetch;
 	logic [7:0]			outA, outB;
 
-	// {PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
-	logic [7:0]			dest_en;
+	// {REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
+	logic [8:0]			dest_en;
 	
 	always_comb begin
 		case (controls.alu_dest)
-			dest_NONE:  dest_en = 8'b0000_0000;
-			dest_REG:   dest_en = 8'b0000_0001;
-			dest_SP_l:  dest_en = 8'b0000_0010;
-			dest_SP_h:  dest_en = 8'b0000_0100;
-			dest_PC_l:  dest_en = 8'b0000_1000;
-			dest_PC_h:  dest_en = 8'b0001_0000;
-			dest_MEMD:  dest_en = 8'b0010_0000;
-			dest_MEMA:  dest_en = 8'b0100_0000;
-			dest_PC:	dest_en = 8'b1000_0000;
-			default:	dest_en = 8'bxxx_xxxx;
+			dest_NONE:  dest_en = 9'b00000_0000;
+			dest_REG:   dest_en = 9'b00000_0001;
+			dest_SP_l:  dest_en = 9'b00000_0010;
+			dest_SP_h:  dest_en = 9'b00000_0100;
+			dest_PC_l:  dest_en = 9'b00000_1000;
+			dest_PC_h:  dest_en = 9'b00001_0000;
+			dest_MEMD:  dest_en = 9'b00010_0000;
+			dest_MEMA:  dest_en = 9'b00100_0000;
+			dest_PC:	dest_en = 9'b01000_0000;
+			dest_REGA:  dest_en = 9'b10000_0000;
+			default:	dest_en = 9'bxxxx_xxxx;
 		endcase
 	end
 	
@@ -111,8 +109,8 @@ module datapath
 	
 	logic [63:0]			window;
 	
-	register_file	rf 	(.reg_input (alu_output), .reg_selA (controls.reg_selA), .reg_selB (controls.reg_selB), .rst (rst), 
-		.clk (clk), .load_en (dest_en[0]), .flags_in (flags_in), .reg_outA (outA), .reg_outB (outB), .flags (flags_out), .window (window));
+	register_file	rf 	(.reg_input (alu_output), .reg_selA (controls.reg_selA), .reg_selB (controls.reg_selB), .rst (rst), .addr_input (MAR_next),
+		.clk (clk), .load_en ({dest_en[8], dest_en[0]}), .flags_in (flags_in), .reg_outA (outA), .reg_outB (outB), .flags (flags_out), .window (window));
 	
 	assign regA = window[7:0];
 	assign regB = window[15:8];

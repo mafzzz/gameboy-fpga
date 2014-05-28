@@ -30,7 +30,8 @@
 */
 module register_file
 	(input logic [7:0] 	reg_input,
-	input logic 		load_en,
+	input logic [15:0]	addr_input,
+	input logic [1:0]	load_en,
 	input reg_sel_t		reg_selA,
 	input reg_sel_t		reg_selB,
 	input logic 		rst,
@@ -46,7 +47,7 @@ module register_file
 	reg [3:0]	F;
 	assign flags = F;
 	
-	assign window = {L, H, F, E, B, D, C, A};
+	assign window = {L, H, F, E, D, C, B, A};
 	
 	always_ff @(posedge clk, posedge rst) begin
 		// Reset all registers to 0
@@ -65,7 +66,7 @@ module register_file
 
 			F <= flags_in;
 
-			if (load_en) 
+			if (load_en[0]) 
 				case (reg_selA)
 					reg_A: A <= reg_input;
 					reg_B: B <= reg_input;
@@ -76,7 +77,13 @@ module register_file
 					reg_L: L <= reg_input;
 					default: /* Do Nothing */;
 				endcase
-			else
+			else if (load_en[1])
+				case (reg_selA)
+					reg_B: {B, C} <= addr_input;
+					reg_D: {D, E} <= addr_input;
+					reg_H: {H, L} <= addr_input;
+					default: /* Do Nothing */;
+				endcase
 				/* Do Nothing */;
 		end
 	end
