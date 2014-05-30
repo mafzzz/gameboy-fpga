@@ -18,12 +18,15 @@
 *	
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
-
+/*
 `include "constants.sv"
 `include "controlpath.sv"
 `include "memoryunit.sv"
 `include "registerfile.sv"
 `include "alu.sv"
+*/
+
+`include "constants.sv"
 
 /* Module Datapath: Connects RegisterFile, ALU, Controlpath, and Memory units together.
 *
@@ -67,32 +70,38 @@ module datapath
 	logic 				fetch;
 	logic [7:0]			outA, outB;
 
-	// {REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
-	logic [8:0]			dest_en;
+	// {SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
+	logic [9:0]			dest_en;
 	
 	always_comb begin
 		case (controls.alu_dest)
-			dest_NONE:  dest_en = 9'b00000_0000;
-			dest_REG:   dest_en = 9'b00000_0001;
-			dest_SP_l:  dest_en = 9'b00000_0010;
-			dest_SP_h:  dest_en = 9'b00000_0100;
-			dest_PC_l:  dest_en = 9'b00000_1000;
-			dest_PC_h:  dest_en = 9'b00001_0000;
-			dest_MEMD:  dest_en = 9'b00010_0000;
-			dest_MEMA:  dest_en = 9'b00100_0000;
-			dest_PC:	dest_en = 9'b01000_0000;
-			dest_REGA:  dest_en = 9'b10000_0000;
-			default:	dest_en = 9'bxxxx_xxxx;
+			dest_NONE:  dest_en = 10'b00000_00000;
+			dest_REG:   dest_en = 10'b00000_00001;
+			dest_SP_l:  dest_en = 10'b00000_00010;
+			dest_SP_h:  dest_en = 10'b00000_00100;
+			dest_PC_l:  dest_en = 10'b00000_01000;
+			dest_PC_h:  dest_en = 10'b00000_10000;
+			dest_MEMD:  dest_en = 10'b00001_00000;
+			dest_MEMA:  dest_en = 10'b00010_00000;
+			dest_PC:	dest_en = 10'b00100_00000;
+			dest_REGA:  dest_en = 10'b01000_00000;
+			dest_SP:	dest_en = 10'b10000_00000;
+			default:	dest_en = 10'bxxxxx_xxxxx;
 		endcase
 	end
 	
 	tri [7:0] 			databus;
-	assign databus = (controls.write_en) ? MDR : 8'bz;
+	assign databus = /*(controls.write_en) ? MDR : */8'bz;
 	
 	assign IR_next			= (fetch) ? databus : IR;
 	
-	assign SP_next[7:0] 	= (dest_en[1]) ? alu_output : SP[7:0];
-	assign SP_next[15:8]	= (dest_en[2]) ? alu_output : SP[15:8];
+	always_comb 
+		if (dest_en[9])
+			SP_next			= MAR_next;
+		else begin
+			SP_next[7:0] 	= (dest_en[1]) ? alu_output : SP[7:0];
+			SP_next[15:8]	= (dest_en[2]) ? alu_output : SP[15:8];
+	end
 	
 	always_comb begin
 		if (fetch)

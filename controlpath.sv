@@ -722,6 +722,107 @@ module control_path
 						next_state		 = s_EXECUTE;
 					end
 					
+					// READ MEMORY
+					LD_A_BCA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_C;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_A_DEA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_E;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_A_HLA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_A_HLP: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_A_HLN: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_B_HLA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_C_HLA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_D_HLA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_E_HLA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_H_HLA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					LD_L_HLA: begin
+						control.alu_dest = dest_MEMA;
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_AB;
+						next_state		 = s_EXECUTE;
+					end
+					
 					// ADD INSTRUCTIONS
 					ADD_A_A: begin
 						control.reg_selA = reg_A;
@@ -1414,6 +1515,78 @@ module control_path
 						next_state		 = s_FETCH;
 					end
 					
+					// INCREMENT 16-BIT
+					INC_BC: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_INCL;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REGA;
+						next_state		 = s_EXECUTE;
+					end
+					INC_DE: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_INCL;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REGA;
+						next_state		 = s_EXECUTE;
+					end
+					INC_HL: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_INCL;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REGA;
+						next_state		 = s_EXECUTE;
+					end
+					INC_SP: begin
+						control.alu_op	 = alu_INCL;
+						control.alu_srcA = src_SP_l;
+						control.alu_srcB = src_SP_h;
+						control.alu_dest = dest_SP;
+						next_state		 = s_EXECUTE;
+					end
+
+					// DECREMENT 16-BIT
+					DEC_BC: begin
+						control.reg_selA = reg_B;
+						control.reg_selB = reg_C;
+						control.alu_op	 = alu_DECL;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REGA;
+						next_state		 = s_EXECUTE;
+					end
+					DEC_DE: begin
+						control.reg_selA = reg_D;
+						control.reg_selB = reg_E;
+						control.alu_op	 = alu_DECL;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REGA;
+						next_state		 = s_EXECUTE;
+					end
+					DEC_HL: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_op	 = alu_DECL;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_dest = dest_REGA;
+						next_state		 = s_EXECUTE;
+					end
+					DEC_SP: begin
+						control.alu_op	 = alu_DECL;
+						control.alu_srcA = src_SP_l;
+						control.alu_srcB = src_SP_h;
+						control.alu_dest = dest_SP;
+						next_state		 = s_EXECUTE;
+					end
+					
 					// JUMPS ABSOLUTE
 					JP_HLA: begin
 						control.reg_selA = reg_H;
@@ -1710,6 +1883,64 @@ module control_path
 						next_state		 = s_WRITE;
 					end					
 					
+					// READ MEMORY
+					LD_A_BCA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_A_DEA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_A_HLA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_A_HLP: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_INCL;
+						control.alu_dest = dest_REGA;
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_A_HLN: begin
+						control.reg_selA = reg_H;
+						control.reg_selB = reg_L;
+						control.alu_srcA = src_REGA;
+						control.alu_srcB = src_REGB;
+						control.alu_op	 = alu_DECL;
+						control.alu_dest = dest_REGA;
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_B_HLA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_C_HLA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_D_HLA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_E_HLA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_H_HLA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					LD_L_HLA: begin
+						control.read_en = `TRUE;
+						next_state		 = s_WRITE;
+					end
+					
 					// JUMP ABSOLUTE
 					JP_N16: begin
 						control.alu_dest = dest_PC;
@@ -1831,7 +2062,7 @@ module control_path
 						control.alu_dest = dest_REG;
 						next_state 		 = s_FETCH;
 					end
-					
+					/*
 					// LOAD MEMORY
 					LD_BCA_A: begin
 						control.write_en = `TRUE;
@@ -1884,9 +2115,88 @@ module control_path
 					LD_HLA_H: begin
 						control.write_en = `TRUE;
 						next_state		 = s_FETCH;
-					end
+					end*/
 					LD_HLA_L: begin
 						control.write_en = `TRUE;
+						next_state		 = s_FETCH;
+					end
+					
+					// READ MEMORY
+					LD_A_BCA: begin
+						control.reg_selA = reg_A;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_A_DEA: begin
+						control.reg_selA = reg_A;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_A_HLA: begin
+						control.reg_selA = reg_A;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_A_HLP: begin
+						control.reg_selA = reg_A;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_A_HLN: begin
+						control.reg_selA = reg_A;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_B_HLA: begin
+						control.reg_selA = reg_B;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_C_HLA: begin
+						control.reg_selA = reg_C;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_D_HLA: begin
+						control.reg_selA = reg_D;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_E_HLA: begin
+						control.reg_selA = reg_E;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_H_HLA: begin
+						control.reg_selA = reg_H;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
+						next_state		 = s_FETCH;
+					end
+					LD_L_HLA: begin
+						control.reg_selA = reg_L;
+						control.alu_srcB = src_MEMD;
+						control.alu_dest = dest_REG;
+						control.alu_op	 = alu_B;
 						next_state		 = s_FETCH;
 					end
 					

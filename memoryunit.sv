@@ -36,7 +36,7 @@ module sram
 	reg [7:0]			mem [16'hFFFF : 16'h0000];
 	
 	always_ff @(posedge clk)
-		if (WE)
+		if (WE & ~RE)
 			mem[address] <= databus;
 	
 	assign databus = (RE) ? mem[address] : 8'bz;
