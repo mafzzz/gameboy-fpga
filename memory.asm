@@ -1,17 +1,17 @@
 SECTION "Start", CODE[$0000]
-	LD	A, $00
+	LD	A, $C5
 	LD	B, $00
 	LD	D, $00
 	LD	E, $FF
 	LD	H, $10
 	LD	L, $00
-	
+		
 write:
 	LD [HL+], A
 	INC A
 	CP A, E
 	JP NZ, write
-
+	
 	DEC HL
 	
 read:

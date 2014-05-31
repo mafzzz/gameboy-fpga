@@ -51,6 +51,9 @@ module datapath
 	logic [15:0]		SP_next, PC_next, MAR_next;
 	logic [7:0]			IR_next, MDR_next;
 		
+	// {SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
+	logic [9:0]			dest_en;
+		
 	control_code_t		controls;
 		
 	always_ff @(posedge clk, posedge rst) begin
@@ -63,7 +66,7 @@ module datapath
 		end else begin
 			SP 	<=  SP_next;
 			PC 	<=  PC_next;
-			MAR <=  (controls.fetch) ? PC : MAR_next;
+			MAR <=  (controls.fetch) ? PC : ((dest_en[6]) ? MAR_next : MAR);
 			IR  <=  IR_next;
 			MDR <=  MDR_next;
 		end
@@ -74,9 +77,6 @@ module datapath
 	logic [3:0]			alu_flags, flags_in, flags_out;
 	assign flags_in = 	(controls.ld_flags) ? alu_flags : flags_out;
 	logic [7:0]			outA, outB;
-
-	// {SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
-	logic [9:0]			dest_en;
 	
 	always_comb begin
 		case (controls.alu_dest)
