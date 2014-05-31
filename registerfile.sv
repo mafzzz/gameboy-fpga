@@ -47,7 +47,7 @@ module register_file
 	reg [3:0]	F;
 	assign flags = F;
 	
-	assign window = {L, H, F, E, D, C, B, A};
+	assign window = {L, H, {4'b0, F}, E, D, C, B, A};
 	
 	always_ff @(posedge clk, posedge rst) begin
 		// Reset all registers to 0

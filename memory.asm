@@ -9,7 +9,6 @@ SECTION "Start", CODE[$0000]
 write:
 	LD [HL+], A
 	INC A
-	STOP
 	CP A, E
 	JP NZ, write
 
@@ -23,10 +22,14 @@ read:
 	JP NZ, fail
 	CP A, D
 	JP NZ, read
+	
+	LD B, $42
+	NOP
+	NOP
 	STOP
 	
 fail:
-	LD B, $17
+	LD B, $DE
 	NOP
 	NOP
 	STOP

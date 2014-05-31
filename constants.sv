@@ -22,7 +22,7 @@
 `define TRUE 	1'b1
 `define	FALSE 	1'b0
 
-`define synthesis TRUE
+`define synthesis
 
 `ifndef CONSTANTS
 `define CONSTANTS
@@ -218,9 +218,11 @@ typedef struct packed {
 	alu_src_t 	alu_srcA;
 	alu_src_t 	alu_srcB;
 	dest_t 		alu_dest;
+	logic			fetch;
+	logic			load_op_code;
 	logic 		read_en;
 	logic 		write_en;
-	logic		ld_flags;
+	logic			ld_flags;
 } control_code_t;
 
 `endif
