@@ -1,5 +1,5 @@
 /**************************************************************************
-*	"testbench.sv"
+*	"memoryunit.sv"
 *	GameBoy SystemVerilog reverse engineering project.
 *   Copyright (C) 2014 Sohil Shah
 *
@@ -34,10 +34,11 @@ module sram
 	input logic			clk);
 	
 	reg [7:0]			mem [16'hFFFF : 16'h0000];
-	
-	always_ff @(posedge clk)
-		if (WE & ~RE)
+		
+	always @(posedge clk) begin
+		if (WE)
 			mem[address] <= databus;
+	end
 	
 	assign databus = (RE) ? mem[address] : 8'bz;
 	

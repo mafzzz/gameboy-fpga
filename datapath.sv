@@ -18,13 +18,13 @@
 *	
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
-/*
-`include "constants.sv"
+
+`ifndef synthesis
 `include "controlpath.sv"
 `include "memoryunit.sv"
 `include "registerfile.sv"
 `include "alu.sv"
-*/
+`endif
 
 `include "constants.sv"
 
@@ -45,6 +45,8 @@ module datapath
 	logic [15:0]		SP_next, PC_next, MAR_next;
 	logic [7:0]			IR_next, MDR_next;
 	
+	logic 				fetch;
+	
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
 			SP 	<= 16'b0;
@@ -55,7 +57,7 @@ module datapath
 		end else begin
 			SP 	<=  SP_next;
 			PC 	<=  PC_next;
-			MAR <=  MAR_next;
+			MAR <=  (fetch) ? MAR_next : PC_next;
 			IR  <=  IR_next;
 			MDR <=  MDR_next;
 		end
@@ -67,7 +69,6 @@ module datapath
 	logic [3:0]			alu_flags, flags_in, flags_out;
 	assign flags_in = 	(controls.ld_flags) ? alu_flags : flags_out;
 		
-	logic 				fetch;
 	logic [7:0]			outA, outB;
 
 	// {SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
@@ -91,7 +92,7 @@ module datapath
 	end
 	
 	tri [7:0] 			databus;
-	assign databus = /*(controls.write_en) ? MDR : */8'bz;
+	assign databus = (controls.write_en) ? MDR : 8'bz;
 	
 	assign IR_next			= (fetch) ? databus : IR;
 	
@@ -161,9 +162,6 @@ module datapath
 	
 	control_path		cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls), .fetch_op_code (fetch));
 	
-	logic [15:0]	address;
-	assign address = (fetch) ? PC : MAR;
-	
-	sram			mu	(.clk (clk), .address (address), .databus (databus), .RE (controls.read_en | fetch), .WE (controls.write_en));
+	sram			mu	(.clk (clk), .address (MAR), .databus (databus), .RE (controls.read_en | fetch), .WE (controls.write_en));
 	
 endmodule: datapath

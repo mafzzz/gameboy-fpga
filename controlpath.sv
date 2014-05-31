@@ -48,7 +48,7 @@ module control_path
 	always_ff @(posedge clk, posedge rst) begin
 		// Reset into FETCH state, first instruction iteration, no prefix
 		if (rst) begin
-			curr_state <= s_FETCH;
+			curr_state <= s_INIT;
 			iteration <= 3'b0;
 			prefix_CB <= `FALSE;
 		end
@@ -76,6 +76,21 @@ module control_path
 			*
 			*	Does nothing if not first iteration. 
 			*/
+
+			s_INIT: begin
+				control.reg_selA 		= reg_UNK;
+				control.reg_selB 		= reg_UNK;
+				control.alu_op   		= alu_UNK;
+				control.alu_srcA		= src_UNK;
+				control.alu_srcB		= src_UNK;	
+				control.alu_dest		= dest_NONE;
+				control.read_en			= `FALSE;
+				control.write_en		= `FALSE;
+				control.ld_flags		= `FALSE;
+				next_state				= s_FETCH;
+				fetch_op_code			= `TRUE;
+			end
+			
 			s_FETCH: begin
 				
 				control.reg_selA 		= reg_UNK;
@@ -88,9 +103,7 @@ module control_path
 				control.write_en		= `FALSE;
 				control.ld_flags		= `FALSE;
 				
-				if (iteration == 3'b0)
-					fetch_op_code 			= `TRUE;
-				else begin
+				if (iteration == 3'b1) begin
 					case (op_code)
 						// JUMP ABSOLUTE
 						JP_N16: begin
@@ -1609,6 +1622,7 @@ module control_path
 							control.alu_srcB = src_MEMD;
 							control.alu_dest = dest_PC_h;
 							next_state 		 = s_FETCH;
+							fetch_op_code	 = `TRUE;
 							next_iteration	 = 3'b0;
 						end
 					end
@@ -1620,6 +1634,7 @@ module control_path
 							control.alu_dest = dest_MEMA;
 							next_state		 = s_EXECUTE;
 						end else begin
+							fetch_op_code	 = `TRUE;
 							if (flags[3]) begin
 								control.alu_op 	 = alu_B;
 								control.alu_srcB = src_MEMD;
@@ -1642,6 +1657,7 @@ module control_path
 								control.alu_srcB = src_MEMD;
 								control.alu_dest = dest_PC_h;
 							end
+							fetch_op_code	 = `TRUE;
 							next_state 		 = s_FETCH;
 							next_iteration	 = 3'b0;
 						end
@@ -1659,6 +1675,7 @@ module control_path
 								control.alu_srcB = src_MEMD;
 								control.alu_dest = dest_PC_h;
 							end
+							fetch_op_code	 = `TRUE;						
 							next_state 		 = s_FETCH;
 							next_iteration	 = 3'b0;
 						end
@@ -1676,11 +1693,11 @@ module control_path
 								control.alu_srcB = src_MEMD;
 								control.alu_dest = dest_PC_h;
 							end
+							fetch_op_code	 = `TRUE;
 							next_state 		 = s_FETCH;
 							next_iteration	 = 3'b0;
 						end
 					end
-
 					
 					PREFIX: begin
 						next_state = s_FETCH;
@@ -2010,6 +2027,7 @@ module control_path
 				control.read_en			= `FALSE;
 				control.write_en		= `FALSE;
 				control.ld_flags		= `FALSE;
+				fetch_op_code			= `TRUE;
 				
 				case (op_code)
 					// LOAD REGISTER IMMEDIATE
@@ -2062,7 +2080,7 @@ module control_path
 						control.alu_dest = dest_REG;
 						next_state 		 = s_FETCH;
 					end
-					/*
+					
 					// LOAD MEMORY
 					LD_BCA_A: begin
 						control.write_en = `TRUE;
@@ -2115,7 +2133,7 @@ module control_path
 					LD_HLA_H: begin
 						control.write_en = `TRUE;
 						next_state		 = s_FETCH;
-					end*/
+					end
 					LD_HLA_L: begin
 						control.write_en = `TRUE;
 						next_state		 = s_FETCH;
@@ -2207,6 +2225,7 @@ module control_path
 						control.alu_srcB = src_PC_l;
 						control.alu_dest = dest_MEMA;
 						next_state		 = s_FETCH;
+						fetch_op_code	 = `FALSE;
 						next_iteration	 = 3'b1;
 					end
 					JP_Z_N16: begin
@@ -2215,6 +2234,7 @@ module control_path
 						control.alu_srcB = src_PC_l;
 						control.alu_dest = dest_MEMA;
 						next_state		 = s_FETCH;
+						fetch_op_code	 = `FALSE;
 						next_iteration	 = 3'b1;
 					end
 					JP_NZ_N16: begin
@@ -2223,6 +2243,7 @@ module control_path
 						control.alu_srcB = src_PC_l;
 						control.alu_dest = dest_MEMA;
 						next_state		 = s_FETCH;
+						fetch_op_code	 = `FALSE;
 						next_iteration	 = 3'b1;
 					end
 					JP_C_N16: begin
@@ -2231,6 +2252,7 @@ module control_path
 						control.alu_srcB = src_PC_l;
 						control.alu_dest = dest_MEMA;
 						next_state		 = s_FETCH;
+						fetch_op_code	 = `FALSE;
 						next_iteration	 = 3'b1;
 					end
 					JP_NC_N16: begin
@@ -2239,6 +2261,7 @@ module control_path
 						control.alu_srcB = src_PC_l;
 						control.alu_dest = dest_MEMA;
 						next_state		 = s_FETCH;
+						fetch_op_code	 = `FALSE;
 						next_iteration	 = 3'b1;
 					end
 					default: begin

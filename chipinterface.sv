@@ -20,7 +20,7 @@
 **************************************************************************/
 
 `include "constants.sv"
-
+`ifndef simulation
 /* Module ChipInterface: Connects Cyclone V board ports to datapath
 *
 *	WIP
@@ -42,7 +42,6 @@ module ChipInterface
 	sseg A_outl(regA[3:0], HEX2);
 	sseg B_outh(regB[7:4], HEX1);
 	sseg B_outl(regB[3:0], HEX0);
-	
 	
 	datapath dp(.*);
 	
@@ -80,3 +79,4 @@ module sseg
 	end
 	
 endmodule: sseg
+`endif

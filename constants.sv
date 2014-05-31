@@ -22,10 +22,10 @@
 `define TRUE 	1'b1
 `define	FALSE 	1'b0
 
-`define synthesis TRUE
-
 `ifndef CONSTANTS
 `define CONSTANTS
+
+`define synthesis
 
 /*	Constants file
 *
@@ -118,13 +118,14 @@ typedef enum logic [3:0] {
 /*
 *	FSM State enumeration
 */
-typedef enum logic [1:0] {
-	s_FETCH		= 2'b00,
-	s_DECODE	= 2'b01,
-	s_EXECUTE	= 2'b10,
-	s_WRITE		= 2'b11,
+typedef enum logic [2:0] {
+	s_FETCH		= 3'b000,
+	s_DECODE	= 3'b001,
+	s_EXECUTE	= 3'b010,
+	s_WRITE		= 3'b011,
+	s_INIT		= 3'b100,
 	
-	s_UNK		= 2'bxx
+	s_UNK		= 3'bxx
 } control_state_t;
 
 /*
