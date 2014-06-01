@@ -113,7 +113,7 @@ module datapath
 	
 	always_comb 
 		if (dest_en[9])
-			SP_next			= MAR_next;
+			SP_next			= addr_out;
 		else begin
 			SP_next[7:0] 	= (dest_en[1]) ? alu_output : SP[7:0];
 			SP_next[15:8]	= (dest_en[2]) ? alu_output : SP[15:8];
@@ -132,7 +132,7 @@ module datapath
 	
 	assign MDR_next		 	= (controls.read_en) ? databus : ((dest_en[5]) ? alu_output : MDR);
 		
-	register_file	rf 	(.reg_input (alu_output), .reg_selA (controls.reg_selA), .reg_selB (controls.reg_selB), .rst (rst), .addr_input (MAR_next),
+	register_file	rf 	(.reg_input (alu_output), .reg_selA (controls.reg_selA), .reg_selB (controls.reg_selB), .rst (rst), .addr_input (addr_out),
 		.clk (clk), .load_en ({dest_en[8], dest_en[0]}), .flags_in (flags_in), .reg_outA (outA), .reg_outB (outB), .flags (flags_out), .window (window));
 	
 	assign regA = window[7:0];
