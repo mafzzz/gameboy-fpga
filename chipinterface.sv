@@ -28,21 +28,33 @@
 */
 module ChipInterface
 	(input logic [1:0]	KEY,
-	input logic [0:0]	SW,
+	input logic [9:0]	SW,
 	input logic			CLOCK_50_B5B,
 	output logic [6:0]	HEX0, HEX1, HEX2, HEX3);
 	
 	logic clk, rst;
+	logic clk_out, clk_lock;
 	
-	assign clk = (SW[0]) ? ~KEY[1] : CLOCK_50_B5B;
+	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (clk_out), .locked (clk_lock));
+	
+	assign clk = (SW[0]) ? ~KEY[1] : clk_out;
 	assign rst = ~KEY[0];
 	
-	logic [7:0]			regA, regB;
-	sseg A_outh(regA[7:4], HEX3);
-	sseg A_outl(regA[3:0], HEX2);
-	sseg B_outh(regB[7:4], HEX1);
-	sseg B_outl(regB[3:0], HEX0);
+	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
 	
+	logic [7:0] 		outa, outb;
+	
+	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regH : '0)));
+	assign outb = (~SW[9] & ~SW[8]) ? regB : ((~SW[9] & SW[8]) ? regD : ((SW[9] & ~SW[8]) ? regF : ((SW[9] & SW[8]) ? regL : '0)));
+	
+<<<<<<< HEAD
+=======
+	sseg a_outh(outa[7:4], HEX3);
+	sseg a_outl(outa[3:0], HEX2);
+	sseg b_outh(outb[7:4], HEX1);
+	sseg b_outl(outb[3:0], HEX0);
+	
+>>>>>>> GameBoy
 	datapath dp(.*);
 	
 endmodule: ChipInterface

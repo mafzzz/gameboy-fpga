@@ -22,6 +22,8 @@
 `include "datapath.sv"
 `define simulation
 
+`timescale 1ns/1ns
+
 /* 	Module Testbench: Testing environment for the design on completion
 *
 *	WIP
@@ -32,9 +34,10 @@ module testbench();
 	logic	clk;
 	logic	rst;
 	
-	logic [7:0] regA, regB;
+	logic [7:0] regA, regB, regC, regD, regE, regF, regH, regL;
 	
 	datapath DUT (.*);
+	vars	v ();
 	
 	initial begin
 		rst <= '1;
@@ -44,10 +47,17 @@ module testbench();
 	end
 
 	initial
+<<<<<<< HEAD
 		forever #10 clk <= ~clk;
+=======
+		forever #239 clk <= ~clk;
 	
-	std_instruction_t	instruc;
 	initial
+		forever @(edge clk) $cast(v.instruc, DUT.IR);
+>>>>>>> GameBoy
+	
+	initial
+<<<<<<< HEAD
 		forever #5 $cast(instruc, DUT.IR);
 	
 	initial begin
@@ -58,7 +68,26 @@ module testbench();
 				DUT.rf.A, DUT.rf.B, DUT.rf.C, DUT.rf.D, DUT.rf.E, DUT.rf.H, DUT.rf.L,
 				DUT.rf.F[3], DUT.rf.F[2], DUT.rf.F[1], DUT.rf.F[0]);
 		#500000;
+=======
+		forever @(posedge clk) v.cycles++;
+	
+	initial begin
+
+		$monitor("State: %s 	Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP:	%h	|	Reset: %b \
+				Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\
+				Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+				DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
+				regA, regB, regC, regD, regE, regH, regL, DUT.MAR, DUT.MDR,
+				regF[3], regF[2], regF[1], regF[0]); 
+		
+		#5000000;
+>>>>>>> GameBoy
 		$stop;
 	end
 	
 endmodule: testbench
+
+module vars();
+	std_instruction_t	instruc;
+	int cycles;
+endmodule: vars

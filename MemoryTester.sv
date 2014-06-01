@@ -1,5 +1,5 @@
 /**************************************************************************
-*	"memoryunit.sv"
+*	"MemoryTester.sv"
 *	GameBoy SystemVerilog reverse engineering project.
 *   Copyright (C) 2014 Sohil Shah
 *
@@ -21,27 +21,37 @@
 
 `include "constants.sv"
 
-/* 	Module sram: Block sram memory
+/* Module MemoryTester: Board tester for sram implementation
 *
 *	WIP
 *
 */
-module sram
-	(inout	 	[7:0]	databus,
-	input logic [15:0]	address,
-	input logic			RE,
-	input logic			WE,
-	input logic			clk);
+module MemoryTester
+	(input logic [3:0]	KEY,
+	input logic [9:0]	SW,
+	input logic			CLOCK_50_B5B,
+	output logic [6:0]	HEX0, HEX1, HEX2, HEX3);
 	
-	reg [7:0]			mem [16'hFFFF : 16'h0000];
-		
-	always @(posedge clk) begin
-		if (WE)
-			mem[address] <= databus;
+	logic clk, rst;
+	
+	assign clk = (SW[9]) ? ~KEY[1] : CLOCK_50_B5B;
+	assign rst = ~KEY[0];
+	
+	reg [7:0]			regA, regB;
+	sseg A_outh(regA[7:4], HEX3);
+	sseg A_outl(regA[3:0], HEX2);
+	sseg B_outh(regB[7:4], HEX1);
+	sseg B_outl(regB[3:0], HEX0);
+
+	tri [7:0] data;
+
+	always_ff @(posedge clk) begin
+		regA <= SW[7:0];
+		regB <= (~KEY[2]) ? data : regB;
 	end
 	
-	assign databus = (RE) ? mem[address] : 8'bz;
+	assign data = (~KEY[3] && KEY[2]) ? SW[8] : 8'bz;
 	
-	initial $readmemh("memory.hex", mem);
+	sram ram (.clk (clk), .databus (data), .address ({8'h00, regA}), .RE (~KEY[2]), .WE (~KEY[3]));
 	
-endmodule: sram
+endmodule: MemoryTester
