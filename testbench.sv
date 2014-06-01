@@ -47,28 +47,12 @@ module testbench();
 	end
 
 	initial
-<<<<<<< HEAD
-		forever #10 clk <= ~clk;
-=======
 		forever #239 clk <= ~clk;
 	
 	initial
 		forever @(edge clk) $cast(v.instruc, DUT.IR);
->>>>>>> GameBoy
 	
 	initial
-<<<<<<< HEAD
-		forever #5 $cast(instruc, DUT.IR);
-	
-	initial begin
-		$monitor("State: %s 			| 	PC: %h 	IR: %s	%b		SP:	%h	|	Reset: %b \
-				Registers {A B C D E H L} : {%h %h %h %h %h %h %h} \
-				Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
-				DUT.cp.curr_state.name, DUT.PC, instruc.name, DUT.IR, DUT.SP, rst,
-				DUT.rf.A, DUT.rf.B, DUT.rf.C, DUT.rf.D, DUT.rf.E, DUT.rf.H, DUT.rf.L,
-				DUT.rf.F[3], DUT.rf.F[2], DUT.rf.F[1], DUT.rf.F[0]);
-		#500000;
-=======
 		forever @(posedge clk) v.cycles++;
 	
 	initial begin
@@ -81,7 +65,6 @@ module testbench();
 				regF[3], regF[2], regF[1], regF[0]); 
 		
 		#5000000;
->>>>>>> GameBoy
 		$stop;
 	end
 	

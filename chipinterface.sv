@@ -47,14 +47,11 @@ module ChipInterface
 	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regH : '0)));
 	assign outb = (~SW[9] & ~SW[8]) ? regB : ((~SW[9] & SW[8]) ? regD : ((SW[9] & ~SW[8]) ? regF : ((SW[9] & SW[8]) ? regL : '0)));
 	
-<<<<<<< HEAD
-=======
 	sseg a_outh(outa[7:4], HEX3);
 	sseg a_outl(outa[3:0], HEX2);
 	sseg b_outh(outb[7:4], HEX1);
 	sseg b_outl(outb[3:0], HEX0);
 	
->>>>>>> GameBoy
 	datapath dp(.*);
 	
 endmodule: ChipInterface

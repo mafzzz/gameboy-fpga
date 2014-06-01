@@ -47,7 +47,7 @@ module control_path
 	always_ff @(posedge clk, posedge rst) begin
 		// Reset into FETCH state, first instruction iteration, no prefix
 		if (rst) begin
-			curr_state <= s_INIT;
+			curr_state <= s_FETCH;
 			iteration <= 3'b0;
 			prefix_CB <= `FALSE;
 		end
@@ -71,21 +71,6 @@ module control_path
 			*
 			*	Does nothing if not first iteration. 
 			*/
-
-			s_INIT: begin
-				control.reg_selA 		= reg_UNK;
-				control.reg_selB 		= reg_UNK;
-				control.alu_op   		= alu_UNK;
-				control.alu_srcA		= src_UNK;
-				control.alu_srcB		= src_UNK;	
-				control.alu_dest		= dest_NONE;
-				control.read_en			= `FALSE;
-				control.write_en		= `FALSE;
-				control.ld_flags		= `FALSE;
-				next_state				= s_FETCH;
-				fetch_op_code			= `TRUE;
-			end
-			
 			s_FETCH: begin
 				
 				control.reg_selA 		= reg_UNK;
@@ -2062,10 +2047,6 @@ module control_path
 					
 				end else if (iteration == 3'd1) begin
 				
-<<<<<<< HEAD
-				if (iteration == 3'b1) begin
-					case (op_code)
-=======
 					case(op_code)
 					
 						// LOAD MEMORY IMMEDIATE
@@ -2088,7 +2069,6 @@ module control_path
 							next_iteration	 = 3'd2;
 						end
 					
->>>>>>> GameBoy
 						// JUMP ABSOLUTE
 						JP_N16: begin
 							control.alu_op 	 = alu_B;
@@ -2180,86 +2160,6 @@ module control_path
 				
 					case(op_code)
 					
-<<<<<<< HEAD
-					// JUMPS ABSOLUTE
-					JP_HLA: begin
-						control.reg_selA = reg_H;
-						control.reg_selB = reg_L;
-						control.alu_op	 = alu_AB;
-						control.alu_srcA = src_REGA;
-						control.alu_srcB = src_REGB;
-						control.alu_dest = dest_PC;
-						next_state		 = s_FETCH;
-					end
-					JP_N16: begin
-						if (iteration == 3'b0) begin 
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-							next_state		 = s_EXECUTE;
-						end else begin
-							control.alu_op 	 = alu_B;
-							control.alu_srcB = src_MEMD;
-							control.alu_dest = dest_PC_h;
-							next_state 		 = s_FETCH;
-							fetch_op_code	 = `TRUE;
-							next_iteration	 = 3'b0;
-						end
-					end
-					JP_Z_N16: begin
-						if (iteration == 3'b0) begin 
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-							next_state		 = s_EXECUTE;
-						end else begin
-							fetch_op_code	 = `TRUE;
-							if (flags[3]) begin
-								control.alu_op 	 = alu_B;
-								control.alu_srcB = src_MEMD;
-								control.alu_dest = dest_PC_h;
-							end
-							next_state 		 = s_FETCH;
-							next_iteration	 = 3'b0;
-						end
-					end
-					JP_C_N16: begin
-						if (iteration == 3'b0) begin 
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-							next_state		 = s_EXECUTE;
-						end else begin
-							if (flags[0]) begin
-								control.alu_op 	 = alu_B;
-								control.alu_srcB = src_MEMD;
-								control.alu_dest = dest_PC_h;
-							end
-							fetch_op_code	 = `TRUE;
-							next_state 		 = s_FETCH;
-							next_iteration	 = 3'b0;
-						end
-					end
-					JP_NZ_N16: begin
-						if (iteration == 3'b0) begin 
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-							next_state		 = s_EXECUTE;
-						end else begin
-							if (~flags[3]) begin
-								control.alu_op 	 = alu_B;
-								control.alu_srcB = src_MEMD;
-								control.alu_dest = dest_PC_h;
-							end
-							fetch_op_code	 = `TRUE;						
-							next_state 		 = s_FETCH;
-							next_iteration	 = 3'b0;
-=======
 						// LOAD MEMORY IMMEDIATE
 						LD_N16A_A: begin
 							control.alu_op	 = alu_B;
@@ -2268,7 +2168,6 @@ module control_path
 							control.alu_dest = dest_MEMD;
 							
 							next_iteration	 = 3'd3;
->>>>>>> GameBoy
 						end
 
 						// LOAD MEMORY IMMEDIATE
@@ -2276,74 +2175,7 @@ module control_path
 							control.alu_op	 = alu_INCL;
 							control.alu_srcA = src_PC_h;
 							control.alu_srcB = src_PC_l;
-<<<<<<< HEAD
-							control.alu_dest = dest_MEMA;
-							next_state		 = s_EXECUTE;
-						end else begin
-							if (~flags[0]) begin
-								control.alu_op 	 = alu_B;
-								control.alu_srcB = src_MEMD;
-								control.alu_dest = dest_PC_h;
-							end
-							fetch_op_code	 = `TRUE;
-							next_state 		 = s_FETCH;
-							next_iteration	 = 3'b0;
-						end
-					end
-					
-					PREFIX: begin
-						next_state = s_FETCH;
-						next_prefix = `TRUE;
-					end
-					STOP: begin
-						next_state = s_DECODE;
-						$stop;
-					end
-					NOP: begin
-						next_state = s_FETCH;
-					end
-					
-					default: begin
-						next_state = s_EXECUTE;
-					end
-				endcase
-				
-			end
-			
-			/*	State = EXECUTE
-			*
-			*	Executes ALU operation or memory read based on iteration and instruction. 
-			*/
-			s_EXECUTE: begin
-				control.reg_selA 		= reg_UNK;
-				control.reg_selB 		= reg_UNK;
-				control.alu_op   		= alu_UNK;
-				control.alu_srcA		= src_UNK;
-				control.alu_srcB		= src_UNK;	
-				control.alu_dest		= dest_NONE;
-				control.read_en			= `FALSE;
-				control.write_en		= `FALSE;
-				control.ld_flags		= `FALSE;
-				
-				case (op_code)
-					// LOAD REGISTER IMMEDIATE
-					LD_A_N8: begin
-						control.alu_dest = dest_PC;
-						control.alu_op	 = alu_INCL;
-						control.alu_srcA = src_PC_h;
-						control.alu_srcB = src_PC_l;
-
-						control.read_en  = `TRUE;
-						next_state 		 = s_WRITE;
-					end
-					LD_B_N8: begin
-						control.alu_dest = dest_PC;
-						control.alu_op	 = alu_INCL;
-						control.alu_srcA = src_PC_h;
-						control.alu_srcB = src_PC_l;
-=======
 							control.alu_dest = dest_PC;
->>>>>>> GameBoy
 						
 							control.read_en = `TRUE;
 							next_iteration	 = 3'd3;
@@ -2354,270 +2186,6 @@ module control_path
 						end
 					endcase
 					
-<<<<<<< HEAD
-					default: begin
-						next_state = s_WRITE;
-					end
-				endcase
-			end
-				
-			/*	State = WRITE
-			*
-			*	Writes back to registers, increments iteration if more iterations necessary. 
-			*	Resets iteration if operation done based on instruction. 
-			*/
-			s_WRITE: begin
-				control.reg_selA 		= reg_UNK;
-				control.reg_selB 		= reg_UNK;
-				control.alu_op   		= alu_UNK;
-				control.alu_srcA		= src_UNK;
-				control.alu_srcB		= src_UNK;	
-				control.alu_dest		= dest_NONE;
-				control.read_en			= `FALSE;
-				control.write_en		= `FALSE;
-				control.ld_flags		= `FALSE;
-				fetch_op_code			= `TRUE;
-				
-				case (op_code)
-					// LOAD REGISTER IMMEDIATE
-					LD_A_N8: begin
-						control.alu_op 	 = alu_B;
-						control.reg_selA = reg_A;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						next_state 		 = s_FETCH;
-					end
-					LD_B_N8: begin
-						control.alu_op 	 = alu_B;
-						control.reg_selA = reg_B;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						next_state 		 = s_FETCH;
-					end
-					LD_C_N8: begin
-						control.alu_op 	 = alu_B;
-						control.reg_selA = reg_C;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						next_state 		 = s_FETCH;
-					end
-					LD_D_N8: begin
-						control.alu_op 	 = alu_B;
-						control.reg_selA = reg_D;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						next_state 		 = s_FETCH;
-					end
-					LD_E_N8: begin
-						control.alu_op 	 = alu_B;
-						control.reg_selA = reg_E;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						next_state 		 = s_FETCH;
-					end
-					LD_H_N8: begin
-						control.alu_op 	 = alu_B;
-						control.reg_selA = reg_H;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						next_state 		 = s_FETCH;
-					end
-					LD_L_N8: begin
-						control.alu_op 	 = alu_B;
-						control.reg_selA = reg_L;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						next_state 		 = s_FETCH;
-					end
-					
-					// LOAD MEMORY
-					LD_BCA_A: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_DEA_A: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLA_A: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLP_A: begin
-						control.reg_selA = reg_H;
-						control.reg_selB = reg_L;
-						control.alu_srcA = src_REGA;
-						control.alu_srcB = src_REGB;
-						control.alu_op	 = alu_INCL;
-						control.alu_dest = dest_REGA;
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLN_A: begin
-						control.reg_selA = reg_H;
-						control.reg_selB = reg_L;
-						control.alu_srcA = src_REGA;
-						control.alu_srcB = src_REGB;
-						control.alu_op	 = alu_DECL;
-						control.alu_dest = dest_REGA;
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLA_B: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLA_C: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLA_D: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLA_E: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLA_H: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					LD_HLA_L: begin
-						control.write_en = `TRUE;
-						next_state		 = s_FETCH;
-					end
-					
-					// READ MEMORY
-					LD_A_BCA: begin
-						control.reg_selA = reg_A;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_A_DEA: begin
-						control.reg_selA = reg_A;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_A_HLA: begin
-						control.reg_selA = reg_A;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_A_HLP: begin
-						control.reg_selA = reg_A;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_A_HLN: begin
-						control.reg_selA = reg_A;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_B_HLA: begin
-						control.reg_selA = reg_B;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_C_HLA: begin
-						control.reg_selA = reg_C;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_D_HLA: begin
-						control.reg_selA = reg_D;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_E_HLA: begin
-						control.reg_selA = reg_E;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_H_HLA: begin
-						control.reg_selA = reg_H;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					LD_L_HLA: begin
-						control.reg_selA = reg_L;
-						control.alu_srcB = src_MEMD;
-						control.alu_dest = dest_REG;
-						control.alu_op	 = alu_B;
-						next_state		 = s_FETCH;
-					end
-					
-					// JUMP ABSOLUTE
-					JP_N16: begin
-						control.alu_op	 = alu_AB;
-						control.alu_srcA = src_PC_h;
-						control.alu_srcB = src_PC_l;
-						control.alu_dest = dest_MEMA;
-						next_state		 = s_FETCH;
-						fetch_op_code	 = `FALSE;
-						next_iteration	 = 3'b1;
-					end
-					JP_Z_N16: begin
-						control.alu_op	 = alu_AB;
-						control.alu_srcA = src_PC_h;
-						control.alu_srcB = src_PC_l;
-						control.alu_dest = dest_MEMA;
-						next_state		 = s_FETCH;
-						fetch_op_code	 = `FALSE;
-						next_iteration	 = 3'b1;
-					end
-					JP_NZ_N16: begin
-						control.alu_op	 = alu_AB;
-						control.alu_srcA = src_PC_h;
-						control.alu_srcB = src_PC_l;
-						control.alu_dest = dest_MEMA;
-						next_state		 = s_FETCH;
-						fetch_op_code	 = `FALSE;
-						next_iteration	 = 3'b1;
-					end
-					JP_C_N16: begin
-						control.alu_op	 = alu_AB;
-						control.alu_srcA = src_PC_h;
-						control.alu_srcB = src_PC_l;
-						control.alu_dest = dest_MEMA;
-						next_state		 = s_FETCH;
-						fetch_op_code	 = `FALSE;
-						next_iteration	 = 3'b1;
-					end
-					JP_NC_N16: begin
-						control.alu_op	 = alu_AB;
-						control.alu_srcA = src_PC_h;
-						control.alu_srcB = src_PC_l;
-						control.alu_dest = dest_MEMA;
-						next_state		 = s_FETCH;
-						fetch_op_code	 = `FALSE;
-						next_iteration	 = 3'b1;
-					end
-					default: begin
-						next_state = s_FETCH;
-					end
-				endcase
-=======
 				end else if (iteration == 3'd3) begin
 					case(op_code)
 					
@@ -2626,7 +2194,6 @@ module control_path
 						end
 					endcase
 				end
->>>>>>> GameBoy
 			end
 		endcase
 	end

@@ -22,11 +22,6 @@
 `define TRUE 	1'b1
 `define	FALSE 	1'b0
 
-<<<<<<< HEAD
-=======
-`define synthesis
-
->>>>>>> GameBoy
 `ifndef CONSTANTS
 `define CONSTANTS
 
@@ -124,14 +119,13 @@ typedef enum logic [3:0] {
 /*
 *	FSM State enumeration
 */
-typedef enum logic [2:0] {
-	s_FETCH		= 3'b000,
-	s_DECODE	= 3'b001,
-	s_EXECUTE	= 3'b010,
-	s_WRITE		= 3'b011,
-	s_INIT		= 3'b100,
+typedef enum logic [1:0] {
+	s_FETCH		= 2'b00,
+	s_DECODE	= 2'b01,
+	s_EXECUTE	= 2'b10,
+	s_WRITE		= 2'b11,
 	
-	s_UNK		= 3'bxx
+	s_UNK		= 2'bxx
 } control_state_t;
 
 /*
@@ -225,11 +219,11 @@ typedef struct packed {
 	alu_src_t 	alu_srcA;
 	alu_src_t 	alu_srcB;
 	dest_t 		alu_dest;
-	logic			fetch;
-	logic			load_op_code;
+	logic		fetch;
+	logic		load_op_code;
 	logic 		read_en;
 	logic 		write_en;
-	logic			ld_flags;
+	logic		ld_flags;
 } control_code_t;
 
 `endif
