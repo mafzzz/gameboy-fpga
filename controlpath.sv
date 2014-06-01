@@ -139,7 +139,7 @@ module control_path
 				next_iteration			= iteration;
 				next_state				= s_WRITE;
 				
-				if (iteration == 3'b0) begin
+				if (iteration != 3'b1) begin
 					case (op_code)
 						// REGISTER LOAD OPERATIONS
 						LD_A_D: begin
@@ -687,6 +687,45 @@ module control_path
 							control.alu_srcA = src_REGA;
 							control.alu_srcB = src_REGB;
 							control.alu_op	 = alu_AB;
+						end
+						
+						// LOAD MEMORY IMMEDIATE
+						LD_N16A_A: begin
+							if (iteration == 3'b0) begin
+								control.alu_op	 = alu_AB;
+								control.alu_srcA = src_PC_h;
+								control.alu_srcB = src_PC_l;
+								control.alu_dest = dest_MEMA;
+							end else if (iteration == 3'd2) begin
+								control.alu_op	 = alu_B;
+								control.alu_srcB = src_MEMD;
+								control.alu_dest = dest_MEMA_h;
+							end else if (iteration == 3'd3) begin
+								control.alu_op	 = alu_INCL;
+								control.alu_srcA = src_PC_h;
+								control.alu_srcB = src_PC_l;
+								control.alu_dest = dest_PC;		
+								control.write_en = `TRUE;
+							end
+						end
+						
+						// READ MEMORY IMMEDIATE
+						LD_A_N16A: begin
+							if (iteration == 3'b0) begin
+								control.alu_op	 = alu_AB;
+								control.alu_srcA = src_PC_h;
+								control.alu_srcB = src_PC_l;
+								control.alu_dest = dest_MEMA;
+							end else if (iteration == 3'd2) begin
+								control.alu_op	 = alu_B;
+								control.alu_srcB = src_MEMD;
+								control.alu_dest = dest_MEMA_h;
+							end else if (iteration == 3'd3) begin
+								control.alu_op	 = alu_B;
+								control.reg_selA = reg_A;
+								control.alu_srcB = src_MEMD;
+								control.alu_dest = dest_REG;
+							end
 						end
 						
 						// ADD INSTRUCTIONS
@@ -1634,6 +1673,22 @@ module control_path
 							control.alu_op	 = alu_B;
 						end
 						
+						// LOAD MEMORY IMMEDIATE
+						LD_N16A_A: begin
+							control.alu_op	 = alu_AB;
+							control.alu_srcA = src_PC_h;
+							control.alu_srcB = src_PC_l;
+							control.alu_dest = dest_MEMA;
+						end
+
+						// READ MEMORY IMMEDIATE
+						LD_A_N16A: begin
+							control.alu_op	 = alu_AB;
+							control.alu_srcA = src_PC_h;
+							control.alu_srcB = src_PC_l;
+							control.alu_dest = dest_MEMA;
+						end
+						
 						// JUMP ABSOLUTE
 						JP_N16: begin
 							control.alu_op	 = alu_AB;
@@ -1920,6 +1975,28 @@ module control_path
 							next_iteration  = 3'b1;
 						end
 						
+						// LOAD MEMORY IMMEDIATE
+						LD_N16A_A: begin
+							control.alu_op	 = alu_INCL;
+							control.alu_srcA = src_PC_h;
+							control.alu_srcB = src_PC_l;
+							control.alu_dest = dest_PC;
+							
+							control.read_en	 = `TRUE;
+							next_iteration	 = 3'b1;
+						end
+						
+						// READ MEMORY IMMEDIATE
+						LD_A_N16A: begin
+							control.alu_op	 = alu_INCL;
+							control.alu_srcA = src_PC_h;
+							control.alu_srcB = src_PC_l;
+							control.alu_dest = dest_PC;
+							
+							control.read_en	 = `TRUE;
+							next_iteration	 = 3'b1;
+						end
+						
 						// JUMP ABSOLUTE
 						JP_N16: begin
 							control.alu_dest = dest_PC;
@@ -1971,6 +2048,27 @@ module control_path
 				end else if (iteration == 3'd1) begin
 				
 					case(op_code)
+					
+						// LOAD MEMORY IMMEDIATE
+						LD_N16A_A: begin
+							control.alu_op	 = alu_B;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_MEMA_l;
+							
+							control.read_en	 = `TRUE;
+							next_iteration	 = 3'd2;
+						end
+						
+						// READ MEMORY IMMEDIATE
+						LD_A_N16A: begin
+							control.alu_op	 = alu_B;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_MEMA_l;
+							
+							control.read_en	 = `TRUE;
+							next_iteration	 = 3'd2;
+						end
+					
 						// JUMP ABSOLUTE
 						JP_N16: begin
 							control.alu_op 	 = alu_B;
@@ -2060,6 +2158,35 @@ module control_path
 					
 				end else if (iteration == 3'd2) begin
 				
+					case(op_code)
+					
+						// LOAD MEMORY IMMEDIATE
+						LD_N16A_A: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_A;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_MEMD;
+							
+							next_iteration	 = 3'd3;
+						end
+
+						// LOAD MEMORY IMMEDIATE
+						LD_A_N16A: begin
+							control.alu_op	 = alu_INCL;
+							control.alu_srcA = src_PC_h;
+							control.alu_srcB = src_PC_l;
+							control.alu_dest = dest_PC;
+						
+							control.read_en = `TRUE;
+							next_iteration	 = 3'd3;
+						end
+
+						default: begin
+							next_iteration		= 3'b0;
+						end
+					endcase
+					
+				end else if (iteration == 3'd3) begin
 					case(op_code)
 					
 						default: begin

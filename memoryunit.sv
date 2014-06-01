@@ -21,7 +21,7 @@
 
 `include "constants.sv"
 
-/* 	Module sram: simulation model of memory
+/* 	Module sram: Block sram memory
 *
 *	WIP
 *

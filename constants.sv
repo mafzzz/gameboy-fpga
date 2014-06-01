@@ -91,7 +91,6 @@ typedef enum logic [3:0] {
 	src_PC_l 	= 4'b0_101,
 	src_PC_h 	= 4'b0_110,
 	src_MEMD 	= 4'b0_111,
-	src_MEMA 	= 4'b1_000,
 	
 	src_UNK 	= 4'bxxxx
 } alu_src_t;
@@ -108,9 +107,11 @@ typedef enum logic [3:0] {
 	dest_PC_h 	= 4'b0_101,
 	dest_MEMD 	= 4'b0_110,
 	dest_MEMA 	= 4'b0_111,
-	dest_PC 	= 4'b1_000,
-	dest_REGA   = 4'b1_001,
-	dest_SP		= 4'b1_010,
+	dest_MEMA_l = 4'b1_000,
+	dest_MEMA_h = 4'b1_001,
+	dest_PC 	= 4'b1_010,
+	dest_REGA   = 4'b1_100,
+	dest_SP		= 4'b1_101,
 	
 	dest_UNK 	= 4'bxxxx
 } dest_t;

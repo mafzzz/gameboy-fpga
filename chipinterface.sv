@@ -33,8 +33,11 @@ module ChipInterface
 	output logic [6:0]	HEX0, HEX1, HEX2, HEX3);
 	
 	logic clk, rst;
+	logic clk_out, clk_lock;
 	
-	assign clk = (SW[0]) ? ~KEY[1] : CLOCK_50_B5B;
+	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (clk_out), .locked (clk_lock));
+	
+	assign clk = (SW[0]) ? ~KEY[1] : clk_out;
 	assign rst = ~KEY[0];
 	
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;

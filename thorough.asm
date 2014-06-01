@@ -1,0 +1,6 @@
+SECTION "Start", CODE [$0000]
+	LD	A, $C5
+	LD	[$DEAD], A
+	LD	A, $00
+	LD	A, [$DEAD]
+	STOP

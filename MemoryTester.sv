@@ -1,5 +1,5 @@
 /**************************************************************************
-*	"chipinterface.sv"
+*	"MemoryTester.sv"
 *	GameBoy SystemVerilog reverse engineering project.
 *   Copyright (C) 2014 Sohil Shah
 *
@@ -21,7 +21,7 @@
 
 `include "constants.sv"
 
-/* Module ChipInterface: Connects Cyclone V board ports to datapath
+/* Module MemoryTester: Board tester for sram implementation
 *
 *	WIP
 *
