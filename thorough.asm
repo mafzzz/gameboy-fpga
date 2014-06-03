@@ -1,39 +1,45 @@
 SECTION "Start", CODE [$0000]
 	
-init:	LD	B, $00		; Fib(0)
-		LD	A, $01		; Fib(1)
-		LD	D, $0D		; Max fibonacci number
-		LD	E, $01		; Counter
-		
-		LD	H, $50
-		LD	L, $00		; Starting address
-		
-		LD	[HL], B
-		INC	HL
-		LD	[HL+], A
-		
-write:	LD	C, A
-		ADD A, B
-		LD	B, C
-		LD	[HL], $42
-		INC	HL
-		INC	E
-		LD	C, A
-		LD	A, D
-		CP	A, E
-		LD	A, C
-		JP	NZ, write
-		
-read:	LD	L, $08
-		LD	A, [HL-]
-		LD	E, A
-		LD	A, [HL-]
-		LD	D, A
-		LD	A, [$5006]
-		LD	C, A
-		DEC	HL
-		LD	B, [HL]
-		DEC	HL
-		LD	A, $01
-		ADD	A, $ff
-		STOP
+	LD	HL, $0100
+	LD	DE, $0101
+	
+	LD	A, $00
+write:
+	CP	A, D
+	JP	Z, cont
+	LD	[DE], A
+	LD	[HL], $FF
+	INC	HL
+	INC	DE
+	INC	HL
+	INC	DE
+	JP	write
+
+cont:	
+	LD	DE, $FFFE
+	LD	HL, $FFFF
+
+read:
+	LD	A, [HL-]
+	CP	A, $00
+	JP	NZ, fail
+	DEC HL
+	LD	A, [DE]
+	CP	A, $FF
+	JP	NZ, fail
+	DEC	DE
+	DEC	DE
+	LD	A, $FF
+	CP	A, H
+	JP	NZ, read
+	
+	LD	A, $42
+	STOP
+	NOP
+	NOP
+	
+fail:
+	LD	A, $DE
+	STOP
+	NOP
+	NOP

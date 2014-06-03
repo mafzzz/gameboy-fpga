@@ -47,10 +47,11 @@ module testbench();
 	end
 
 	initial
+	//	4.19 MHz clock for simulation
 		forever #239 clk <= ~clk;
 	
 	initial
-		forever @(edge clk) $cast(v.instruc, DUT.IR);
+		forever @(posedge DUT.IR) $cast(v.instruc, DUT.IR);
 	
 	initial
 		forever @(posedge clk) v.cycles++;
@@ -63,9 +64,7 @@ module testbench();
 				DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
 				regA, regB, regC, regD, regE, regH, regL, DUT.MAR, DUT.MDR,
 				regF[3], regF[2], regF[1], regF[0]); 
-		
-		#5000000;
-		$stop;
+	
 	end
 	
 endmodule: testbench

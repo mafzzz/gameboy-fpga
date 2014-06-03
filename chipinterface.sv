@@ -35,6 +35,7 @@ module ChipInterface
 	logic clk, rst;
 	logic clk_out, clk_lock;
 	
+	// Altera PLL module for 4.19 MHz clock
 	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (clk_out), .locked (clk_lock));
 	
 	assign clk = (SW[0]) ? ~KEY[1] : clk_out;

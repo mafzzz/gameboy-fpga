@@ -75,6 +75,7 @@ typedef enum logic [4:0] {
 	alu_AB 		= 5'b1_0101,
 	alu_INCL	= 5'b1_0110,
 	alu_DECL	= 5'b1_0111,
+	alu_ADS		= 5'b1_1000,
 	
 	alu_UNK 	= 5'bx_xxxx
 } alu_op_t;

@@ -70,6 +70,8 @@ module datapath
 
 	logic [7:0] 		inA, inB;
 		
+	logic				PC_dec_h, PC_inc_h;
+	
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
 			SP 	<= 16'b0;
@@ -126,7 +128,7 @@ module datapath
 			PC_next = addr_out;
 		else begin
 			PC_next[7:0] 	= (dest_en[3]) ? alu_output : PC[7:0];
-			PC_next[15:8]	= (dest_en[4]) ? alu_output : PC[15:8];
+			PC_next[15:8]	= (PC_dec_h) ? PC[15:8] - 1 : ((PC_inc_h) ? PC[15:8] + 1 : ((dest_en[4]) ? alu_output : PC[15:8]));
 		end
 	end
 	
@@ -173,7 +175,7 @@ module datapath
 	end
 	
 	alu				al	(.op_A (inA), .op_B (inB), .op_code (controls.alu_op), .curr_flags (flags_out), .next_flags (alu_flags), .alu_result (alu_output),
-		.addr_result (addr_out));
+		.addr_result (addr_out), .PC_inc_h (PC_inc_h), .PC_dec_h (PC_dec_h));
 	
 	assign MAR_next = (dest_en[6]) ? addr_out : ((dest_en[10]) ? {MAR[15:8], alu_output[7:0]} : ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR));
 	
