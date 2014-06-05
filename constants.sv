@@ -66,16 +66,22 @@ typedef enum logic [4:0] {
 	alu_DAA 	= 5'b0_1100,
 	alu_CPL 	= 5'b0_1101,
 	alu_RLC 	= 5'b0_1110,
-	alu_RL 		= 5'b0_1111,
-	alu_RRC 	= 5'b1_0000,
-	alu_RR 		= 5'b1_0001,
-	alu_SLA 	= 5'b1_0010,
-	alu_SRA 	= 5'b1_0011,
-	alu_SRL 	= 5'b1_0100,
-	alu_AB 		= 5'b1_0101,
-	alu_INCL	= 5'b1_0110,
-	alu_DECL	= 5'b1_0111,
-	alu_ADS		= 5'b1_1000,
+	alu_RLCA	= 5'b0_1111,
+	alu_RL 		= 5'b1_0000,
+	alu_RLA		= 5'b1_0001,
+	alu_RRC 	= 5'b1_0010,
+	alu_RRCA	= 5'b1_0011,
+	alu_RR 		= 5'b1_0100,
+	alu_RRA		= 5'b1_0101,
+	alu_SLA 	= 5'b1_0110,
+	alu_SRA 	= 5'b1_0111,
+	alu_SRL 	= 5'b1_1000,
+	alu_AB 		= 5'b1_1001,
+	alu_INCL	= 5'b1_1010,
+	alu_DECL	= 5'b1_1011,
+	alu_ADS		= 5'b1_1100,
+	alu_SCF		= 5'b1_1101,
+	alu_CCF		= 5'b1_1110,
 	
 	alu_UNK 	= 5'bx_xxxx
 } alu_op_t;
@@ -92,6 +98,7 @@ typedef enum logic [3:0] {
 	src_PC_l 	= 4'b0_101,
 	src_PC_h 	= 4'b0_110,
 	src_MEMD 	= 4'b0_111,
+	src_FLAGS	= 4'b1_000,
 	
 	src_UNK 	= 4'bxxxx
 } alu_src_t;
@@ -113,6 +120,7 @@ typedef enum logic [3:0] {
 	dest_PC 	= 4'b1_010,
 	dest_REGA   = 4'b1_100,
 	dest_SP		= 4'b1_101,
+	dest_FLAGS	= 4'b1_110,
 	
 	dest_UNK 	= 4'bxxxx
 } dest_t;

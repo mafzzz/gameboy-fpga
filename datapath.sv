@@ -57,8 +57,8 @@ module datapath
 	logic [3:0]			alu_flags, flags_in, flags_out;
 	logic [7:0]			outA, outB;
 		
-	// {MEMA_h, MEMA_l, SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
-	logic [11:0]		dest_en;
+	// {FLAGS, MEMA_h, MEMA_l, SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
+	logic [12:0]		dest_en;
 		
 	control_code_t		controls;
 	
@@ -88,26 +88,27 @@ module datapath
 		end
 	end
 		
-	assign flags_in = 	(controls.ld_flags) ? alu_flags : flags_out;
-	
 	always_comb begin
 		case (controls.alu_dest)
-			dest_NONE:  	dest_en = 12'b0000_0000_0000;
-			dest_REG:   	dest_en = 12'b0000_0000_0001;
-			dest_SP_l:  	dest_en = 12'b0000_0000_0010;
-			dest_SP_h:  	dest_en = 12'b0000_0000_0100;
-			dest_PC_l:  	dest_en = 12'b0000_0000_1000;
-			dest_PC_h:  	dest_en = 12'b0000_0001_0000;
-			dest_MEMD:  	dest_en = 12'b0000_0010_0000;
-			dest_MEMA:  	dest_en = 12'b0000_0100_0000;
-			dest_PC:		dest_en = 12'b0000_1000_0000;
-			dest_REGA:  	dest_en = 12'b0001_0000_0000;
-			dest_SP:		dest_en = 12'b0010_0000_0000;
-			dest_MEMA_l:	dest_en = 12'b0100_0000_0000;
-			dest_MEMA_h:	dest_en = 12'b1000_0000_0000;
-			default:		dest_en = 12'bxxxx_xxxx_xxxx;
+			dest_NONE:  	dest_en = 13'b0_0000_0000_0000;
+			dest_REG:   	dest_en = 13'b0_0000_0000_0001;
+			dest_SP_l:  	dest_en = 13'b0_0000_0000_0010;
+			dest_SP_h:  	dest_en = 13'b0_0000_0000_0100;
+			dest_PC_l:  	dest_en = 13'b0_0000_0000_1000;
+			dest_PC_h:  	dest_en = 13'b0_0000_0001_0000;
+			dest_MEMD:  	dest_en = 13'b0_0000_0010_0000;
+			dest_MEMA:  	dest_en = 13'b0_0000_0100_0000;
+			dest_PC:		dest_en = 13'b0_0000_1000_0000;
+			dest_REGA:  	dest_en = 13'b0_0001_0000_0000;
+			dest_SP:		dest_en = 13'b0_0010_0000_0000;
+			dest_MEMA_l:	dest_en = 13'b0_0100_0000_0000;
+			dest_MEMA_h:	dest_en = 13'b0_1000_0000_0000;
+			dest_FLAGS:		dest_en = 13'b1_0000_0000_0000;
+			default:		dest_en = 13'bx_xxxx_xxxx_xxxx;
 		endcase
 	end
+	
+	assign flags_in = 	(dest_en[12]) ? alu_output[7:4] : ((controls.ld_flags) ? alu_flags : flags_out);
 	
 	assign databus = (controls.write_en) ? MDR : 8'bz;
 	
@@ -156,6 +157,7 @@ module datapath
 			src_PC_l: inA = PC[7:0];
 			src_PC_h: inA = PC[15:8];
 			src_MEMD: inA = MDR;
+			src_FLAGS:inA = {flags_out, 4'b0};
 			default:  inA = 8'bx;
 		endcase
 	end
@@ -170,6 +172,7 @@ module datapath
 			src_PC_l: inB = PC[7:0];
 			src_PC_h: inB = PC[15:8];
 			src_MEMD: inB = MDR;
+			src_FLAGS:inB = {flags_out, 4'b0};
 			default:  inB = 8'bx;
 		endcase
 	end

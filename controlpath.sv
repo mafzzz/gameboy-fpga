@@ -1594,8 +1594,8 @@ module control_path
 						end
 						INC_SP: begin
 							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_SP_l;
-							control.alu_srcB = src_SP_h;
+							control.alu_srcA = src_SP_h;
+							control.alu_srcB = src_SP_l;
 							control.alu_dest = dest_SP;
 						end
 
@@ -1626,8 +1626,8 @@ module control_path
 						end
 						DEC_SP: begin
 							control.alu_op	 = alu_DECL;
-							control.alu_srcA = src_SP_l;
-							control.alu_srcB = src_SP_h;
+							control.alu_srcA = src_SP_h;
+							control.alu_srcB = src_SP_l;
 							control.alu_dest = dest_SP;
 						end
 						
@@ -1648,6 +1648,60 @@ module control_path
 							control.reg_selA = reg_H;
 							control.reg_selB = reg_L;
 							control.alu_dest = dest_MEMA;
+						end
+						
+						// NO PREFIX ROTATES/SHIFTS
+						RLCA: begin
+							control.reg_selA = reg_A;
+							control.alu_op	 = alu_RLCA;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_REG;
+							control.ld_flags = `TRUE;
+						end
+						RLA: begin
+							control.reg_selA = reg_A;
+							control.alu_op	 = alu_RLA;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_REG;
+							control.ld_flags = `TRUE;
+						end
+						RRCA: begin
+							control.reg_selA = reg_A;
+							control.alu_op	 = alu_RRCA;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_REG;
+							control.ld_flags = `TRUE;
+						end
+						RRA: begin
+							control.reg_selA = reg_A;
+							control.alu_op	 = alu_RRA;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_REG;
+							control.ld_flags = `TRUE;
+						end
+
+						// MISC. ALU OPERATIONS
+						DAA: begin
+							control.reg_selA = reg_A;
+							control.alu_op	 = alu_DAA;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_REG;
+							control.ld_flags = `TRUE;
+						end
+						SCF: begin
+							control.alu_op	 = alu_SCF;
+							control.ld_flags = `TRUE;
+						end
+						CPL: begin
+							control.reg_selA = reg_A;
+							control.alu_op	 = alu_CPL;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_REG;
+							control.ld_flags = `TRUE;
+						end
+						CCF: begin
+							control.alu_op	 = alu_CCF;
+							control.ld_flags = `TRUE;
 						end
 						
 						// JUMPS ABSOLUTE
@@ -1739,53 +1793,108 @@ module control_path
 						end
 						
 						// JUMP RELATIVE
-						JR_N8: begin
+						JR_N8, JR_Z_N8, JR_NZ_N8, JR_C_N8, JR_NC_N8: begin
 							control.alu_op	 = alu_AB;
 							control.alu_srcA = src_PC_h;
 							control.alu_srcB = src_PC_l;
 							control.alu_dest = dest_MEMA;
 						end
-						JR_Z_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
+
+						// STACK OPERATIONS
+						PUSH_AF: begin
+							if (iteration == 3'b0 || iteration == 3'd2) begin
+								control.alu_dest = dest_SP;
+								control.alu_op	 = alu_DECL;
+								control.alu_srcA = src_SP_h;
+								control.alu_srcB = src_SP_l;
+							end else begin
+								control.alu_op	 = alu_B;
+								control.alu_srcB = src_FLAGS;
+								control.alu_dest = dest_MEMD;
+							end
 						end
-						JR_NZ_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
+						PUSH_BC: begin
+							if (iteration == 3'b0 || iteration == 3'd2) begin
+								control.alu_dest = dest_SP;
+								control.alu_op	 = alu_DECL;
+								control.alu_srcA = src_SP_h;
+								control.alu_srcB = src_SP_l;
+							end else begin
+								control.alu_op	 = alu_B;
+								control.reg_selA = reg_C;
+								control.alu_srcB = src_REGA;
+								control.alu_dest = dest_MEMD;
+							end
 						end
-						JR_C_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
+						PUSH_DE: begin
+							if (iteration == 3'b0 || iteration == 3'd2) begin
+								control.alu_dest = dest_SP;
+								control.alu_op	 = alu_DECL;
+								control.alu_srcA = src_SP_h;
+								control.alu_srcB = src_SP_l;
+							end else begin
+								control.alu_op	 = alu_B;
+								control.reg_selA = reg_E;
+								control.alu_srcB = src_REGA;
+								control.alu_dest = dest_MEMD;
+							end
 						end
-						JR_NC_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
+						PUSH_HL: begin
+							if (iteration == 3'b0 || iteration == 3'd2) begin
+								control.alu_dest = dest_SP;
+								control.alu_op	 = alu_DECL;
+								control.alu_srcA = src_SP_h;
+								control.alu_srcB = src_SP_l;
+							end else begin
+								control.alu_op	 = alu_B;
+								control.reg_selA = reg_L;
+								control.alu_srcB = src_REGA;
+								control.alu_dest = dest_MEMD;
+							end
 						end
 						
+						POP_AF, POP_BC, POP_DE, POP_HL:
+						begin
+							if (iteration == 3'b0) begin
+								control.alu_op		= alu_AB;
+								control.alu_srcA	= src_SP_h;
+								control.alu_srcB	= src_SP_l;
+								control.alu_dest	= dest_MEMA;
+							end else begin
+								control.alu_op	 = alu_INCL;
+								control.alu_srcA = src_SP_h;
+								control.alu_srcB = src_SP_l;
+								control.alu_dest = dest_SP;
+								control.read_en = `TRUE;
+							end
+						end
+												
+						HALT: begin
+							next_state = s_EXECUTE;
+							
+							// For simulation purposes
+							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP:	%h	|	Reset: %b \n\
+				Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n\
+				Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+							DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
+							DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
+							DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
+							$stop;
+						end
 						PREFIX: begin
 							next_prefix = `TRUE;
 						end
 						STOP: begin
 							next_state = s_EXECUTE;
 							
-							`ifndef synthesis
 							// For simulation purposes
-							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP:	%h	|	Reset: %b \
-									Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\
-									Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
-									DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
-									DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
-									DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
+							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP:	%h	|	Reset: %b \n\
+				Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n\
+				Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+							DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
+							DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
+							DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
 							$stop;
-							`endif
 						end
 						NOP: begin
 							// DO NOTHING
@@ -2228,6 +2337,56 @@ module control_path
 							end else begin
 								// Do Nothing
 							end
+						end
+						
+						// STACK OPERATIONS
+						PUSH_AF: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_A;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_MEMD;
+						end
+						PUSH_BC: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_B;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_MEMD;
+						end
+						PUSH_DE: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_D;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_MEMD;
+						end
+						PUSH_HL: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_H;
+							control.alu_srcB = src_REGA;
+							control.alu_dest = dest_MEMD;
+						end
+						
+						POP_AF: begin
+							control.alu_op	 = alu_B;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_FLAGS;
+						end
+						POP_BC: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_C;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_REG;
+						end
+						POP_DE: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_E;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_REG;
+						end
+						POP_HL: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_L;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_REG;
 						end
 						
 						default: begin
@@ -2709,24 +2868,30 @@ module control_path
 						end
 						
 						// JUMP RELATIVE
-						JR_N8: begin
+						JR_N8, JR_Z_N8, JR_NZ_N8, JR_C_N8, JR_NC_N8:
+						begin
 							control.read_en	= `TRUE;
 							next_iteration	= 3'b1;
 						end
-						JR_Z_N8: begin
-							control.read_en	= `TRUE;
+
+						// STACK OPERATIONS
+						PUSH_AF, PUSH_BC, PUSH_DE, PUSH_HL: 
+						begin
+							control.alu_op		= alu_AB;
+							control.alu_srcA 	= src_SP_h;
+							control.alu_srcB 	= src_SP_l;
+							control.alu_dest	= dest_MEMA;
 							next_iteration	= 3'b1;
 						end
-						JR_NZ_N8: begin
-							control.read_en	= `TRUE;
-							next_iteration	= 3'b1;
-						end
-						JR_C_N8: begin
-							control.read_en	= `TRUE;
-							next_iteration	= 3'b1;
-						end
-						JR_NC_N8: begin
-							control.read_en	= `TRUE;
+						
+						POP_AF, POP_BC, POP_DE, POP_HL:
+						begin
+							control.alu_op	 = alu_INCL;
+							control.alu_srcA = src_SP_h;
+							control.alu_srcB = src_SP_l;
+							control.alu_dest = dest_SP;
+						
+							control.read_en = `TRUE;
 							next_iteration	= 3'b1;
 						end
 						
@@ -2998,6 +3163,22 @@ module control_path
 							next_iteration	 = 3'b0;
 						end
 
+						// STACK OPERATIONS
+						PUSH_AF, PUSH_BC, PUSH_DE, PUSH_HL: 
+						begin
+							control.write_en 	= `TRUE;
+							next_iteration		= 3'd2;
+						end
+						
+						POP_AF, POP_BC, POP_DE, POP_HL:
+						begin
+							control.alu_op		= alu_AB;
+							control.alu_srcA	= src_SP_h;
+							control.alu_srcB	= src_SP_l;
+							control.alu_dest	= dest_MEMA;
+							next_iteration 		= 3'd2;
+						end
+						
 						default: begin
 							next_iteration		= 3'b0;
 						end
@@ -3057,6 +3238,45 @@ module control_path
 							next_iteration	 = 3'd3;
 						end
 
+						// STACK OPERATIONS
+						PUSH_AF, PUSH_BC, PUSH_DE, PUSH_HL: 
+						begin
+							control.alu_op		= alu_AB;
+							control.alu_srcA 	= src_SP_h;
+							control.alu_srcB 	= src_SP_l;
+							control.alu_dest	= dest_MEMA;
+							next_iteration		= 3'd3;
+						end
+						
+						POP_AF: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_A;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_REG;
+							next_iteration	 = 3'b0;
+						end
+						POP_BC: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_B;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_REG;
+							next_iteration	 = 3'b0;
+						end
+						POP_DE: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_D;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_REG;
+							next_iteration	 = 3'b0;
+						end
+						POP_HL: begin
+							control.alu_op	 = alu_B;
+							control.reg_selA = reg_H;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_REG;
+							next_iteration	 = 3'b0;
+						end
+						
 						default: begin
 							next_iteration		= 3'b0;
 						end
@@ -3064,6 +3284,24 @@ module control_path
 					
 				end else if (iteration == 3'd3) begin
 					case(op_code)
+					
+						// STACK OPERATIONS
+						PUSH_AF: begin
+							control.write_en 	= `TRUE;
+							next_iteration		= 3'd0;
+						end
+						PUSH_BC: begin
+							control.write_en 	= `TRUE;
+							next_iteration		= 3'd0;
+						end
+						PUSH_DE: begin
+							control.write_en 	= `TRUE;
+							next_iteration		= 3'd0;
+						end
+						PUSH_HL: begin
+							control.write_en 	= `TRUE;
+							next_iteration		= 3'd0;
+						end
 					
 						default: begin
 							next_iteration		= 3'b0;

@@ -204,6 +204,12 @@ module alu
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
 			end
+
+			alu_RLCA: begin 
+				{next_flags[0], alu_result} = {op_B[7], op_B[6:0], op_B[7]};
+				addr_result = 16'bx;
+				next_flags[3:1] = 2'b00;
+			end
 			
 			// Rotate left through carry
 			alu_RL: begin
@@ -212,6 +218,12 @@ module alu
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
 			end
+
+			alu_RLA: begin
+				{next_flags[0], alu_result} = {op_B[7], op_B[6:0], curr_flags[0]};
+				addr_result = 16'bx;
+				next_flags[3:1] = 2'b00;
+			end
 			
 			// Rotate right with carry
 			alu_RRC: begin
@@ -219,6 +231,12 @@ module alu
 				next_flags[3] = (alu_result == 8'b0);
 				addr_result = 16'bx;
 				next_flags[2:1] = 2'b00;
+			end
+	
+			alu_RRCA: begin
+				{next_flags[0], alu_result} = {op_B[0], op_B[0], op_B[7:1]};
+				addr_result = 16'bx;
+				next_flags[3:1] = 2'b00;
 			end
 			
 			// Rotate right through carry
@@ -229,6 +247,12 @@ module alu
 				next_flags[2:1] = 2'b00;
 			end
 			
+			alu_RRA: begin
+				{next_flags[0], alu_result} = {op_B[0], curr_flags[0], op_B[7:1]};
+				addr_result = 16'bx;
+				next_flags[3:1] = 2'b00;
+			end
+
 			// Arithmetic shift left
 			alu_SLA: begin
 				{next_flags[0], alu_result} = {op_B[7], op_B << 1};
@@ -265,6 +289,20 @@ module alu
 				alu_result = 8'bx;
 				addr_result = {op_A, op_B} - 1;
 				next_flags = curr_flags;
+			end
+			
+			// Set carry flag
+			alu_SCF: begin
+				alu_result = 8'bx;
+				addr_result = 8'bx;
+				next_flags = {curr_flags[3], 1'b0, 1'b0, 1'b1};
+			end
+
+			// Complement carry flag
+			alu_CCF: begin
+				alu_result = 8'bx;
+				addr_result = 8'bx;
+				next_flags = {curr_flags[3], 1'b0, 1'b0, ~curr_flags[0]};
 			end
 	
 			// Unknown OP Code

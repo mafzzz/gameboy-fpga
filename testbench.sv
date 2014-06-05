@@ -51,7 +51,7 @@ module testbench();
 		forever #239 clk <= ~clk;
 	
 	initial
-		forever @(posedge DUT.IR) $cast(v.instruc, DUT.IR);
+		forever @(posedge clk) $cast(v.instruc, DUT.IR);
 	
 	initial
 		forever @(posedge clk) v.cycles++;
