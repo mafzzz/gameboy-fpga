@@ -488,49 +488,16 @@ module control_path
 						
 						
 						// LOAD REGISTER IMMEDIATE
-						LD_A_N8: begin
+						LD_A_N8, LD_B_N8, LD_C_N8, LD_D_N8, LD_E_N8, LD_H_N8, LD_L_N8:
+						begin
 							control.alu_op	 = alu_AB;
 							control.alu_srcA = src_PC_h;
 							control.alu_srcB = src_PC_l;
 							control.alu_dest = dest_MEMA;
 						end
-						LD_B_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						LD_C_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						LD_D_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						LD_E_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						LD_H_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						LD_L_N8: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						LD_BC_N16: begin
+						
+						LD_BC_N16, LD_DE_N16, LD_HL_N16, LD_SP_N16: 
+						begin
 							if (iteration == 3'b0) begin
 								control.alu_op	 = alu_AB;
 								control.alu_srcA = src_PC_h;
@@ -545,78 +512,10 @@ module control_path
 								control.read_en  = `TRUE;
 							end
 						end
-						LD_DE_N16: begin
-							if (iteration == 3'b0) begin
-								control.alu_op	 = alu_AB;
-								control.alu_srcA = src_PC_h;
-								control.alu_srcB = src_PC_l;
-								control.alu_dest = dest_MEMA;
-							end else begin
-								control.alu_dest = dest_PC;
-								control.alu_op	 = alu_INCL;
-								control.alu_srcA = src_PC_h;
-								control.alu_srcB = src_PC_l;
-						
-								control.read_en  = `TRUE;
-							end
-						end
-						LD_HL_N16: begin
-							if (iteration == 3'b0) begin
-								control.alu_op	 = alu_AB;
-								control.alu_srcA = src_PC_h;
-								control.alu_srcB = src_PC_l;
-								control.alu_dest = dest_MEMA;
-							end else begin
-								control.alu_dest = dest_PC;
-								control.alu_op	 = alu_INCL;
-								control.alu_srcA = src_PC_h;
-								control.alu_srcB = src_PC_l;
-						
-								control.read_en  = `TRUE;
-							end
-						end
-						LD_SP_N16: begin
-							if (iteration == 3'b0) begin
-								control.alu_op	 = alu_AB;
-								control.alu_srcA = src_PC_h;
-								control.alu_srcB = src_PC_l;
-								control.alu_dest = dest_MEMA;
-							end else begin
-								control.alu_dest = dest_PC;
-								control.alu_op	 = alu_INCL;
-								control.alu_srcA = src_PC_h;
-								control.alu_srcB = src_PC_l;
-						
-								control.read_en  = `TRUE;
-							end
-						end
-						
+
 						// LOAD MEMORY
-						LD_BCA_A: begin
-							control.reg_selA = reg_A;
-							control.alu_srcB = src_REGA;
-							control.alu_dest = dest_MEMD;
-							control.alu_op	 = alu_B;
-						end
-						LD_DEA_A: begin
-							control.reg_selA = reg_A;
-							control.alu_srcB = src_REGA;
-							control.alu_dest = dest_MEMD;
-							control.alu_op	 = alu_B;
-						end
-						LD_HLA_A: begin
-							control.reg_selA = reg_A;
-							control.alu_srcB = src_REGA;
-							control.alu_dest = dest_MEMD;
-							control.alu_op	 = alu_B;
-						end
-						LD_HLP_A: begin
-							control.reg_selA = reg_A;
-							control.alu_srcB = src_REGA;
-							control.alu_dest = dest_MEMD;
-							control.alu_op	 = alu_B;
-						end
-						LD_HLN_A: begin
+						LD_BCA_A, LD_DEA_A, LD_HLA_A, LD_HLP_A, LD_HLN_A: 
+						begin
 							control.reg_selA = reg_A;
 							control.alu_srcB = src_REGA;
 							control.alu_dest = dest_MEMD;
@@ -676,71 +575,8 @@ module control_path
 							control.alu_srcB = src_REGB;
 							control.alu_op	 = alu_AB;
 						end
-						LD_A_HLA: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-						end
-						LD_A_HLP: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-						end
-						LD_A_HLN: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-						end
-						LD_B_HLA: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-						end
-						LD_C_HLA: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-						end
-						LD_D_HLA: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-						end
-						LD_E_HLA: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-						end
-						LD_H_HLA: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-						end
-						LD_L_HLA: begin
+						LD_A_HLA, LD_A_HLP, LD_A_HLN, LD_B_HLA, LD_C_HLA, LD_D_HLA, LD_E_HLA, LD_H_HLA, LD_L_HLA:
+						begin
 							control.alu_dest = dest_MEMA;
 							control.reg_selA = reg_H;
 							control.reg_selB = reg_L;
@@ -1632,7 +1468,7 @@ module control_path
 						end
 						
 						// INCREMENT/DECREMENT MEMORY
-						INC_HLA: begin
+						INC_HLA, DEC_HLA: begin
 							control.alu_op	 = alu_AB;
 							control.alu_srcA = src_REGA;
 							control.alu_srcB = src_REGB;
@@ -1640,16 +1476,7 @@ module control_path
 							control.reg_selB = reg_L;
 							control.alu_dest = dest_MEMA;
 						end
-						
-						DEC_HLA: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_dest = dest_MEMA;
-						end
-						
+												
 						// NO PREFIX ROTATES/SHIFTS
 						RLCA: begin
 							control.reg_selA = reg_A;
@@ -1873,25 +1700,22 @@ module control_path
 							next_state = s_EXECUTE;
 							
 							// For simulation purposes
-							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP:	%h	|	Reset: %b \n\
+							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: HALT	(0x%h)		SP:	%h	|	Reset: %b \n\
 				Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n\
 				Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
-							DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
+							DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, DUT.IR, DUT.SP, rst,
 							DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
 							DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
 							$stop;
-						end
-						PREFIX: begin
-							next_prefix = `TRUE;
 						end
 						STOP: begin
 							next_state = s_EXECUTE;
 							
 							// For simulation purposes
-							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP:	%h	|	Reset: %b \n\
+							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: STOP	(0x%h)		SP:	%h	|	Reset: %b \n\
 				Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n\
 				Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
-							DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
+							DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, DUT.IR, DUT.SP, rst,
 							DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
 							DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
 							$stop;
@@ -1976,13 +1800,8 @@ module control_path
 						end
 						
 						// LOAD MEMORY
-						LD_BCA_A: begin
-							control.write_en = `TRUE;
-						end
-						LD_DEA_A: begin
-							control.write_en = `TRUE;
-						end
-						LD_HLA_A: begin
+						LD_BCA_A, LD_DEA_A, LD_HLA_A, LD_HLA_B, LD_HLA_C, LD_HLA_D, LD_HLA_E, LD_HLA_H, LD_HLA_L:
+						begin
 							control.write_en = `TRUE;
 						end
 						LD_HLP_A: begin
@@ -2003,51 +1822,10 @@ module control_path
 							control.alu_dest = dest_REGA;
 							control.write_en = `TRUE;
 						end
-						LD_HLA_B: begin
-							control.write_en = `TRUE;
-						end
-						LD_HLA_C: begin
-							control.write_en = `TRUE;
-						end
-						LD_HLA_D: begin
-							control.write_en = `TRUE;
-						end
-						LD_HLA_E: begin
-							control.write_en = `TRUE;
-						end
-						LD_HLA_H: begin
-							control.write_en = `TRUE;
-						end
-						LD_HLA_L: begin
-							control.write_en = `TRUE;
-						end
 						
 						// READ MEMORY
-						LD_A_BCA: begin
-							control.reg_selA = reg_A;
-							control.alu_srcB = src_MEMD;
-							control.alu_dest = dest_REG;
-							control.alu_op	 = alu_B;
-						end
-						LD_A_DEA: begin
-							control.reg_selA = reg_A;
-							control.alu_srcB = src_MEMD;
-							control.alu_dest = dest_REG;
-							control.alu_op	 = alu_B;
-						end
-						LD_A_HLA: begin
-							control.reg_selA = reg_A;
-							control.alu_srcB = src_MEMD;
-							control.alu_dest = dest_REG;
-							control.alu_op	 = alu_B;
-						end
-						LD_A_HLP: begin
-							control.reg_selA = reg_A;
-							control.alu_srcB = src_MEMD;
-							control.alu_dest = dest_REG;
-							control.alu_op	 = alu_B;
-						end
-						LD_A_HLN: begin
+						LD_A_BCA, LD_A_DEA, LD_A_HLA, LD_A_HLP, LD_A_HLN:
+						begin
 							control.reg_selA = reg_A;
 							control.alu_srcB = src_MEMD;
 							control.alu_dest = dest_REG;
@@ -2098,16 +1876,9 @@ module control_path
 							control.alu_dest = dest_MEMA;
 						end
 						
-						// LOAD MEMORY IMMEDIATE
-						LD_N16A_A: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-
-						// READ MEMORY IMMEDIATE
-						LD_A_N16A: begin
+						// MEMORY IMMEDIATE
+						LD_N16A_A, LD_A_N16A: 
+						begin
 							control.alu_op	 = alu_AB;
 							control.alu_srcA = src_PC_h;
 							control.alu_srcB = src_PC_l;
@@ -2260,31 +2031,7 @@ module control_path
 						end
 						
 						// JUMP ABSOLUTE
-						JP_N16: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						JP_Z_N16: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						JP_NZ_N16: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						JP_C_N16: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-						end
-						JP_NC_N16: begin
+						JP_N16, JP_Z_N16, JP_NZ_N16, JP_C_N16, JP_NC_N16: begin
 							control.alu_op	 = alu_AB;
 							control.alu_srcA = src_PC_h;
 							control.alu_srcB = src_PC_l;
@@ -2420,7 +2167,8 @@ module control_path
 				if (iteration == 3'b0) begin
 					case (op_code)
 						// LOAD REGISTER IMMEDIATE
-						LD_A_N8: begin
+						LD_A_N8, LD_B_N8, LD_C_N8, LD_D_N8, LD_E_N8, LD_H_N8, LD_L_N8, LD_BC_N16, LD_DE_N16, LD_HL_N16, LD_SP_N16: 
+						begin
 							control.alu_dest = dest_PC;
 							control.alu_op	 = alu_INCL;
 							control.alu_srcA = src_PC_h;
@@ -2429,97 +2177,7 @@ module control_path
 							control.read_en  = `TRUE;
 							next_iteration	 = 3'b1;
 						end
-						LD_B_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_C_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_D_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
 						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_E_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_H_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_L_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_BC_N16: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_DE_N16: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_HL_N16: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						LD_SP_N16: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-
 						// LOAD MEMORY
 						LD_BCA_A: begin
 							control.alu_dest = dest_MEMA;
@@ -2539,7 +2197,8 @@ module control_path
 							control.alu_op	 = alu_AB;
 							next_iteration	 = 3'b1;
 						end
-						LD_HLA_A: begin
+						LD_HLA_A, LD_HLP_A, LD_HLN_A, LD_HLA_L, LD_HLA_B, LD_HLA_C, LD_HLA_D, LD_HLA_E, LD_HLA_H: 
+						begin
 							control.alu_dest = dest_MEMA;
 							control.reg_selA = reg_H;
 							control.reg_selB = reg_L;
@@ -2548,89 +2207,10 @@ module control_path
 							control.alu_op	 = alu_AB;
 							next_iteration	 = 3'b1;
 						end
-						LD_HLP_A: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-							next_iteration	 = 3'b1;
-						end
-						LD_HLN_A: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-							next_iteration	 = 3'b1;
-						end
-						LD_HLA_B: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-							next_iteration	 = 3'b1;
-						end
-						LD_HLA_C: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-							next_iteration	 = 3'b1;
-						end
-						LD_HLA_D: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-							next_iteration	 = 3'b1;
-						end
-						LD_HLA_E: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-							next_iteration	 = 3'b1;
-						end
-						LD_HLA_H: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-							next_iteration	 = 3'b1;
-						end
-						LD_HLA_L: begin
-							control.alu_dest = dest_MEMA;
-							control.reg_selA = reg_H;
-							control.reg_selB = reg_L;
-							control.alu_srcA = src_REGA;
-							control.alu_srcB = src_REGB;
-							control.alu_op	 = alu_AB;
-							next_iteration	 = 3'b1;
-						end					
-						
+
 						// READ MEMORY
-						LD_A_BCA: begin
-							control.read_en = `TRUE;
-							next_iteration	= 3'b1;
-						end
-						LD_A_DEA: begin
-							control.read_en = `TRUE;
-							next_iteration	= 3'b1;
-						end
-						LD_A_HLA: begin
+						LD_A_BCA, LD_A_DEA, LD_A_HLA, LD_B_HLA, LD_C_HLA, LD_D_HLA, LD_E_HLA, LD_H_HLA, LD_L_HLA, LD_HLA_N8:
+						begin
 							control.read_en = `TRUE;
 							next_iteration	= 3'b1;
 						end
@@ -2654,49 +2234,9 @@ module control_path
 							control.read_en  = `TRUE;
 							next_iteration	 = 3'b1;
 						end
-						LD_B_HLA: begin
-							control.read_en = `TRUE;
-							next_iteration	= 3'b1;
-						end
-						LD_C_HLA: begin
-							control.read_en = `TRUE;
-							next_iteration	= 3'b1;
-						end
-						LD_D_HLA: begin
-							control.read_en = `TRUE;
-							next_iteration	= 3'b1;
-						end
-						LD_E_HLA: begin
-							control.read_en = `TRUE;
-							next_iteration	= 3'b1;
-						end
-						LD_H_HLA: begin
-							control.read_en = `TRUE;
-							next_iteration  = 3'b1;
-						end
-						LD_L_HLA: begin
-							control.read_en = `TRUE;
-							next_iteration  = 3'b1;
-						end
 						
-						LD_HLA_N8: begin
-							control.read_en	= `TRUE;
-							next_iteration	= 3'b1;
-						end
-						
-						// LOAD MEMORY IMMEDIATE
-						LD_N16A_A: begin
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_PC;
-							
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						
-						// READ MEMORY IMMEDIATE
-						LD_A_N16A: begin
+						// MEMORY IMMEDIATE
+						LD_N16A_A, LD_A_N16A: begin
 							control.alu_op	 = alu_INCL;
 							control.alu_srcA = src_PC_h;
 							control.alu_srcB = src_PC_l;
@@ -2707,70 +2247,11 @@ module control_path
 						end
 						
 						// ARITHMATIC OPERATIONS
-						ADD_A_HLA: begin
+						ADD_A_HLA, ADC_A_HLA, SUB_A_HLA, SBC_A_HLA, AND_A_HLA, OR_A_HLA, XOR_A_HLA, CP_A_HLA,
+							ADD_A_N8, ADC_A_N8, SUB_A_N8, SBC_A_N8, AND_A_N8, OR_A_N8, XOR_A_N8, CP_A_N8: 
+						begin
 							control.read_en	 = `TRUE;
 							next_iteration	 = 3'b1;
-						end
-						ADC_A_HLA: begin
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						SUB_A_HLA: begin
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						SBC_A_HLA: begin
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						AND_A_HLA: begin
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						OR_A_HLA: begin
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						XOR_A_HLA: begin
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						CP_A_HLA: begin
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-
-						ADD_A_N8: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
-						end
-						ADC_A_N8: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
-						end
-						SUB_A_N8: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
-						end
-						SBC_A_N8: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
-						end
-						AND_A_N8: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
-						end
-						OR_A_N8: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
-						end
-						XOR_A_N8: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
-						end
-						CP_A_N8: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
 						end
 
 						ADD_HL_BC: begin
@@ -2810,18 +2291,13 @@ module control_path
 						end
 						
 						// INCREMENT/DECREMENT MEMORY
-						INC_HLA: begin
-							control.read_en	 = `TRUE;
-							next_iteration 	 = 3'b1;
-						end
-						
-						DEC_HLA: begin
+						INC_HLA, DEC_HLA: begin
 							control.read_en	 = `TRUE;
 							next_iteration 	 = 3'b1;
 						end
 						
 						// JUMP ABSOLUTE
-						JP_N16: begin
+						JP_N16, JP_Z_N16, JP_C_N16, JP_NZ_N16, JP_NC_N16: begin
 							control.alu_dest = dest_PC;
 							control.alu_op	 = alu_INCL;
 							control.alu_srcA = src_PC_h;
@@ -2830,43 +2306,7 @@ module control_path
 							control.read_en  = `TRUE;
 							next_iteration		 = 3'b1;
 						end
-						JP_Z_N16: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration		 = 3'b1;
-						end
-						JP_C_N16: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration		 = 3'b1;
-						end
-						JP_NZ_N16: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration		 = 3'b1;
-						end
-						JP_NC_N16: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-						
-							control.read_en  = `TRUE;
-							next_iteration	 = 3'b1;
-						end
-						
+
 						// JUMP RELATIVE
 						JR_N8, JR_Z_N8, JR_NZ_N8, JR_C_N8, JR_NC_N8:
 						begin
@@ -2895,6 +2335,10 @@ module control_path
 							next_iteration	= 3'b1;
 						end
 						
+						PREFIX: begin
+							next_prefix = `TRUE;
+						end
+						
 					endcase				
 					
 				end else if (iteration == 3'd1) begin
@@ -2902,28 +2346,8 @@ module control_path
 					case(op_code)
 					
 						// LOAD 16-BIT IMMEDIATE
-						LD_BC_N16: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-							next_iteration	 = 3'd2;
-						end
-						LD_DE_N16: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-							next_iteration	 = 3'd2;
-						end
-						LD_HL_N16: begin
-							control.alu_op	 = alu_AB;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-							control.alu_dest = dest_MEMA;
-							next_iteration	 = 3'd2;
-						end
-						LD_SP_N16: begin
+						LD_BC_N16, LD_DE_N16, LD_HL_N16, LD_SP_N16: 
+						begin
 							control.alu_op	 = alu_AB;
 							control.alu_srcA = src_PC_h;
 							control.alu_srcB = src_PC_l;
@@ -2942,8 +2366,9 @@ module control_path
 							next_iteration		 = 3'd2;
 						end
 					
-						// LOAD MEMORY IMMEDIATE
-						LD_N16A_A: begin
+						// MEMORY IMMEDIATE
+						LD_N16A_A, LD_A_N16A: 
+						begin
 							control.alu_op	 = alu_B;
 							control.alu_srcB = src_MEMD;
 							control.alu_dest = dest_MEMA_l;
@@ -2951,75 +2376,10 @@ module control_path
 							control.read_en	 = `TRUE;
 							next_iteration	 = 3'd2;
 						end
-						
-						// READ MEMORY IMMEDIATE
-						LD_A_N16A: begin
-							control.alu_op	 = alu_B;
-							control.alu_srcB = src_MEMD;
-							control.alu_dest = dest_MEMA_l;
-							
-							control.read_en	 = `TRUE;
-							next_iteration	 = 3'd2;
-						end
-					
+											
 						// ARITHMATIC OPERATIONS
-						ADD_A_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						ADC_A_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						SUB_A_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						SBC_A_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						AND_A_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						OR_A_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						XOR_A_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						CP_A_N8: begin
+						ADD_A_N8, ADC_A_N8, SUB_A_N8, SBC_A_N8, AND_A_N8, OR_A_N8, XOR_A_N8, CP_A_N8: 
+						begin
 							control.alu_dest = dest_PC;
 							control.alu_op	 = alu_INCL;
 							control.alu_srcA = src_PC_h;
@@ -3029,16 +2389,11 @@ module control_path
 						end
 					
 						// INCREMENT/DECREMENT MEMORY
-						INC_HLA: begin
+						INC_HLA, DEC_HLA: begin
 							control.write_en = `TRUE;
 							next_iteration 	 = 3'b0;
 						end
-						
-						DEC_HLA: begin
-							control.write_en = `TRUE;
-							next_iteration 	 = 3'b0;
-						end
-					
+											
 						// JUMP ABSOLUTE
 						JP_N16: begin
 							control.alu_op 	 = alu_B;
@@ -3122,39 +2477,8 @@ module control_path
 						end
 						
 						// JUMP RELATIVE
-						JR_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						JR_Z_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						JR_NZ_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						JR_C_N8: begin
-							control.alu_dest = dest_PC;
-							control.alu_op	 = alu_INCL;
-							control.alu_srcA = src_PC_h;
-							control.alu_srcB = src_PC_l;
-
-							next_iteration	 = 3'b0;
-						end
-						JR_NC_N8: begin
+						JR_N8, JR_Z_N8, JR_NZ_N8, JR_C_N8, JR_NC_N8: 
+						begin
 							control.alu_dest = dest_PC;
 							control.alu_op	 = alu_INCL;
 							control.alu_srcA = src_PC_h;
@@ -3286,23 +2610,12 @@ module control_path
 					case(op_code)
 					
 						// STACK OPERATIONS
-						PUSH_AF: begin
+						PUSH_AF, PUSH_BC, PUSH_DE, PUSH_HL: 
+						begin
 							control.write_en 	= `TRUE;
 							next_iteration		= 3'd0;
 						end
-						PUSH_BC: begin
-							control.write_en 	= `TRUE;
-							next_iteration		= 3'd0;
-						end
-						PUSH_DE: begin
-							control.write_en 	= `TRUE;
-							next_iteration		= 3'd0;
-						end
-						PUSH_HL: begin
-							control.write_en 	= `TRUE;
-							next_iteration		= 3'd0;
-						end
-					
+						
 						default: begin
 							next_iteration		= 3'b0;
 						end
