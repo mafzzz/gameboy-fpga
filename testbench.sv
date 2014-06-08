@@ -65,6 +65,8 @@ cycle(dec):%d				Condition codes {Z N H C} : {%b %b %b %b}\n\n",
 				regA, regB, regC, regD, regE, regH, regL, DUT.MAR, DUT.MDR, v.cycles,
 				regF[3], regF[2], regF[1], regF[0]); 
 	
+		#100000;
+		$stop;
 	end
 	
 endmodule: testbench

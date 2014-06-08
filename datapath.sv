@@ -57,8 +57,8 @@ module datapath
 	logic [3:0]			alu_flags, flags_in, flags_out;
 	logic [7:0]			outA, outB;
 		
-	// {FLAGS, MEMA_h, MEMA_l, SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
-	logic [12:0]		dest_en;
+	// {MEMAH, FLAGS, MEMA_h, MEMA_l, SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
+	logic [13:0]		dest_en;
 		
 	control_code_t		controls;
 	
@@ -70,7 +70,7 @@ module datapath
 
 	logic [7:0] 		inA, inB;
 		
-	logic				PC_dec_h, PC_inc_h;
+	logic				PC_dec_h, PC_inc_h, SP_dec_h, SP_inc_h;
 	
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
@@ -90,21 +90,22 @@ module datapath
 		
 	always_comb begin
 		case (controls.alu_dest)
-			dest_NONE:  	dest_en = 13'b0_0000_0000_0000;
-			dest_REG:   	dest_en = 13'b0_0000_0000_0001;
-			dest_SP_l:  	dest_en = 13'b0_0000_0000_0010;
-			dest_SP_h:  	dest_en = 13'b0_0000_0000_0100;
-			dest_PC_l:  	dest_en = 13'b0_0000_0000_1000;
-			dest_PC_h:  	dest_en = 13'b0_0000_0001_0000;
-			dest_MEMD:  	dest_en = 13'b0_0000_0010_0000;
-			dest_MEMA:  	dest_en = 13'b0_0000_0100_0000;
-			dest_PC:		dest_en = 13'b0_0000_1000_0000;
-			dest_REGA:  	dest_en = 13'b0_0001_0000_0000;
-			dest_SP:		dest_en = 13'b0_0010_0000_0000;
-			dest_MEMA_l:	dest_en = 13'b0_0100_0000_0000;
-			dest_MEMA_h:	dest_en = 13'b0_1000_0000_0000;
-			dest_FLAGS:		dest_en = 13'b1_0000_0000_0000;
-			default:		dest_en = 13'bx_xxxx_xxxx_xxxx;
+			dest_NONE:  	dest_en = 14'b00_0000_0000_0000;
+			dest_REG:   	dest_en = 14'b00_0000_0000_0001;
+			dest_SP_l:  	dest_en = 14'b00_0000_0000_0010;
+			dest_SP_h:  	dest_en = 14'b00_0000_0000_0100;
+			dest_PC_l:  	dest_en = 14'b00_0000_0000_1000;
+			dest_PC_h:  	dest_en = 14'b00_0000_0001_0000;
+			dest_MEMD:  	dest_en = 14'b00_0000_0010_0000;
+			dest_MEMA:  	dest_en = 14'b00_0000_0100_0000;
+			dest_PC:		dest_en = 14'b00_0000_1000_0000;
+			dest_REGA:  	dest_en = 14'b00_0001_0000_0000;
+			dest_SP:		dest_en = 14'b00_0010_0000_0000;
+			dest_MEMA_l:	dest_en = 14'b00_0100_0000_0000;
+			dest_MEMA_h:	dest_en = 14'b00_1000_0000_0000;
+			dest_FLAGS:		dest_en = 14'b01_0000_0000_0000;
+			dest_MEMAH:		dest_en	= 14'b10_0000_0000_0000;
+			default:		dest_en = 14'bxx_xxxx_xxxx_xxxx;
 		endcase
 	end
 	
@@ -119,7 +120,7 @@ module datapath
 			SP_next			= addr_out;
 		else begin
 			SP_next[7:0] 	= (dest_en[1]) ? alu_output : SP[7:0];
-			SP_next[15:8]	= (dest_en[2]) ? alu_output : SP[15:8];
+			SP_next[15:8]	= (SP_dec_h) ? SP[15:8] - 1: ((SP_inc_h) ? SP[15:8] + 1 : ((dest_en[2]) ? alu_output : SP[15:8]));
 	end
 	
 	always_comb begin
@@ -157,6 +158,7 @@ module datapath
 			src_PC_l: inA = PC[7:0];
 			src_PC_h: inA = PC[15:8];
 			src_MEMD: inA = MDR;
+			src_MEMA: inA = MAR[15:8];
 			src_FLAGS:inA = {flags_out, 4'b0};
 			default:  inA = 8'bx;
 		endcase
@@ -172,15 +174,17 @@ module datapath
 			src_PC_l: inB = PC[7:0];
 			src_PC_h: inB = PC[15:8];
 			src_MEMD: inB = MDR;
+			src_MEMA: inB = MAR[7:0];
 			src_FLAGS:inB = {flags_out, 4'b0};
 			default:  inB = 8'bx;
 		endcase
 	end
 	
 	alu				al	(.op_A (inA), .op_B (inB), .op_code (controls.alu_op), .curr_flags (flags_out), .next_flags (alu_flags), .alu_result (alu_output),
-		.addr_result (addr_out), .PC_inc_h (PC_inc_h), .PC_dec_h (PC_dec_h));
+		.addr_result (addr_out), .PC_inc_h (PC_inc_h), .PC_dec_h (PC_dec_h), .SP_inc_h (SP_inc_h), .SP_dec_h (SP_dec_h));
 	
-	assign MAR_next = (dest_en[6]) ? addr_out : ((dest_en[10]) ? {MAR[15:8], alu_output[7:0]} : ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR));
+	assign MAR_next = (dest_en[13]) ? {8'hFF, alu_output} : ((dest_en[6]) ? addr_out : ((dest_en[10]) ? {MAR[15:8], alu_output[7:0]} : 
+					  ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR)));
 	
 	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls));
 	

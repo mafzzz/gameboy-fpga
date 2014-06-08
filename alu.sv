@@ -31,8 +31,8 @@ module alu
 	input logic [7:0]	op_B,
 	input alu_op_t		op_code,
 	input logic [3:0]	curr_flags,
-	output logic		PC_inc_h,
-	output logic		PC_dec_h,
+	output logic		PC_inc_h, SP_inc_h,
+	output logic		PC_dec_h, SP_dec_h,
 	output logic [3:0]	next_flags,
 	output logic [7:0]	alu_result,
 	output logic [15:0]	addr_result);
@@ -40,6 +40,9 @@ module alu
 	always_comb begin 
 		PC_inc_h	= 1'b0;
 		PC_dec_h	= 1'b0;
+		SP_inc_h	= 1'b0;
+		SP_dec_h	= 1'b0;
+
 		case (op_code)
 			
 			// No operation
@@ -81,8 +84,8 @@ module alu
 				next_flags[2] = 1'b0;
 			end
 			
-			// Signed addition for JR, B is signed
-			alu_ADS: begin
+			// Signed addition for JR, B is signed, for PC only
+			alu_ADS_PC: begin
 				addr_result = 16'bx;
 				next_flags = curr_flags;
 				if (op_B[7]) begin
@@ -93,6 +96,22 @@ module alu
 					{PC_inc_h, alu_result} = op_A + op_B;
 					PC_dec_h = 1'b0;
 				end
+			end
+
+			// Signed addition, B is signed, for SP only
+			alu_ADS_SP: begin
+				addr_result = 16'bx;
+				next_flags[3:2] = 2'b0;
+				if (op_B[7]) begin
+					{SP_dec_h, alu_result} = op_A + op_B;
+					SP_dec_h = ~SP_dec_h;
+					SP_inc_h = 1'b0;
+				end else begin
+					{SP_inc_h, alu_result} = op_A + op_B;
+					SP_dec_h = 1'b0;
+				end
+				next_flags[0] = SP_dec_h | SP_inc_h;
+				next_flags[1] = alu_result[4] ^ (op_A[4] ^ op_B[4]);
 			end
 			
 			// A - B
