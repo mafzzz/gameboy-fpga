@@ -777,6 +777,14 @@ module control_path
 							control.alu_dest = dest_MEMA;
 						end
 						
+						// ADD SP
+						ADD_SP_N8: begin
+							control.alu_op	 = alu_AB;
+							control.alu_srcA = src_PC_h;
+							control.alu_srcB = src_PC_l;
+							control.alu_dest = dest_MEMA;
+						end
+						
 						// ADD CARRY
 						ADC_A_A: begin
 							control.reg_selA = reg_A;
@@ -2007,8 +2015,9 @@ module control_path
 
 						
 						HALT: begin
-							next_state = s_EXECUTE;
+							next_state = s_WRITE;
 							
+							`ifndef synthesis
 							// For simulation purposes
 							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: HALT	(0x%h)		SP:	%h	|	Reset: %b \n\
 				Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n\
@@ -2016,11 +2025,12 @@ module control_path
 							DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, DUT.IR, DUT.SP, rst,
 							DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
 							DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
-							$stop;
+							`endif
 						end
 						STOP: begin
 							next_state = s_EXECUTE;
 							
+							`ifndef synthesis
 							// For simulation purposes
 							$display("State: %s 	Iter: %d	| 	PC: %h 	IR: STOP	(0x%h)		SP:	%h	|	Reset: %b \n\
 				Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n\
@@ -2029,6 +2039,7 @@ module control_path
 							DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
 							DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
 							$stop;
+							`endif
 						end
 						NOP: begin
 							// DO NOTHING
@@ -2280,6 +2291,15 @@ module control_path
 							control.ld_flags = `TRUE;
 						end
 
+						// ADD SP
+						ADD_SP_N8: begin
+							control.alu_op	 = alu_ADS_SP;
+							control.alu_srcA = src_SP_l;
+							control.alu_srcB = src_MEMD;
+							control.alu_dest = dest_SP_l;
+							control.ld_flags = `TRUE;
+						end
+						
 						ADD_A_N8: begin
 							control.reg_selA = reg_A;
 							control.alu_op	 = alu_ADD;
@@ -2724,6 +2744,17 @@ module control_path
 							control.ld_flags = `TRUE;
 						end
 						
+						// ADD SP
+						ADD_SP_N8: begin
+							control.alu_dest = dest_PC;
+							control.alu_op	 = alu_INCL;
+							control.alu_srcA = src_PC_h;
+							control.alu_srcB = src_PC_l;
+						
+							control.read_en  = `TRUE;
+							next_iteration	 = 3'b1;
+						end
+						
 						// INCREMENT/DECREMENT MEMORY
 						INC_HLA, DEC_HLA: begin
 							control.read_en	 = `TRUE;
@@ -2738,7 +2769,7 @@ module control_path
 							control.alu_srcB = src_PC_l;
 						
 							control.read_en  = `TRUE;
-							next_iteration		 = 3'b1;
+							next_iteration	 = 3'b1;
 						end
 
 						// JUMP RELATIVE
@@ -2875,6 +2906,11 @@ module control_path
 				end else if (iteration == 3'd1) begin
 				
 					case(op_code)
+					
+						// ADD SP
+						ADD_SP_N8: begin
+							next_iteration   = 3'd2;
+						end
 					
 						// LOAD 16-BIT IMMEDIATE
 						LD_BC_N16, LD_DE_N16, LD_HL_N16, LD_SP_N16: 
@@ -3174,6 +3210,11 @@ module control_path
 				end else if (iteration == 3'd2) begin
 				
 					case(op_code)
+					
+						// ADD SP
+						ADD_SP_N8: begin
+							next_iteration   = 3'd3;
+						end
 					
 						// LOAD 16-BIT IMMEDIATE
 						LD_BC_N16: begin

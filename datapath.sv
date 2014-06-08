@@ -121,7 +121,7 @@ module datapath
 		else begin
 			SP_next[7:0] 	= (dest_en[1]) ? alu_output : SP[7:0];
 			SP_next[15:8]	= (SP_dec_h) ? SP[15:8] - 1: ((SP_inc_h) ? SP[15:8] + 1 : ((dest_en[2]) ? alu_output : SP[15:8]));
-	end
+		end
 	
 	always_comb begin
 		if (controls.fetch)
