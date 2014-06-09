@@ -181,7 +181,7 @@ module datapath
 	end
 	
 	alu				al	(.op_A (inA), .op_B (inB), .op_code (controls.alu_op), .curr_flags (flags_out), .next_flags (alu_flags), .alu_result (alu_output),
-		.addr_result (addr_out), .PC_inc_h (PC_inc_h), .PC_dec_h (PC_dec_h), .SP_inc_h (SP_inc_h), .SP_dec_h (SP_dec_h));
+		.addr_result (addr_out), .PC_inc_h (PC_inc_h), .PC_dec_h (PC_dec_h), .SP_inc_h (SP_inc_h), .SP_dec_h (SP_dec_h), .bit_num (bit_num));
 	
 	assign MAR_next = (dest_en[13]) ? {8'hFF, alu_output} : ((dest_en[6]) ? addr_out : ((dest_en[10]) ? {MAR[15:8], alu_output[7:0]} : 
 					  ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR)));

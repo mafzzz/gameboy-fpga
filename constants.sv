@@ -25,8 +25,6 @@
 `ifndef CONSTANTS
 `define CONSTANTS
 
-`define synthesis
-
 /*	Constants file
 *
 *	Contains typedefs, macro definitions, and enumerations for readability
@@ -83,6 +81,9 @@ typedef enum logic [5:0] {
 	alu_SCF		= 6'b01_1101,
 	alu_CCF		= 6'b01_1110,
 	alu_ADS_SP  = 6'b01_1111,
+	alu_BIT		= 6'b10_0000,
+	alu_SET		= 6'b10_0001,
+	alu_RES		= 6'b10_0010,
 	
 	alu_UNK 	= 6'bxx_xxxx
 } alu_op_t;
@@ -231,6 +232,7 @@ typedef struct packed {
 	alu_src_t 	alu_srcA;
 	alu_src_t 	alu_srcB;
 	dest_t 		alu_dest;
+	logic [2:0] bit_num;
 	logic		fetch;
 	logic		load_op_code;
 	logic 		read_en;

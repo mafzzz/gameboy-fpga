@@ -31,6 +31,7 @@ module alu
 	input logic [7:0]	op_B,
 	input alu_op_t		op_code,
 	input logic [3:0]	curr_flags,
+	input logic [2:0]	bit_num,
 	output logic		PC_inc_h, SP_inc_h,
 	output logic		PC_dec_h, SP_dec_h,
 	output logic [3:0]	next_flags,
@@ -322,6 +323,34 @@ module alu
 				alu_result = 8'bx;
 				addr_result = 8'bx;
 				next_flags = {curr_flags[3], 1'b0, 1'b0, ~curr_flags[0]};
+			end
+	
+			// Checks if bit at bit_num is zero
+			alu_BIT: begin
+				alu_result = 8'bx;
+				addr_result = 16'bx;
+				next_flags[3] = ~(op_B[bit_num]);
+				next_flags[2] = 1'b0;
+				next_flags[1] = 1'b1;
+				next_flags[0] = curr_flags[0];
+			end
+			
+			// Sets bit at bit_num
+			alu_SET: begin
+				alu_result = op_B;
+				alu_result[bit_num] = 1'b1;
+				
+				addr_result = 16'bx;
+				next_flags = curr_flags;
+			end
+			
+			// Resets bit at bit_num
+			alu_RES: begin
+				alu_result = op_B;
+				alu_result[bit_num] = 1'b0;
+				
+				addr_result = 16'bx;
+				next_flags = curr_flags;
 			end
 	
 			// Unknown OP Code

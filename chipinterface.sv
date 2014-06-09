@@ -20,7 +20,9 @@
 **************************************************************************/
 
 `include "constants.sv"
-`ifndef simulation
+
+`define synthesis
+
 /* Module ChipInterface: Connects Cyclone V board ports to datapath
 *
 *	WIP
@@ -89,4 +91,3 @@ module sseg
 	end
 	
 endmodule: sseg
-`endif
