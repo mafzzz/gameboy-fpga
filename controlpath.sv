@@ -3227,27 +3227,27 @@ module control_path
 								control.reg_selA = reg_B;
 								control.alu_srcB = src_MEMD;
 								control.alu_dest = dest_REG;
-								next_iteration		= 3'b0;
+								next_iteration	 = 3'b0;
 							end
 							LD_DE_N16: begin
 								control.alu_op 	 = alu_B;
 								control.reg_selA = reg_D;
 								control.alu_srcB = src_MEMD;
 								control.alu_dest = dest_REG;
-								next_iteration		= 3'b0;
+								next_iteration 	 = 3'b0;
 							end
 							LD_HL_N16: begin
 								control.alu_op 	 = alu_B;
 								control.reg_selA = reg_H;
 								control.alu_srcB = src_MEMD;
 								control.alu_dest = dest_REG;
-								next_iteration		= 3'b0;
+								next_iteration 	 = 3'b0;
 							end
 							LD_SP_N16: begin
 								control.alu_op 	 = alu_B;
 								control.alu_srcB = src_MEMD;
 								control.alu_dest = dest_SP_h;
-								next_iteration		= 3'b0;
+								next_iteration	 = 3'b0;
 							end
 
 							// LOAD MEMORY IMMEDIATE
@@ -3562,28 +3562,28 @@ module control_path
 							end
 							CALL_Z_N16: begin
 								control.alu_op		= alu_B;
-								control.alu_srcB		= src_MEMD;
+								control.alu_srcB	= src_MEMD;
 								control.alu_dest	= dest_PC_l;
 							
 								next_iteration 	= 3'd0;
 							end
 							CALL_NZ_N16: begin
 								control.alu_op		= alu_B;
-								control.alu_srcB		= src_MEMD;
+								control.alu_srcB	= src_MEMD;
 								control.alu_dest	= dest_PC_l;
 							
 								next_iteration 	= 3'd0;
 							end
 							CALL_C_N16: begin
 								control.alu_op		= alu_B;
-								control.alu_srcB		= src_MEMD;
+								control.alu_srcB	= src_MEMD;
 								control.alu_dest	= dest_PC_l;
 							
 								next_iteration 	= 3'd0;
 							end
 							CALL_NC_N16: begin
 								control.alu_op		= alu_B;
-								control.alu_srcB		= src_MEMD;
+								control.alu_srcB	= src_MEMD;
 								control.alu_dest	= dest_PC_l;
 							
 								next_iteration 	= 3'd0;
@@ -3606,19 +3606,19 @@ module control_path
 					control.reg_selB 		= reg_UNK;
 					control.alu_op   		= alu_UNK;
 					control.alu_srcA		= src_UNK;
-					control.alu_srcB			= src_UNK;	
+					control.alu_srcB		= src_UNK;	
 					control.alu_dest		= dest_NONE;
 					control.read_en			= `FALSE;
 					control.write_en		= `FALSE;
 					control.ld_flags		= `FALSE;
 					control.load_op_code 	= `FALSE;
-					control.fetch 			= `FALSE;
 					control.bit_num			= 3'bx;
-					next_prefix	  			= prefix_CB;
+					next_prefix	  			= `TRUE;
 					next_iteration			= iteration;
 					next_state				= s_DECODE;
 					
-					// DO NOTHING
+					if (iteration == 3'b0)
+						control.fetch 		= `TRUE;
 					
 				end
 				
@@ -3637,14 +3637,14 @@ module control_path
 					control.read_en			= `FALSE;
 					control.write_en		= `FALSE;
 					control.ld_flags		= `FALSE;
-					control.load_op_code 	= `FALSE;
 					control.fetch 			= `FALSE;
 					control.bit_num			= 3'bx;
-					next_prefix	  			= prefix_CB;
+					next_prefix	  			= `TRUE;
 					next_iteration			= iteration;
 					next_state				= s_EXECUTE;
 					
-					// DO NOTHING
+					if (iteration == 3'b0)
+						control.load_op_code	= `TRUE;
 
 				end
 				
@@ -3665,7 +3665,7 @@ module control_path
 					control.load_op_code 	= `FALSE;
 					control.fetch 			= `FALSE;
 					control.bit_num			= 3'bx;
-					next_prefix	  			= prefix_CB;
+					next_prefix	  			= `TRUE;
 					next_iteration			= iteration;
 					next_state				= s_WRITE;
 					
@@ -5338,6 +5338,551 @@ module control_path
 							control.alu_dest 	= dest_REG;
 						end
 						
+						// HL OPERATIONS
+						RLC_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RLC;
+								control.alu_dest	= dest_MEMD;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RL_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RL;
+								control.alu_dest	= dest_MEMD;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RRC_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RRC;
+								control.alu_dest	= dest_MEMD;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RR_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RR;
+								control.alu_dest	= dest_MEMD;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SLA_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SLA;
+								control.alu_dest	= dest_MEMD;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SRA_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SRA;
+								control.alu_dest	= dest_MEMD;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SRL_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SRL;
+								control.alu_dest	= dest_MEMD;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SWAP_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SWAP;
+								control.alu_dest	= dest_MEMD;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						BIT_0_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_BIT;
+								control.bit_num		= 3'd0;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						BIT_1_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_BIT;
+								control.bit_num		= 3'd1;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						BIT_2_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.bit_num		= 3'd2;
+								control.alu_op	 	= alu_BIT;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						BIT_3_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_BIT;
+								control.bit_num		= 3'd3;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						BIT_4_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_BIT;
+								control.bit_num		= 3'd4;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						BIT_5_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.bit_num		= 3'd5;
+								control.alu_op	 	= alu_BIT;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						BIT_6_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_BIT;
+								control.bit_num		= 3'd6;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						BIT_7_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_BIT;
+								control.bit_num		= 3'd7;
+								control.ld_flags	= `TRUE;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SET_0_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SET;
+								control.bit_num		= 3'd0;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SET_1_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SET;
+								control.bit_num		= 3'd1;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SET_2_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.bit_num		= 3'd2;
+								control.alu_op	 	= alu_SET;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SET_3_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SET;
+								control.bit_num		= 3'd3;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SET_4_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SET;
+								control.bit_num		= 3'd4;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SET_5_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.bit_num		= 3'd5;
+								control.alu_op	 	= alu_SET;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SET_6_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SET;
+								control.bit_num		= 3'd6;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						SET_7_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_SET;
+								control.bit_num		= 3'd7;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RES_0_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RES;
+								control.bit_num		= 3'd0;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RES_1_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RES;
+								control.bit_num		= 3'd1;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RES_2_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.bit_num		= 3'd2;
+								control.alu_op	 	= alu_RES;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RES_3_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RES;
+								control.bit_num		= 3'd3;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RES_4_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RES;
+								control.bit_num		= 3'd4;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RES_5_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.bit_num		= 3'd5;
+								control.alu_op	 	= alu_RES;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RES_6_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RES;
+								control.bit_num		= 3'd6;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
+						RES_7_HLA: begin
+							if (iteration == 3'b0) begin
+								control.reg_selA 	= reg_H;
+								control.reg_selB 	= reg_L;
+								control.alu_srcA	= src_REGA;
+								control.alu_srcB 	= src_REGB;
+								control.alu_op		= alu_AB;
+								control.alu_dest	= dest_MEMA;
+							end else if (iteration == 3'b1) begin
+								control.alu_srcB 	= src_MEMD;
+								control.alu_op	 	= alu_RES;
+								control.bit_num		= 3'd7;
+								control.alu_dest	= dest_MEMD;
+							end else begin
+								// DO NOTHING
+							end
+						end
 					endcase
 					
 				end
@@ -5364,6 +5909,44 @@ module control_path
 					next_prefix	  			= `FALSE;
 					next_iteration			= 3'b0;
 					next_state				= s_FETCH;
+					
+					case (op_code) 
+							
+							// HL OPERATIONS
+							RLC_HLA,   RL_HLA,    SLA_HLA,   RRC_HLA,   RR_HLA,    SRA_HLA,   SRL_HLA,   SWAP_HLA:
+							begin
+								if (iteration == 3'b0) begin
+									control.read_en		= `TRUE;
+									next_prefix 		= `TRUE;
+									next_iteration 		= 3'b1;
+								end else if (iteration == 3'b1) begin
+									control.write_en	= `TRUE;
+									next_iteration 		= 3'd2;
+									next_prefix 		= `TRUE;
+								end else begin
+									// DO NOTHING
+								end
+							end
+							
+							BIT_0_HLA, BIT_1_HLA, BIT_2_HLA, BIT_3_HLA, BIT_4_HLA, BIT_5_HLA, BIT_6_HLA, BIT_7_HLA, 
+							RES_0_HLA, RES_1_HLA, RES_2_HLA, RES_3_HLA, RES_4_HLA, RES_5_HLA, RES_6_HLA, RES_7_HLA, 
+							SET_0_HLA, SET_1_HLA, SET_2_HLA, SET_3_HLA, SET_4_HLA, SET_5_HLA, SET_6_HLA, SET_7_HLA:
+							
+							begin
+								if (iteration == 3'b0) begin
+									control.read_en		= `TRUE;
+									next_prefix 		= `TRUE;
+									next_iteration 		= 3'b1;
+								end else if (iteration == 3'b1) begin
+									next_iteration 		= 3'd2;
+									next_prefix 		= `TRUE;
+								end else begin
+									// DO NOTHING
+								end
+							end
+
+					endcase
+					
 				end
 				
 			endcase

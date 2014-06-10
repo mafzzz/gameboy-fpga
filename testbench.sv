@@ -57,14 +57,14 @@ module testbench();
 	
 	initial begin
 
-		
+		/*
 		$monitor("State: %s 	Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP:	%h	|	Reset: %b \
 				Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\
 cycle(dec):%d				Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
 				DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
 				regA, regB, regC, regD, regE, regH, regL, DUT.MAR, DUT.MDR, v.cycles,
 				regF[3], regF[2], regF[1], regF[0]); 	
-				
+			*/	
 	end
 	
 endmodule: testbench
