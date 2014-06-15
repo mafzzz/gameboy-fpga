@@ -21,8 +21,6 @@
 
 `include "constants.sv"
 
-`define synthesis
-
 /* Module ChipInterface: Connects Cyclone V board ports to datapath
 *
 *	WIP
@@ -48,19 +46,20 @@ module ChipInterface
 	output logic 		HDMI_TX_CLK,
 	output logic 		HDMI_TX_DE,
 	output logic 		HDMI_TX_HS,
-	output logic 		HDMI_TX_VS);
+	output logic 		HDMI_TX_VS
 	);
 	
 	/* ------------------------------------------------------------*/
 	/***  ALTERA PLL CLOCKS ***/
 	/* ------------------------------------------------------------*/
 
-	logic clk_cpu;
+	logic clk_cpu, clk_out;
 	logic clk_lock;		
 	logic rst;
 
 	// Altera PLL module for 4.19 MHz clock
-	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (clk_cpu), .locked (clk_lock));
+	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (HDMI_TX_CLK), .outclk_1 (clk_out));
+	assign cpu_clk = (SW[0]) ? KEY[1] : clk_out;
 	
 	/* ------------------------------------------------------------*/
 	/***  CPU CORE INTANTIATION ***/
@@ -80,12 +79,11 @@ module ChipInterface
 	sseg b_outl(outb[3:0], HEX0);
 	
 	datapath dp(.clk (clk_cpu), .rst (rst), .regA (regA), .regB (regB), .regC (regC), 
-		.regD (regD), .regE (regE), .regH (regH), .regL (regL));
+		.regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
 	/* ------------------------------------------------------------*/
 	/***  HDMI TX AND I2C INSTANTIATION ***/
 	/* ------------------------------------------------------------*/
-	logic clk, rst, clk_i2c;
 	reg [7:0] outA;
 	reg stop;
 

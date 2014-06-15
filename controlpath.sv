@@ -1688,15 +1688,6 @@ module control_path
 								end
 							end
 							
-							JP_HLA: begin
-								control.alu_op		= alu_AB;
-								control.alu_srcA	= src_REGA;
-								control.alu_srcB	= src_REGB;
-								control.reg_selA	= reg_H;
-								control.reg_selB	= reg_L;
-								control.alu_dest	= dest_PC;
-							end
-							
 							// JUMP RELATIVE
 							JR_N8, JR_Z_N8, JR_NZ_N8, JR_C_N8, JR_NC_N8: begin
 								control.alu_op	 = alu_AB;
@@ -3613,6 +3604,7 @@ module control_path
 					control.ld_flags		= `FALSE;
 					control.load_op_code 	= `FALSE;
 					control.bit_num			= 3'bx;
+					control.fetch 			= `FALSE;
 					next_prefix	  			= `TRUE;
 					next_iteration			= iteration;
 					next_state				= s_DECODE;
@@ -3637,6 +3629,7 @@ module control_path
 					control.read_en			= `FALSE;
 					control.write_en		= `FALSE;
 					control.ld_flags		= `FALSE;
+					control.load_op_code	= `FALSE;
 					control.fetch 			= `FALSE;
 					control.bit_num			= 3'bx;
 					next_prefix	  			= `TRUE;
@@ -3872,57 +3865,6 @@ module control_path
 							control.reg_selA	= reg_L;
 							control.alu_srcB	= src_REGA;
 							control.alu_op		= alu_RR;
-							control.alu_dest	= dest_REG;
-							control.ld_flags	= `TRUE;
-						end
-
-						// ROTATE LEFT
-						RL_A: begin
-							control.reg_selA	= reg_A;
-							control.alu_srcB	= src_REGA;
-							control.alu_op		= alu_RL;
-							control.alu_dest	= dest_REG;
-							control.ld_flags	= `TRUE;
-						end
-						RL_B: begin
-							control.reg_selA	= reg_B;
-							control.alu_srcB	= src_REGA;
-							control.alu_op		= alu_RL;
-							control.alu_dest	= dest_REG;
-							control.ld_flags	= `TRUE;
-						end
-						RL_C: begin
-							control.reg_selA	= reg_C;
-							control.alu_srcB	= src_REGA;
-							control.alu_op		= alu_RL;
-							control.alu_dest	= dest_REG;
-							control.ld_flags	= `TRUE;
-						end
-						RL_D: begin
-							control.reg_selA	= reg_D;
-							control.alu_srcB	= src_REGA;
-							control.alu_op		= alu_RL;
-							control.alu_dest	= dest_REG;
-							control.ld_flags	= `TRUE;
-						end
-						RL_E: begin
-							control.reg_selA	= reg_E;
-							control.alu_srcB	= src_REGA;
-							control.alu_op		= alu_RL;
-							control.alu_dest	= dest_REG;
-							control.ld_flags	= `TRUE;
-						end
-						RL_H: begin
-							control.reg_selA	= reg_H;
-							control.alu_srcB	= src_REGA;
-							control.alu_op		= alu_RL;
-							control.alu_dest	= dest_REG;
-							control.ld_flags	= `TRUE;
-						end
-						RL_L: begin
-							control.reg_selA	= reg_L;
-							control.alu_srcB	= src_REGA;
-							control.alu_op		= alu_RL;
 							control.alu_dest	= dest_REG;
 							control.ld_flags	= `TRUE;
 						end
@@ -5903,6 +5845,7 @@ module control_path
 					control.write_en		= `FALSE;
 					control.ld_flags		= `FALSE;
 					control.load_op_code 	= `FALSE;
+					control.bit_num 		= `FALSE;
 					control.fetch 			= `FALSE;
 					
 					// MAKE SURE WE GO BACK TO NORMAL MODE

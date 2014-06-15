@@ -20,6 +20,7 @@
 **************************************************************************/
 
 `include "constants.sv"
+`define synthesis
 
 /* 	Module sram: Block sram memory
 *
