@@ -223,6 +223,20 @@ typedef enum op_code_t {
 } cb_instruction_t;
 
 /*
+*	Micro-code for i2c
+*/
+typedef enum logic [2:0] {
+	i2c_NOP		= 3'b000,
+	i2c_START	= 3'b001,
+	i2c_STOP	= 3'b010,
+	i2c_READ	= 3'b011,
+	i2c_WRITE	= 3'b100,
+	
+	i2c_HALT	= 3'b111,
+	i2c_UNK		= 3'bxxx
+} i2c_micro_instruc_t;
+
+/*
 *	Controlpath control code output for Datapath
 */
 typedef struct packed {

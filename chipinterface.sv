@@ -29,34 +29,78 @@
 *
 */
 module ChipInterface
-	(input logic [1:0]	KEY,
+	/* ------------------------------------------------------------*/
+	/***  CHIP PORT DECLARATIONS ***/
+	/* ------------------------------------------------------------*/
+	(
+	// buttons/leds
+	input logic [1:0]	KEY,
 	input logic [9:0]	SW,
+	output logic [6:0]	HEX0, HEX1, HEX2, HEX3,
+	
+	// clocks
 	input logic			CLOCK_50_B5B,
-	output logic [6:0]	HEX0, HEX1, HEX2, HEX3);
 	
-	logic clk, rst;
-	logic clk_out, clk_lock;
+	// hdmi
+	output logic		I2C_SCL,
+	inout tri 			I2C_SDA,
+	output logic [23:0] HDMI_TX_D,
+	output logic 		HDMI_TX_CLK,
+	output logic 		HDMI_TX_DE,
+	output logic 		HDMI_TX_HS,
+	output logic 		HDMI_TX_VS);
+	);
 	
+	/* ------------------------------------------------------------*/
+	/***  ALTERA PLL CLOCKS ***/
+	/* ------------------------------------------------------------*/
+
+	logic clk_cpu;
+	logic clk_lock;		
+	logic rst;
+
 	// Altera PLL module for 4.19 MHz clock
-	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (clk_out), .locked (clk_lock));
+	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (clk_cpu), .locked (clk_lock));
 	
-	assign clk = (SW[0]) ? ~KEY[1] : clk_out;
+	/* ------------------------------------------------------------*/
+	/***  CPU CORE INTANTIATION ***/
+	/* ------------------------------------------------------------*/
 	assign rst = ~KEY[0];
 	
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
-	
 	logic [7:0] 		outa, outb;
 	
-	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regH : '0)));
-	assign outb = (~SW[9] & ~SW[8]) ? regB : ((~SW[9] & SW[8]) ? regD : ((SW[9] & ~SW[8]) ? regF : ((SW[9] & SW[8]) ? regL : '0)));
+	// 00: AF    01: BC    10: DE    11: HL
+	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regB : ((SW[9] & ~SW[8]) ? regD : ((SW[9] & SW[8]) ? regH : '0)));
+	assign outb = (~SW[9] & ~SW[8]) ? regF : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regL : '0)));
 	
 	sseg a_outh(outa[7:4], HEX3);
 	sseg a_outl(outa[3:0], HEX2);
 	sseg b_outh(outb[7:4], HEX1);
 	sseg b_outl(outb[3:0], HEX0);
 	
-	datapath dp(.*);
+	datapath dp(.clk (clk_cpu), .rst (rst), .regA (regA), .regB (regB), .regC (regC), 
+		.regD (regD), .regE (regE), .regH (regH), .regL (regL));
 	
+	/* ------------------------------------------------------------*/
+	/***  HDMI TX AND I2C INSTANTIATION ***/
+	/* ------------------------------------------------------------*/
+	logic clk, rst, clk_i2c;
+	reg [7:0] outA;
+	reg stop;
+
+	reg [3:0] counter;
+	reg clk_reduced;
+	reg ack;
+	// Divide 4.19 MHz clk by 11 to give 381 kHz I2C logic driver. 
+	always @(posedge clk_cpu) begin
+		counter = (counter == 4'hA) ? 4'h0 : counter + 4'h1;
+		clk_reduced = (stop) ? 1'b0 : ((counter == 4'h0) ? ~clk_reduced : clk_reduced);
+	end
+	
+	i2c bus(.stop (stop), .clk (clk_reduced), .rst (rst), .outA (outA), .SDA (I2C_SDA), .SCL (I2C_SCL), .ACK (ack));
+	hdmi tx(.clk (HDMI_TX_CLK), .rst (rst), .hsync (HDMI_TX_HS), .vsync(HDMI_TX_VS), .de (HDMI_TX_DE), .data (HDMI_TX_D));
+
 endmodule: ChipInterface
 
 module sseg 
@@ -69,22 +113,22 @@ module sseg
 	always_comb begin
 	
 		case(num)
-			4'h0: disp = 7'b011_1111;
-			4'h1: disp = 7'b000_0110;
-			4'h2: disp = 7'b101_1011;
-			4'h3: disp = 7'b100_1111;
-			4'h4: disp = 7'b110_0110;
-			4'h5: disp = 7'b110_1101;
-			4'h6: disp = 7'b111_1101;
-			4'h7: disp = 7'b000_0111;
-			4'h8: disp = 7'b111_1111;
-			4'h9: disp = 7'b110_0111;
-			4'hA: disp = 7'b111_0111;
-			4'hB: disp = 7'b111_1100;
-			4'hC: disp = 7'b011_1001;
-			4'hD: disp = 7'b101_1110;
-			4'hE: disp = 7'b111_1001;
-			4'hF: disp = 7'b111_0001;
+			4'h0: 		disp = 7'b011_1111;
+			4'h1: 		disp = 7'b000_0110;
+			4'h2: 		disp = 7'b101_1011;
+			4'h3: 		disp = 7'b100_1111;
+			4'h4: 		disp = 7'b110_0110;
+			4'h5: 		disp = 7'b110_1101;
+			4'h6: 		disp = 7'b111_1101;
+			4'h7: 		disp = 7'b000_0111;
+			4'h8: 		disp = 7'b111_1111;
+			4'h9: 		disp = 7'b110_0111;
+			4'hA: 		disp = 7'b111_0111;
+			4'hB: 		disp = 7'b111_1100;
+			4'hC: 		disp = 7'b011_1001;
+			4'hD: 		disp = 7'b101_1110;
+			4'hE: 		disp = 7'b111_1001;
+			4'hF: 		disp = 7'b111_0001;
 			default:	disp = 7'b100_0000;
 		endcase
 	
