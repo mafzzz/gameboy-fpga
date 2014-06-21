@@ -66,15 +66,15 @@ module hdmi
 	end
 	
 	always_comb begin
-		if (horiz_count < 10'd358 && vert_count < 10'd272)
+		if (horiz_count < 10'd378 && vert_count < 10'd281)
 			data = {8'hFF, 8'h00, 8'h00};
-		else if (horiz_count < 10'd648 && vert_count < 10'd272)
+		else if (horiz_count < 10'd618 && vert_count < 10'd281)
 			data = {8'h00, 8'hFF, 8'h00};
-		else if (vert_count < 10'd358)
+		else if (vert_count < 10'd281)
 			data = {8'h00, 8'h00, 8'hFF};
-		else if (horiz_count < 10'd358)
+		else if (horiz_count < 10'd378)
 			data = {8'hF0, 8'h90, 8'h30};
-		else if (horiz_count < 10'd648)
+		else if (horiz_count < 10'd618)
 			data = {8'h30, 8'hF0, 8'h90};
 		else
 			data = {8'h90, 8'h30, 8'hF0};

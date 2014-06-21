@@ -53,7 +53,7 @@ module ChipInterface
 	/***  ALTERA PLL CLOCKS ***/
 	/* ------------------------------------------------------------*/
 
-	logic clk_cpu, clk_out;
+	logic cpu_clk, clk_out;
 	logic clk_lock;		
 	logic rst;
 
@@ -78,7 +78,7 @@ module ChipInterface
 	sseg b_outh(outb[7:4], HEX1);
 	sseg b_outl(outb[3:0], HEX0);
 	
-	datapath dp(.clk (clk_cpu), .rst (rst), .regA (regA), .regB (regB), .regC (regC), 
+	datapath dp(.clk (cpu_clk), .rst (rst), .regA (regA), .regB (regB), .regC (regC), 
 		.regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
 	/* ------------------------------------------------------------*/
@@ -91,7 +91,7 @@ module ChipInterface
 	reg clk_reduced;
 	reg ack;
 	// Divide 4.19 MHz clk by 11 to give 381 kHz I2C logic driver. 
-	always @(posedge clk_cpu) begin
+	always @(posedge cpu_clk) begin
 		counter = (counter == 4'hA) ? 4'h0 : counter + 4'h1;
 		clk_reduced = (stop) ? 1'b0 : ((counter == 4'h0) ? ~clk_reduced : clk_reduced);
 	end

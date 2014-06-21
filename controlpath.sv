@@ -2567,6 +2567,7 @@ module control_path
 					control.ld_flags		= `FALSE;
 					control.load_op_code 	= `FALSE;
 					control.fetch 			= `FALSE;
+					control.bit_num			= 3'bx;
 					next_prefix	  			= prefix_CB;
 					next_iteration			= iteration;
 					next_state				= s_FETCH;
@@ -5845,7 +5846,7 @@ module control_path
 					control.write_en		= `FALSE;
 					control.ld_flags		= `FALSE;
 					control.load_op_code 	= `FALSE;
-					control.bit_num 		= `FALSE;
+					control.bit_num 		= 3'bx;
 					control.fetch 			= `FALSE;
 					
 					// MAKE SURE WE GO BACK TO NORMAL MODE

@@ -87,7 +87,10 @@ module datapath
 			MDR <=  MDR_next;
 		end
 	end
-		
+	
+	/*
+	*	ALU destination 1-hot decoder
+	*/
 	always_comb begin
 		case (controls.alu_dest)
 			dest_NONE:  	dest_en = 14'b00_0000_0000_0000;
@@ -188,6 +191,6 @@ module datapath
 	
 	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls));
 	
-	sram			mu	(.clk (clk), .address (MAR), .databus (databus), .RE (controls.read_en | controls.load_op_code), .WE (controls.write_en));
+	memoryunit		mu	(.clk (clk), .address (MAR), .databus (databus), .OE (controls.read_en | controls.load_op_code), .WE (controls.write_en));
 	
 endmodule: datapath
