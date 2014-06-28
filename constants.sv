@@ -254,4 +254,34 @@ typedef struct packed {
 	logic		ld_flags;
 } control_code_t;
 
+/*
+*	Control/IO register read/write window
+*/
+typedef struct packed {
+	reg [7:0]		joypad;
+	reg [7:0]		serial_data;
+	reg [7:0]		serial_control;
+	reg [7:0]		timer_divide;
+	reg [7:0]		timer_count;
+	reg [7:0]		timer_modulo;
+	reg [7:0]		timer_control;
+	reg [7:0]		interrupt_st;
+		
+	/* TODO SOUND */
+	
+	reg [7:0]		lcd_control;
+	reg [7:0]		lcd_status;
+	reg [7:0]		scroll_y;
+	reg [7:0]		scroll_x;
+	reg [7:0]		lcd_v;
+	reg [7:0]		lcd_v_cp;
+	reg [7:0]		dma;
+	reg [7:0]		bg_pal;
+	reg [7:0]		obj_pal0;
+	reg [7:0]		obj_pal1;
+	reg [7:0]		win_y;
+	reg [7:0]		win_x;
+	reg [7:0]		interrupt_en;
+} control_reg_t;
+
 `endif

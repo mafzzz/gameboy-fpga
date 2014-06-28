@@ -44,6 +44,16 @@ module control_path
 	// FSM states
 	control_state_t		curr_state, next_state;
 	
+	// Interrupt master enable flag
+	reg 	 			IME;
+	logic				enable_interrupts, disable_interrupts;
+	
+	always_ff @(posedge clk, posedge rst) 
+		if (rst) 
+			IME <= `TRUE;
+		else
+			IME <= (enable_interrupts) ? `TRUE : ((disable_interrupts) ? `FALSE : IME);
+	
 	always_ff @(posedge clk, posedge rst) begin
 		// Reset into FETCH state, first instruction iteration, no prefix
 		if (rst) begin
@@ -59,8 +69,10 @@ module control_path
 			curr_state <= next_state;
 		end
 	end
-			
+
 	always_comb begin
+		enable_interrupts = `FALSE;
+		disable_interrupts = `FALSE;
 		
 		if (prefix_CB == `FALSE) begin
 		
@@ -491,6 +503,12 @@ module control_path
 								control.alu_dest = dest_REG;
 							end
 							
+							LD_SP_HL: begin
+								control.reg_selA = reg_L;
+								control.alu_srcB = regA;
+								control.alu_op	 = alu_B;
+								control.alu_dest = dest_SP_l;
+							end
 							
 							// LOAD REGISTER IMMEDIATE
 							LD_A_N8, LD_B_N8, LD_C_N8, LD_D_N8, LD_E_N8, LD_H_N8, LD_L_N8:
@@ -2009,6 +2027,12 @@ module control_path
 								end
 							end
 
+							EI: begin
+								enable_interrupts 	= `TRUE;
+							end
+							DI: begin
+								disable_interrupts 	= `TRUE;
+							end
 							
 							HALT: begin
 								next_state = s_WRITE;
@@ -2584,6 +2608,14 @@ module control_path
 
 								control.read_en  = `TRUE;
 								next_iteration	 = 3'b1;
+							end
+							
+							LD_SP_HL: begin
+								control.reg_selA = reg_H;
+								control.alu_srcB = regA;
+								control.alu_op	 = alu_B;
+								control.alu_dest = dest_SP_h;
+								next_iteration 	 = 3'b1;
 							end
 							
 							// LOAD MEMORY

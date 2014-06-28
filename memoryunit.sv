@@ -23,11 +23,13 @@
 `define synthesis
 
 module memoryunit 
-	(inout 		[7:0]	databus,
-	input logic [15:0]	address,
-	input logic 		OE,
-	input logic 		WE,
-	input logic 		clk);
+	(inout 		[7:0]		databus,
+	input logic [15:0]		address,
+	input control_reg_t		regin, 
+	output control_reg_t	regout;
+	input logic 			OE,
+	input logic 			WE,
+	input logic 			clk);
 	
 	logic CS_rom0, CS_rom1, CS_vram, CS_ram0, CS_ram1, CS_oam, CS_io, CS_ramh;
 	logic [7:0] CS_decoder;
@@ -59,8 +61,8 @@ module memoryunit
 		else if (address >= 16'hFE00 && address < 16'hFEA0)
 			CS_decoder = 8'b0010_0000;
 			
-		// 0xFF4C <= address < 0xFF80  [CONTROL_REGS]
-		else if ((address >= 16'hFF4C && address < 16'hFF80) || address == 16'hFFFF)
+		// 0xFF00 <= address < 0xFF4C  [CONTROL_REGS]
+		else if ((address >= 16'hFF00 && address < 16'hFF4C) || address == 16'hFFFF)
 			CS_decoder = 8'b0100_0000;
 			
 		// 0xFF80 <= address < 0xFFFF  [HIGH_RAM]
@@ -93,8 +95,11 @@ module memoryunit
 
 	
 	/*** CONTROL REGISTER BANK ***/
-	IO_CONTROL_REGS #(.start (16'hFF00), .size (16'h0100), .init ("")) io(.databus (databus), .address (address[7:0]), .CS (CS_io), .OE (OE), .WE (WE), .clk (clk));
 	
+	IO_CONTROL_REGS #(.start (16'hFF00), .size (16'h0100)) io(.databus (databus), .address (address[7:0]), .regout (.regout), .regin (.regin),
+		.CS (CS_io), .OE (OE), .WE (WE), .clk (clk));
+	
+
 endmodule: memoryunit
 
 module SRAM_BANK
@@ -102,7 +107,7 @@ module SRAM_BANK
 	  parameter size   = 16'h4000,
 	  parameter init   = "")
 	
-	(inout  	[7:0]				databus,
+	(inout tri	[7:0]				databus,
 	input logic [$clog2(size)-1:0]	address,
 	input logic						CS,
 	input logic						OE,
@@ -124,27 +129,183 @@ module SRAM_BANK
 endmodule: SRAM_BANK
 
 module IO_CONTROL_REGS
-	#(parameter start  = 16'h0000,
-	  parameter size   = 16'h4000,
-	  parameter init   = "")
+	#(parameter start  = 16'hFF00,
+	  parameter size   = 16'h0100)
 
-	(inout  	[7:0]				databus,
+	(inout tri [7:0]				databus,
 	input logic [$clog2(size)-1:0]	address,
+	input control_reg_t				regin,
+	output control_reg_t			regout,
 	input logic						CS,
 	input logic						OE,
 	input logic						WE,
 	input logic						clk);
 
-	reg [7:0]			mem [16'h0000 : size - 1];
+	control_reg_t	control_regs;
 	
-	always @(posedge clk)
-		if (WE && CS)
-			mem[address] <= databus;
+	// Output register window
+	assign regout = control_regs;
 	
-	assign databus = (OE && CS && ~WE) ? mem[address] : 8'bz;
+	// Address decoder for writes
+	always_ff @(posedge clk, negedge rst) begin
+		if (rst)
+			// DEFAULT VALUES
+			control_regs 		<= '0;
+			
+		else if (WE) begin
+		
+			// Next value by default is regin, set from peripheral components outside CPU
+			// For CPU controlled regs, set by address MUX:
+			case (address)
+			
+				8'h00: 
+					control_regs.joypad <= {2'b0, databus[5:4], regin[3:0]};
+				
+				8'h01: 
+					control_regs.serial_data <= databus;
+				
+				8'h02: 
+					control_regs.serial_control <= databus;
+				
+				8'h04: 
+					control_regs.timer_divide <= 8'b0;
+				
+				8'h05: 
+					control_regs.timer_count <= 8'b0;
+				
+				8'h06: 
+					control_regs.timer_modulo <= databus;
+				
+				8'h07: 
+					control_regs.timer_control <= {5'b0, databus[2:0]};
+				
+				8'h0F: 
+					control_regs.interrupt_st <= regin;
+				
+				8'h40: 
+					control_regs.lcd_control <= databus;
+				
+				8'h41: 
+					control_regs.lcd_status <= {1'b0, databus[6:3], regin[2:0]};
+				
+				8'h42: 
+					control_regs.scroll_y <= databus;
+				
+				8'h43: 
+					control_regs.scroll_x <= databus;
+				
+				8'h44: 
+					control_regs.lcd_v <= regin;
+				
+				8'h45: 
+					control_regs.lcd_v_cp <= databus;
+				
+				8'h46: 
+					control_regs.dma <= databus;
+				
+				8'h47: 
+					control_regs.bg_pal <= databus;
+				
+				8'h48: 
+					control_regs.obj_pal0 <= databus;
+				
+				8'h49: 
+					control_regs.obj_pal1 <= databus;
+				
+				8'h4A: 
+					control_regs.win_y <= databus;
+				
+				8'h4B: 
+					control_regs.win_x <= databus;
+				
+				8'hFF: 
+					control_regs.interrupt_en <= databus;
+				
+				default: begin
+					control_regs <= regin;
+				end
+			endcase
+			
+		end else begin
+			// If not writing, use regin values.
+			control_regs <= regin;
+		end	
+	end
 	
-	initial
-		if (init != "")
-			$readmemh(init, mem);
+	// Address decoder for reads
+	always_comb begin
+		if (OE && ~WE) begin
+			case (address)
+				8'h00: 
+					databus = control_regs.joypad;
+				
+				8'h01: 
+					databus = control_regs.serial_data;
+				
+				8'h02: 
+					databus = control_regs.serial_control;				
+				
+				8'h04: 
+					databus = control_regs.timer_divide;				
+				
+				8'h05: 
+					databus = control_regs.timer_count;				
+				
+				8'h06: 
+					databus = control_regs.timer_modulo;				
+				
+				8'h07: 
+					databus = control_regs.timer_control;		
+				
+				8'h0F: 
+					databus = control_regs.interrupt_st;		
+				
+				8'h40: 
+					databus = control_regs.lcd_control;				
+				
+				8'h41: 
+					databus = control_regs.lcd_status;
+				
+				8'h42: 
+					databus = control_regs.scroll_y;				
+				
+				8'h43: 
+					databus = control_regs.scroll_x;			
+				
+				8'h44: 
+					databus = control_regs.lcd_v;
+				
+				8'h45: 
+					databus = control_regs.lcd_v_cp;				
+				
+				8'h46: 
+					databus = control_regs.dma;			
+				
+				8'h47: 
+					databus = control_regs.bg_pal;				
+				
+				8'h48: 
+					databus = control_regs.obj_pal0;
+				
+				8'h49: 
+					databus = control_regs.obj_pal1;			
+				
+				8'h4A: 
+					databus = control_regs.win_y;			
+				
+				8'h4B: 
+					databus = control_regs.win_x;				
+				
+				8'hFF: 
+					databus = control_regs.interrupt_en;
+				
+				default: begin
+					databus = 8'bx;
+				end
+			endcase
+		end else begin
+			databus = 8'bz;
+		end
+	end
 	
 endmodule: IO_CONTROL_REGS
