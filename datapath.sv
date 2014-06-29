@@ -19,24 +19,34 @@
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
-`ifndef synthesis
 `include "constants.sv"
-`include "controlpath.sv"
-`include "memoryunit.sv"
 `include "registerfile.sv"
 `include "alu.sv"
-`endif
+`include "controlpath.sv"
 
-`include "constants.sv"
-
-/* Module Datapath: Connects RegisterFile, ALU, Controlpath, and Memory units together.
+/* Module Datapath: Defines the core CPU
 *
-*	WIP
-*
+*	Connects RegisterFile, ALU, and Controlpath to create CPU.
+*	
 */
 module datapath
 	(input logic			clk,
 	input logic				rst,
+	
+	// Memory datapath bus
+	output logic			WE,
+	output logic			RE,
+	inout tri 	 [7:0]		databus,
+	output reg   [15:0]		MAR,
+	
+	// Interrupt lines
+	input logic			vblank_int,
+	input logic			lcdc_int,
+	input logic			timer_int,
+	input logic 		serial_int,
+	input logic			joypad_int,
+	
+	// Register window (for debugging)
 	output logic [7:0]		regA,
 	output logic [7:0]		regB,
 	output logic [7:0]		regC,
@@ -46,7 +56,7 @@ module datapath
 	output logic [7:0]		regH,
 	output logic [7:0]		regL);
 	
-	reg [15:0] 			SP, PC, MAR;
+	reg [15:0] 			SP, PC;
 	reg [7:0]  			IR, MDR;
 	
 	logic [15:0]		SP_next, PC_next, MAR_next;
@@ -55,6 +65,7 @@ module datapath
 	logic [15:0]		addr_out;
 		
 	logic [3:0]			alu_flags, flags_in, flags_out;
+	
 	logic [7:0]			outA, outB;
 		
 	// {MEMAH, FLAGS, MEMA_h, MEMA_l, SP, REGA, PC, MEMA, MEMD, PCH, PCL, SPH, SPL, REG}
@@ -63,9 +74,7 @@ module datapath
 	control_code_t		controls;
 	
 	logic [7:0]			alu_output;
-		
-	tri [7:0] 			databus;
-		
+			
 	logic [63:0]		window;
 
 	logic [7:0] 		inA, inB;
@@ -73,6 +82,9 @@ module datapath
 	logic				PC_dec_h, PC_inc_h, SP_dec_h, SP_inc_h;
 	
 	control_reg_t		regin, regout;
+	
+	assign RE = controls.read_en | controls.load_op_code; 
+	assign WE = controls.write_en;
 	
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
@@ -192,8 +204,5 @@ module datapath
 					  ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR)));
 	
 	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls));
-	
-	memoryunit		mu	(.clk (clk), .address (MAR), .databus (databus), .OE (controls.read_en | controls.load_op_code), .WE (controls.write_en), .regin (regin),
-						.regout (regout));
 	
 endmodule: datapath

@@ -2041,9 +2041,9 @@ module control_path
 								// For simulation purposes
 								$display("********************************************");
 								$display("State: %s			Iter: %d	| 	PC: %h 	IR: HALT	(0x%h)		SP: %h	|Reset: %b \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
-								DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, DUT.IR, DUT.SP, rst,
-								DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
-								DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
+								DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, DUT.dp.IR, DUT.dp.SP, rst,
+								DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR,
+								DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]); 
 								$display("********************************************\n");
 								$stop;
 								`endif
@@ -2055,9 +2055,9 @@ module control_path
 								// For simulation purposes
 								$display("********************************************");
 								$display("State: %s			Iter: %d	| 	PC: %h 	IR: STOP	(0x%h)		SP: %h	|Reset: %b \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
-								DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, DUT.IR, DUT.SP, rst,
-								DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
-								DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
+								DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, DUT.dp.IR, DUT.dp.SP, rst,
+								DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR,
+								DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]); 
 								$display("********************************************\n");
 								$stop;
 								`endif

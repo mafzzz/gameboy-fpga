@@ -19,23 +19,21 @@
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
-`include "datapath.sv"
+`include "top.sv"
 
 `timescale 1ns/100ps
 
-/* 	Module Testbench: Testing environment for the design on completion
+/* 	Module Testbench: Testing environment for the design
 *
-*	WIP
+*	Generates clock, reset, peripheral signals. Testing for any individual modules. 
 *
 */
 module testbench();
 
 	logic	clk;
 	logic	rst;
-	
-	logic [7:0] regA, regB, regC, regD, regE, regF, regH, regL;
-	
-	datapath DUT (.*);
+		
+	top DUT (.*);
 	vars	v ();
 	
 	initial begin
@@ -46,24 +44,26 @@ module testbench();
 	end
 
 	initial
-		//	4.19 MHz clock for simulation of real time
+		//	4.19 MHz clock
 		forever #119.2 clk <= ~clk;
 	
 	initial
-		forever @(posedge clk) $cast(v.instruc, DUT.IR);
+		forever @(posedge clk) $cast(v.instruc, DUT.dp.IR);
 	
 	initial
 		forever @(posedge clk) v.cycles++;
 	
 	initial begin
 
+		if ($test$plusargs("debug"))
+			$monitor("State: %s			Iter: %d	| 	PC: %h 	IR: %s		(0x%h)	SP: %h	|Reset: %b \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Clock cycle (dec): %d    Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+			DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, v.instruc.name, DUT.dp.IR, DUT.dp.SP, rst,
+			DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR, v.cycles,
+			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]); 	
+	
+
 		
-				$monitor("State: %s			Iter: %d	| 	PC: %h 	IR: %s		(0x%h)	SP: %h	|Reset: %b \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Clock cycle (dec): %d    Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
-				DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, v.instruc.name, DUT.IR, DUT.SP, rst,
-				regA, regB, regC, regD, regE, regH, regL, DUT.MAR, DUT.MDR, v.cycles,
-				regF[3], regF[2], regF[1], regF[0]); 	
-		
-		#1000000;
+		#10000000;
 		$stop;
 	end
 	

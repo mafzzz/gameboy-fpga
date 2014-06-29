@@ -20,6 +20,7 @@
 **************************************************************************/
 
 `include "constants.sv"
+`include "I2C.sv"
 
 module hdmi
 	(input logic clk,
