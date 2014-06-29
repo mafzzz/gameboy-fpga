@@ -26,7 +26,7 @@ module memoryunit
 	(inout 		[7:0]		databus,
 	input logic [15:0]		address,
 	input control_reg_t		regin, 
-	output control_reg_t	regout;
+	output control_reg_t	regout,
 	input logic 			OE,
 	input logic 			WE,
 	input logic 			clk);
@@ -96,7 +96,7 @@ module memoryunit
 	
 	/*** CONTROL REGISTER BANK ***/
 	
-	IO_CONTROL_REGS #(.start (16'hFF00), .size (16'h0100)) io(.databus (databus), .address (address[7:0]), .regout (.regout), .regin (.regin),
+	IO_CONTROL_REGS #(.start (16'hFF00), .size (16'h0100)) io(.databus (databus), .address (address[7:0]), .regout (regout), .regin (regin),
 		.CS (CS_io), .OE (OE), .WE (WE), .clk (clk));
 	
 
@@ -142,17 +142,14 @@ module IO_CONTROL_REGS
 	input logic						clk);
 
 	control_reg_t	control_regs;
+	logic [7:0]		data;
 	
 	// Output register window
 	assign regout = control_regs;
 	
 	// Address decoder for writes
-	always_ff @(posedge clk, negedge rst) begin
-		if (rst)
-			// DEFAULT VALUES
-			control_regs 		<= '0;
-			
-		else if (WE) begin
+	always_ff @(posedge clk) begin
+		if (WE && CS) begin
 		
 			// Next value by default is regin, set from peripheral components outside CPU
 			// For CPU controlled regs, set by address MUX:
@@ -231,81 +228,83 @@ module IO_CONTROL_REGS
 			control_regs <= regin;
 		end	
 	end
-	
+
 	// Address decoder for reads
 	always_comb begin
-		if (OE && ~WE) begin
+		if (CS) begin
 			case (address)
 				8'h00: 
-					databus = control_regs.joypad;
+					data = control_regs.joypad;
 				
 				8'h01: 
-					databus = control_regs.serial_data;
+					data = control_regs.serial_data;
 				
 				8'h02: 
-					databus = control_regs.serial_control;				
+					data = control_regs.serial_control;				
 				
 				8'h04: 
-					databus = control_regs.timer_divide;				
+					data = control_regs.timer_divide;				
 				
 				8'h05: 
-					databus = control_regs.timer_count;				
+					data = control_regs.timer_count;				
 				
 				8'h06: 
-					databus = control_regs.timer_modulo;				
+					data = control_regs.timer_modulo;				
 				
 				8'h07: 
-					databus = control_regs.timer_control;		
+					data = control_regs.timer_control;		
 				
 				8'h0F: 
-					databus = control_regs.interrupt_st;		
+					data = control_regs.interrupt_st;		
 				
 				8'h40: 
-					databus = control_regs.lcd_control;				
+					data = control_regs.lcd_control;				
 				
 				8'h41: 
-					databus = control_regs.lcd_status;
+					data = control_regs.lcd_status;
 				
 				8'h42: 
-					databus = control_regs.scroll_y;				
+					data = control_regs.scroll_y;				
 				
 				8'h43: 
-					databus = control_regs.scroll_x;			
+					data = control_regs.scroll_x;			
 				
 				8'h44: 
-					databus = control_regs.lcd_v;
+					data = control_regs.lcd_v;
 				
 				8'h45: 
-					databus = control_regs.lcd_v_cp;				
+					data = control_regs.lcd_v_cp;				
 				
 				8'h46: 
-					databus = control_regs.dma;			
+					data = control_regs.dma;			
 				
 				8'h47: 
-					databus = control_regs.bg_pal;				
+					data = control_regs.bg_pal;				
 				
 				8'h48: 
-					databus = control_regs.obj_pal0;
+					data = control_regs.obj_pal0;
 				
 				8'h49: 
-					databus = control_regs.obj_pal1;			
+					data = control_regs.obj_pal1;			
 				
 				8'h4A: 
-					databus = control_regs.win_y;			
+					data = control_regs.win_y;			
 				
 				8'h4B: 
-					databus = control_regs.win_x;				
+					data = control_regs.win_x;				
 				
 				8'hFF: 
-					databus = control_regs.interrupt_en;
+					data = control_regs.interrupt_en;
 				
 				default: begin
-					databus = 8'bx;
+					data = 8'bx;
 				end
 			endcase
 		end else begin
-			databus = 8'bz;
+			data = 8'bx;
 		end
 	end
+	
+	assign databus = (~WE && OE && CS) ? data : 8'bz;
 	
 endmodule: IO_CONTROL_REGS

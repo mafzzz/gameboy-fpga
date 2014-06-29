@@ -505,7 +505,7 @@ module control_path
 							
 							LD_SP_HL: begin
 								control.reg_selA = reg_L;
-								control.alu_srcB = regA;
+								control.alu_srcB = src_REGA;
 								control.alu_op	 = alu_B;
 								control.alu_dest = dest_SP_l;
 							end
@@ -2039,12 +2039,13 @@ module control_path
 								
 								`ifndef synthesis
 								// For simulation purposes
-								$display("State: %s 	Iter: %d	| 	PC: %h 	IR: HALT	(0x%h)		SP:	%h	|	Reset: %b \n\
-					Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n\
-					Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+								$display("********************************************");
+								$display("State: %s			Iter: %d	| 	PC: %h 	IR: HALT	(0x%h)		SP: %h	|Reset: %b \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
 								DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, DUT.IR, DUT.SP, rst,
 								DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
 								DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
+								$display("********************************************\n");
+								$stop;
 								`endif
 							end
 							STOP: begin
@@ -2052,12 +2053,12 @@ module control_path
 								
 								`ifndef synthesis
 								// For simulation purposes
-								$display("State: %s 	Iter: %d	| 	PC: %h 	IR: STOP	(0x%h)		SP:	%h	|	Reset: %b \n\
-					Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n\
-					Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+								$display("********************************************");
+								$display("State: %s			Iter: %d	| 	PC: %h 	IR: STOP	(0x%h)		SP: %h	|Reset: %b \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
 								DUT.cp.curr_state.name, DUT.cp.iteration, DUT.PC, DUT.IR, DUT.SP, rst,
 								DUT.regA, DUT.regB, DUT.regC, DUT.regD, DUT.regE, DUT.regH, DUT.regL, DUT.MAR, DUT.MDR,
 								DUT.regF[3], DUT.regF[2], DUT.regF[1], DUT.regF[0]); 
+								$display("********************************************\n");
 								$stop;
 								`endif
 							end
@@ -2612,7 +2613,7 @@ module control_path
 							
 							LD_SP_HL: begin
 								control.reg_selA = reg_H;
-								control.alu_srcB = regA;
+								control.alu_srcB = src_REGA;
 								control.alu_op	 = alu_B;
 								control.alu_dest = dest_SP_h;
 								next_iteration 	 = 3'b1;

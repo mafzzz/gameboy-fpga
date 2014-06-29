@@ -35,16 +35,16 @@
 *
 */
 module datapath
-	(input logic		clk,
-	input logic			rst,
-	output logic [7:0]	regA,
-	output logic [7:0]	regB,
-	output logic [7:0]	regC,
-	output logic [7:0]	regD,
-	output logic [7:0]	regE,
-	output logic [7:0]	regF,
-	output logic [7:0]	regH,
-	output logic [7:0]	regL);
+	(input logic			clk,
+	input logic				rst,
+	output logic [7:0]		regA,
+	output logic [7:0]		regB,
+	output logic [7:0]		regC,
+	output logic [7:0]		regD,
+	output logic [7:0]		regE,
+	output logic [7:0]		regF,
+	output logic [7:0]		regH,
+	output logic [7:0]		regL);
 	
 	reg [15:0] 			SP, PC, MAR;
 	reg [7:0]  			IR, MDR;
@@ -71,6 +71,8 @@ module datapath
 	logic [7:0] 		inA, inB;
 		
 	logic				PC_dec_h, PC_inc_h, SP_dec_h, SP_inc_h;
+	
+	control_reg_t		regin, regout;
 	
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
@@ -191,6 +193,7 @@ module datapath
 	
 	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls));
 	
-	memoryunit		mu	(.clk (clk), .address (MAR), .databus (databus), .OE (controls.read_en | controls.load_op_code), .WE (controls.write_en));
+	memoryunit		mu	(.clk (clk), .address (MAR), .databus (databus), .OE (controls.read_en | controls.load_op_code), .WE (controls.write_en), .regin (regin),
+						.regout (regout));
 	
 endmodule: datapath
