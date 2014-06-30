@@ -29,7 +29,8 @@ module memoryunit
 	output control_reg_t	regout,
 	input logic 			OE,
 	input logic 			WE,
-	input logic 			clk);
+	input logic 			clk,
+	input logic				rst);
 	
 	logic CS_rom0, CS_rom1, CS_vram, CS_ram0, CS_ram1, CS_oam, CS_io, CS_ramh;
 	logic [7:0] CS_decoder;
@@ -97,7 +98,7 @@ module memoryunit
 	/*** CONTROL REGISTER BANK ***/
 	
 	IO_CONTROL_REGS #(.start (16'hFF00), .size (16'h0100)) io(.databus (databus), .address (address[7:0]), .regout (regout), .regin (regin),
-		.CS (CS_io), .OE (OE), .WE (WE), .clk (clk));
+		.CS (CS_io), .OE (OE), .WE (WE), .clk (clk), .rst (rst));
 	
 
 endmodule: memoryunit
@@ -139,7 +140,8 @@ module IO_CONTROL_REGS
 	input logic						CS,
 	input logic						OE,
 	input logic						WE,
-	input logic						clk);
+	input logic						clk,
+	input logic						rst);
 
 	control_reg_t	control_regs;
 	logic [7:0]		data;
@@ -148,8 +150,11 @@ module IO_CONTROL_REGS
 	assign regout = control_regs;
 	
 	// Address decoder for writes
-	always_ff @(posedge clk) begin
-		if (WE && CS) begin
+	always_ff @(posedge clk, posedge rst) begin
+		if (rst)
+			control_regs <= '0;
+			
+		else if (WE && CS) begin
 		
 			// Next value by default is regin, set from peripheral components outside CPU
 			// For CPU controlled regs, set by address MUX:

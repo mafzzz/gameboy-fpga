@@ -38,13 +38,62 @@ module top
 	tri [7:0] memd;
 	logic RE, WE;
 	
+	logic			vblank_int, lcdc_int, timer_int, serial_int, joypad_int;
+	
 	control_reg_t regin, regout;
 	
 	datapath	dp(.clk (clk), .rst (rst), .databus (memd), .MAR (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
+					.vblank_int (regout.interrupt_st[0]), .lcdc_int (regout.interrupt_st[1]), .timer_int (regout.interrupt_st[2]), 
+					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), 
 					.regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
-	memoryunit	mu(.clk (clk), .address (mema), .databus (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout));
+	memoryunit	mu(.clk (clk), .rst(rst), .address (mema), .databus (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout));
 	
 	display		lcdc();
+	
+	// Timer clock divide
+	logic div_16, div_64, div_256, div_1024;
+	logic [9:0] counter;
+	
+	always_ff @(posedge clk, posedge rst) begin
+		if (rst) begin
+			div_16 <= 1'b0;
+			div_64 <= 1'b0;
+			div_256 <= 1'b0;
+			div_1024 <= 1'b0;
+			counter <= 10'b1;
+		end else begin
+			div_16 <= counter[3:0] == 4'b0;
+			div_64 <= counter[5:0] == 6'b0;
+			div_256 <= counter[7:0] == 8'b0;
+			div_1024 <= counter[9:0] == 10'b0;
+			counter <= counter + 1;
+		end
+	end
+	
+	assign timer_int = (regin.timer_count == 8'b0 && regout.timer_count == 8'hFF) | regout.interrupt_st[2];
+	
+	always_comb begin
+		
+		regin.joypad = regout.joypad;
+		
+		regin.serial_data = regout.serial_data;
+		regin.serial_control = regout.serial_control;
+		
+		regin.timer_divide = (div_256) ? regout.timer_divide + 1 : regout.timer_divide;
+		case (regout.timer_control[1:0])
+			2'b00: regin.timer_count = (div_1024) ? regout.timer_count + 1 : regout.timer_count;
+			2'b01: regin.timer_count = (div_16) ? regout.timer_count + 1 : regout.timer_count;
+			2'b10: regin.timer_count = (div_64) ? regout.timer_count + 1 : regout.timer_count;
+			2'b11: regin.timer_count = (div_256) ? regout.timer_count + 1 : regout.timer_count;
+		endcase
+		regin.timer_control = regout.timer_control;
+		regin.timer_modulo = regout.timer_modulo;
+		
+		regin.interrupt_st = {3'b0, joypad_int, serial_int, timer_int, lcdc_int, vblank_int};
+		
+		
+		
+	end
 	
 endmodule: top

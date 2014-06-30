@@ -54,7 +54,7 @@ module testbench();
 		forever @(posedge clk) v.cycles++;
 	
 	initial begin
-
+	
 		if ($test$plusargs("debug"))
 			$monitor("State: %s			Iter: %d	| 	PC: %h 	IR: %s		(0x%h)	SP: %h	|Reset: %b \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Clock cycle (dec): %d    Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
 			DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, v.instruc.name, DUT.dp.IR, DUT.dp.SP, rst,
