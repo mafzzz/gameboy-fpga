@@ -38,13 +38,13 @@ module top
 	tri [7:0] memd;
 	logic RE, WE;
 	
-	logic			vblank_int, lcdc_int, timer_int, serial_int, joypad_int;
+	logic			vblank_int, lcdc_int, timer_int, serial_int, joypad_int, int_clear;
 	
 	control_reg_t regin, regout;
 	
 	datapath	dp(.clk (clk), .rst (rst), .databus (memd), .MAR (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
 					.vblank_int (regout.interrupt_st[0]), .lcdc_int (regout.interrupt_st[1]), .timer_int (regout.interrupt_st[2]), 
-					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), 
+					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), .int_clear (int_clear),
 					.regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
 	memoryunit	mu(.clk (clk), .rst(rst), .address (mema), .databus (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout));
@@ -71,8 +71,10 @@ module top
 		end
 	end
 	
-	assign timer_int = (regin.timer_count == 8'b0 && regout.timer_count == 8'hFF) | regout.interrupt_st[2];
+	// Interrupts
+	assign timer_int = (int_clear) ? 1'b0 : (regin.timer_count == 8'b0 && regout.timer_count == 8'hFF) | regout.interrupt_st[2];
 	
+	// Control register next state
 	always_comb begin
 		
 		regin.joypad = regout.joypad;
@@ -92,8 +94,22 @@ module top
 		
 		regin.interrupt_st = {3'b0, joypad_int, serial_int, timer_int, lcdc_int, vblank_int};
 		
+		regin.lcd_control = regout.lcd_control;
+		regin.lcd_status = regout.lcd_status;
 		
+		regin.scroll_y = regout.scroll_y;
+		regin.scroll_x = regout.scroll_x;
+		regin.lcd_v = regout.lcd_v;
+		regin.lcd_v_cp = regout.lcd_v_cp;
 		
+		regin.bg_pal = regout.bg_pal;
+		regin.obj_pal0 = regout.obj_pal0;
+		regin.obj_pal1 = regout.obj_pal1;
+		regin.win_y = regout.win_y;
+		regin.win_x = regout.win_x;
+		
+		regin.dma = 8'b0;
+		regin.interrupt_en = regout.interrupt_en;
 	end
 	
 endmodule: top

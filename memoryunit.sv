@@ -281,7 +281,7 @@ module IO_CONTROL_REGS
 					data = control_regs.lcd_v_cp;				
 				
 				8'h46: 
-					data = control_regs.dma;			
+					data = 8'b0;			
 				
 				8'h47: 
 					data = control_regs.bg_pal;				

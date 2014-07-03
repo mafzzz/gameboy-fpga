@@ -45,6 +45,7 @@ module datapath
 	input logic			timer_int,
 	input logic 		serial_int,
 	input logic			joypad_int,
+	output logic		int_clear,
 	
 	// Register window (for debugging)
 	output logic [7:0]		regA,
@@ -203,6 +204,7 @@ module datapath
 	assign MAR_next = (dest_en[13]) ? {8'hFF, alu_output} : ((dest_en[6]) ? addr_out : ((dest_en[10]) ? {MAR[15:8], alu_output[7:0]} : 
 					  ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR)));
 	
-	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls));
+	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls), .int_clear (int_clear), .vblank_int (vlank_int), 
+					.lcdc_int (lcdc_int), .timer_int (timer_int), .serial_int (serial_int), .joypad_int (joypad_int));
 	
 endmodule: datapath

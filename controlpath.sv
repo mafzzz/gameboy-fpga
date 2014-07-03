@@ -28,11 +28,20 @@
 *	and WRITE states and operates on all OP Codes. 
 */
 module control_path
-	(input op_code_t		op_code,
-	input logic [3:0]		flags,
-	input logic 			rst,
+	(input logic 			rst,
 	input logic				clk,
-	output control_code_t 	control);
+	
+	input op_code_t			op_code,
+	input logic [3:0]		flags,
+	output control_code_t 	control,
+	
+	// Interrupt lines
+	input logic			vblank_int,
+	input logic			lcdc_int,
+	input logic			timer_int,
+	input logic 		serial_int,
+	input logic			joypad_int,
+	output logic		int_clear);
 	
 	// Whether the current instruction is a CB prefix instruction
 	logic				prefix_CB, next_prefix;
