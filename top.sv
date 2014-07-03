@@ -44,8 +44,8 @@ module top
 	
 	datapath	dp(.clk (clk), .rst (rst), .databus (memd), .MAR (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
 					.vblank_int (regout.interrupt_st[0]), .lcdc_int (regout.interrupt_st[1]), .timer_int (regout.interrupt_st[2]), 
-					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), .int_clear (int_clear),
-					.regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
+					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), .int_en (regout.interrupt_en), 
+					.int_clear (int_clear), .regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
 	memoryunit	mu(.clk (clk), .rst(rst), .address (mema), .databus (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout));
 	

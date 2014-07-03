@@ -91,19 +91,33 @@ typedef enum logic [5:0] {
 /*
 *	ALU sources enumeration
 */
-typedef enum logic [3:0] {
-	src_NONE 	= 4'b0_000,
-	src_REGA 	= 4'b0_001,
-	src_REGB 	= 4'b0_010,
-	src_SP_l 	= 4'b0_011,
-	src_SP_h 	= 4'b0_100,
-	src_PC_l 	= 4'b0_101,
-	src_PC_h 	= 4'b0_110,
-	src_MEMD 	= 4'b0_111,
-	src_MEMA	= 4'b1_000,
-	src_FLAGS	= 4'b1_001,
+typedef enum logic [4:0] {
+	src_NONE 	= 5'b00_000,
+	src_REGA 	= 5'b00_001,
+	src_REGB 	= 5'b00_010,
+	src_SP_l 	= 5'b00_011,
+	src_SP_h 	= 5'b00_100,
+	src_PC_l 	= 5'b00_101,
+	src_PC_h 	= 5'b00_110,
+	src_MEMD 	= 5'b00_111,
+	src_MEMA	= 5'b01_000,
+	src_FLAGS	= 5'b01_001,
 	
-	src_UNK 	= 4'bxxxx
+	src_00		= 5'b01_010,
+	src_08		= 5'b01_011,
+	src_10		= 5'b01_100,
+	src_18		= 5'b01_101,
+	src_20		= 5'b01_110,
+	src_28		= 5'b01_111,
+	src_30		= 5'b10_000,
+	src_38		= 5'b10_001,
+	src_40		= 5'b10_010,
+	src_48		= 5'b10_011,
+	src_50		= 5'b10_100,
+	src_58		= 5'b10_101,
+	src_60		= 5'b10_110,
+	
+	src_UNK 	= 5'bxx_xxx
 } alu_src_t;
 
 /*
@@ -130,7 +144,7 @@ typedef enum logic [3:0] {
 } dest_t;
 
 /*
-*	FSM State enumeration
+*	Controlpath FSM State enumeration
 */
 typedef enum logic [1:0] {
 	s_FETCH		= 2'b00,
@@ -140,6 +154,20 @@ typedef enum logic [1:0] {
 	
 	s_UNK		= 2'bxx
 } control_state_t;
+
+/*
+*	Interrupts enumeration
+*/
+typedef enum logic [2:0] {
+	int_NONE	= 3'b000,
+	int_VBLANK  = 3'b001,
+	int_LCDC	= 3'b010,
+	int_SERIAL	= 3'b011,
+	int_JOYPAD	= 3'b100,
+	int_TIMER	= 3'b101,
+	
+	int_UNK		= 3'bxxx
+} interrupt_state_t;
 
 /*
 *	OP Code enumeration

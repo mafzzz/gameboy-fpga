@@ -41,6 +41,7 @@ module control_path
 	input logic			timer_int,
 	input logic 		serial_int,
 	input logic			joypad_int,
+	input logic	[7:0]	int_en,
 	output logic		int_clear);
 	
 	// Whether the current instruction is a CB prefix instruction
@@ -52,6 +53,9 @@ module control_path
 	
 	// FSM states
 	control_state_t		curr_state, next_state;
+	
+	// Interrupt states
+	interrupt_state_t	curr_int, next_int;
 	
 	// Interrupt master enable flag
 	reg 	 			IME;
@@ -66,6 +70,7 @@ module control_path
 	always_ff @(posedge clk, posedge rst) begin
 		// Reset into FETCH state, first instruction iteration, no prefix
 		if (rst) begin
+			curr_int <= int_NONE;
 			curr_state <= s_FETCH;
 			iteration <= 3'b0;
 			prefix_CB <= `FALSE;
@@ -73,6 +78,7 @@ module control_path
 		
 		// Next state
 		else begin
+			curr_int <= next_int;
 			iteration <= next_iteration;
 			prefix_CB <= next_prefix;
 			curr_state <= next_state;
@@ -83,8 +89,138 @@ module control_path
 		enable_interrupts = `FALSE;
 		disable_interrupts = `FALSE;
 		
-		if (prefix_CB == `FALSE) begin
+		int_clear = `FALSE;
 		
+		next_int = curr_int;
+		
+		control.reg_selA 		= reg_UNK;
+		control.reg_selB 		= reg_UNK;
+		control.alu_op   		= alu_UNK;
+		control.alu_srcA		= src_UNK;
+		control.alu_srcB		= src_UNK;	
+		control.alu_dest		= dest_NONE;
+		control.read_en			= `FALSE;
+		control.write_en		= `FALSE;
+		control.ld_flags		= `FALSE;
+		control.load_op_code 	= `FALSE;
+		control.fetch 			= `FALSE;
+		control.bit_num			= 3'bx;
+		
+		// Interrupt servicing
+		if (curr_state == s_FETCH && iteration == 3'b0 && IME == `TRUE && 
+				((vblank_int & int_en[0]) | (joypad_int & int_en[4]) | (serial_int & int_en[3]) | (lcdc_int & int_en[1]) | (timer_int & int_en[2]))) begin
+			
+			disable_interrupts = `TRUE;
+			int_clear = `TRUE;
+			
+			if (vblank_int & int_en[0])
+				next_int = int_VBLANK;
+			else if (lcdc_int & int_en[1])
+				next_int = int_LCDC;
+			else if (timer_int & int_en[2])
+				next_int = int_TIMER;
+			else if (serial_int & int_en[3])
+				next_int = int_SERIAL;
+			else if (joypad_int & int_en[4])
+				next_int = int_JOYPAD;
+		
+			next_prefix	  			= prefix_CB;
+			next_iteration			= iteration;
+			next_state 				= s_EXECUTE;
+		
+		end else if (curr_int != int_NONE) begin
+			next_prefix	  			= prefix_CB;
+			next_iteration			= iteration;
+			next_state 				= s_FETCH;
+
+			// PUSH PC ONTO STACK AND JUMP TO ISR ADDRESS
+			case (curr_state)
+				
+				s_EXECUTE: begin
+					next_state 		= s_WRITE;
+					
+					case (iteration) 
+						3'd0: begin
+							control.alu_srcA	= src_SP_h;
+							control.alu_srcB	= src_SP_l;
+							control.alu_op		= alu_DECL;
+							control.alu_dest	= dest_SP;
+						end
+						3'd1: begin
+							control.alu_srcB	= src_SP_l;
+							control.alu_srcA	= src_SP_h;
+							control.alu_op		= alu_AB;
+							control.alu_dest	= dest_MEMA;
+						end
+						3'd2: begin
+							control.alu_srcA	= src_SP_h;
+							control.alu_srcB	= src_SP_l;
+							control.alu_op		= alu_DECL;
+							control.alu_dest	= dest_SP;
+						end
+						3'd3: begin
+							control.alu_srcB	= src_00;
+							control.alu_op		= alu_B;
+							control.alu_dest	= dest_PC_h;
+							
+							control.write_en	= `TRUE;
+						end
+					endcase
+				end
+				
+				s_WRITE: begin
+					next_state		= s_EXECUTE;
+					
+					case (iteration) 
+						3'd0: begin
+							control.alu_srcB	= src_PC_h;
+							control.alu_op		= alu_B;
+							control.alu_dest	= dest_MEMD;
+							next_iteration		= 3'd1;
+						end
+						3'd1: begin
+							control.alu_srcB	= src_PC_l;
+							control.alu_op		= alu_B;
+							control.alu_dest	= dest_MEMD;
+							
+							next_iteration		= 3'd2;
+							control.write_en	= `TRUE;
+						end
+						3'd2: begin
+							control.alu_srcB	= src_SP_l;
+							control.alu_srcA	= src_SP_h;
+							control.alu_op		= alu_AB;
+							control.alu_dest	= dest_MEMA;
+
+							next_iteration		= 3'd3;
+						end
+						3'd3: begin
+							case (curr_int)
+								int_VBLANK: control.alu_srcB	= src_40;
+								int_LCDC:	control.alu_srcB	= src_48;
+								int_TIMER:	control.alu_srcB	= src_50;
+								int_SERIAL:	control.alu_srcB	= src_58;
+								int_JOYPAD:	control.alu_srcB	= src_60;
+								default:	control.alu_srcB	= src_00;
+							endcase
+							
+							next_state			= s_FETCH;
+							next_iteration		= 3'd0;
+							next_int			= int_NONE;
+							control.alu_op		= alu_B;
+							control.alu_dest	= dest_PC_l;
+						end
+					endcase
+				end
+			
+				default: /* Do nothing */;
+			endcase
+		
+		end else if (prefix_CB == `FALSE) begin
+
+			next_prefix	  			= prefix_CB;
+			next_iteration			= iteration;
+
 			unique case (curr_state)
 			
 				/*	State = FETCH
@@ -96,20 +232,6 @@ module control_path
 				*/
 				s_FETCH: begin
 					
-					control.reg_selA 		= reg_UNK;
-					control.reg_selB 		= reg_UNK;
-					control.alu_op   		= alu_UNK;
-					control.alu_srcA		= src_UNK;
-					control.alu_srcB		= src_UNK;	
-					control.alu_dest		= dest_NONE;
-					control.read_en			= `FALSE;
-					control.write_en		= `FALSE;
-					control.ld_flags		= `FALSE;
-					control.load_op_code 	= `FALSE;
-					control.fetch 			= `FALSE;
-					control.bit_num			= 3'bx;
-					next_prefix	  			= prefix_CB;
-					next_iteration			= iteration;
 					next_state				= s_DECODE;
 					
 					if (iteration == 3'b0)
@@ -123,20 +245,7 @@ module control_path
 				*
 				*/
 				s_DECODE: begin
-					control.reg_selA 		= reg_UNK;
-					control.reg_selB 		= reg_UNK;
-					control.alu_op   		= alu_UNK;
-					control.alu_srcA		= src_UNK;
-					control.alu_srcB		= src_UNK;	
-					control.alu_dest		= dest_NONE;
-					control.read_en			= `FALSE;
-					control.write_en		= `FALSE;
-					control.ld_flags		= `FALSE;
-					control.load_op_code 	= `FALSE;
-					control.fetch 			= `FALSE;
-					control.bit_num			= 3'bx;
-					next_prefix	  			= prefix_CB;
-					next_iteration			= iteration;
+				
 					next_state				= s_EXECUTE;
 					
 					if (iteration == 3'b0)
@@ -149,20 +258,7 @@ module control_path
 				*	Executes ALU operation or memory read based on iteration and instruction. 
 				*/
 				s_EXECUTE: begin
-					control.reg_selA 		= reg_UNK;
-					control.reg_selB 		= reg_UNK;
-					control.alu_op   		= alu_UNK;
-					control.alu_srcA		= src_UNK;
-					control.alu_srcB		= src_UNK;	
-					control.alu_dest		= dest_NONE;
-					control.read_en			= `FALSE;
-					control.write_en		= `FALSE;
-					control.ld_flags		= `FALSE;
-					control.load_op_code 	= `FALSE;
-					control.fetch 			= `FALSE;
-					control.bit_num			= 3'bx;
-					next_prefix	  			= prefix_CB;
-					next_iteration			= iteration;
+
 					next_state				= s_WRITE;
 					
 					if (iteration != 3'b1) begin
@@ -2035,6 +2131,21 @@ module control_path
 									control.read_en 	= `TRUE;
 								end
 							end
+							RETI: begin
+								if (iteration == 3'b0) begin
+									control.alu_op		= alu_AB;
+									control.alu_srcA	= src_SP_h;
+									control.alu_srcB	= src_SP_l;
+									control.alu_dest 	= dest_MEMA;
+								end else if (iteration == 3'd2) begin
+									control.alu_op		= alu_INCL;
+									control.alu_srcA	= src_SP_h;
+									control.alu_srcB	= src_SP_l;
+									control.alu_dest 	= dest_SP;
+
+									control.read_en 	= `TRUE;
+								end
+							end
 
 							EI: begin
 								enable_interrupts 	= `TRUE;
@@ -2576,6 +2687,11 @@ module control_path
 									control.alu_dest	= dest_PC_l;
 								end
 							end
+							RETI: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_MEMD;
+								control.alu_dest	= dest_PC_l;
+							end
 							
 							default: begin
 								// DO NOTHING
@@ -2590,20 +2706,7 @@ module control_path
 				*	Resets iteration if operation done based on instruction. 
 				*/
 				s_WRITE: begin
-					control.reg_selA 		= reg_UNK;
-					control.reg_selB 		= reg_UNK;
-					control.alu_op   		= alu_UNK;
-					control.alu_srcA		= src_UNK;
-					control.alu_srcB		= src_UNK;	
-					control.alu_dest		= dest_NONE;
-					control.read_en			= `FALSE;
-					control.write_en		= `FALSE;
-					control.ld_flags		= `FALSE;
-					control.load_op_code 	= `FALSE;
-					control.fetch 			= `FALSE;
-					control.bit_num			= 3'bx;
-					next_prefix	  			= prefix_CB;
-					next_iteration			= iteration;
+
 					next_state				= s_FETCH;
 
 					if (iteration == 3'b0) begin
@@ -2935,7 +3038,16 @@ module control_path
 								
 								next_iteration 		= 3'b1;
 							end
-							
+							RETI: begin
+								control.alu_op		= alu_INCL;
+								control.alu_srcA	= src_SP_h;
+								control.alu_srcB	= src_SP_l;
+								control.alu_dest 	= dest_SP;
+								
+								control.read_en		= `TRUE; 
+								next_iteration 		= 3'b1;
+							end
+
 							PREFIX: begin
 								next_prefix = `TRUE;
 							end
@@ -3240,7 +3352,15 @@ module control_path
 								end else 
 									next_iteration		= 3'b0;
 							end
-							
+							RETI: begin
+								control.alu_op		= alu_AB;
+								control.alu_srcA	= src_SP_h;
+								control.alu_srcB	= src_SP_l;
+								control.alu_dest 	= dest_MEMA;
+								
+								next_iteration 		= 3'd2;
+							end
+
 							default: begin
 								next_iteration		= 3'b0;
 							end
@@ -3462,6 +3582,15 @@ module control_path
 								
 								next_iteration 		= 3'd3;
 							end
+							RETI: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_MEMD;
+								control.alu_dest 	= dest_PC_h;
+								
+								enable_interrupts 	= `TRUE;
+								
+								next_iteration 		= 3'd3;
+							end
 							
 							default: begin
 								next_iteration		= 3'b0;
@@ -3632,24 +3761,13 @@ module control_path
 			endcase
 		
 		end else begin
-	
+		
+			next_prefix	  			= `TRUE;
+			next_iteration			= iteration;
+
 			case (curr_state)
 				s_FETCH: begin
 					
-					control.reg_selA 		= reg_UNK;
-					control.reg_selB 		= reg_UNK;
-					control.alu_op   		= alu_UNK;
-					control.alu_srcA		= src_UNK;
-					control.alu_srcB		= src_UNK;	
-					control.alu_dest		= dest_NONE;
-					control.read_en			= `FALSE;
-					control.write_en		= `FALSE;
-					control.ld_flags		= `FALSE;
-					control.load_op_code 	= `FALSE;
-					control.bit_num			= 3'bx;
-					control.fetch 			= `FALSE;
-					next_prefix	  			= `TRUE;
-					next_iteration			= iteration;
 					next_state				= s_DECODE;
 					
 					if (iteration == 3'b0)
@@ -3663,20 +3781,7 @@ module control_path
 				*
 				*/
 				s_DECODE: begin
-					control.reg_selA 		= reg_UNK;
-					control.reg_selB 		= reg_UNK;
-					control.alu_op   		= alu_UNK;
-					control.alu_srcA		= src_UNK;
-					control.alu_srcB		= src_UNK;	
-					control.alu_dest		= dest_NONE;
-					control.read_en			= `FALSE;
-					control.write_en		= `FALSE;
-					control.ld_flags		= `FALSE;
-					control.load_op_code	= `FALSE;
-					control.fetch 			= `FALSE;
-					control.bit_num			= 3'bx;
-					next_prefix	  			= `TRUE;
-					next_iteration			= iteration;
+
 					next_state				= s_EXECUTE;
 					
 					if (iteration == 3'b0)
@@ -3689,20 +3794,7 @@ module control_path
 				*	Executes ALU operation or memory read based on iteration and instruction. 
 				*/
 				s_EXECUTE: begin
-					control.reg_selA 		= reg_UNK;
-					control.reg_selB 		= reg_UNK;
-					control.alu_op   		= alu_UNK;
-					control.alu_srcA		= src_UNK;
-					control.alu_srcB		= src_UNK;	
-					control.alu_dest		= dest_NONE;
-					control.read_en			= `FALSE;
-					control.write_en		= `FALSE;
-					control.ld_flags		= `FALSE;
-					control.load_op_code 	= `FALSE;
-					control.fetch 			= `FALSE;
-					control.bit_num			= 3'bx;
-					next_prefix	  			= `TRUE;
-					next_iteration			= iteration;
+
 					next_state				= s_WRITE;
 					
 					// DO OUR PREFIX INSTRUCTION
@@ -5878,18 +5970,6 @@ module control_path
 				*	Resets iteration if operation done based on instruction. 
 				*/
 				s_WRITE: begin
-					control.reg_selA 		= reg_UNK;
-					control.reg_selB 		= reg_UNK;
-					control.alu_op   		= alu_UNK;
-					control.alu_srcA		= src_UNK;
-					control.alu_srcB		= src_UNK;	
-					control.alu_dest		= dest_NONE;
-					control.read_en			= `FALSE;
-					control.write_en		= `FALSE;
-					control.ld_flags		= `FALSE;
-					control.load_op_code 	= `FALSE;
-					control.bit_num 		= 3'bx;
-					control.fetch 			= `FALSE;
 					
 					// MAKE SURE WE GO BACK TO NORMAL MODE
 					next_prefix	  			= `FALSE;

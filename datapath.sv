@@ -45,6 +45,7 @@ module datapath
 	input logic			timer_int,
 	input logic 		serial_int,
 	input logic			joypad_int,
+	input logic	[7:0]	int_en,
 	output logic		int_clear,
 	
 	// Register window (for debugging)
@@ -168,33 +169,63 @@ module datapath
 	
 	always_comb begin
 		case (controls.alu_srcA)
-			src_NONE: inA = 8'bx;
-			src_REGA: inA = outA;
-			src_REGB: inA = outB;
-			src_SP_l: inA = SP[7:0];
-			src_SP_h: inA = SP[15:8];
-			src_PC_l: inA = PC[7:0];
-			src_PC_h: inA = PC[15:8];
-			src_MEMD: inA = MDR;
-			src_MEMA: inA = MAR[15:8];
-			src_FLAGS:inA = {flags_out, 4'b0};
-			default:  inA = 8'bx;
+			src_NONE: 	inA = 8'bx;
+			src_REGA: 	inA = outA;
+			src_REGB: 	inA = outB;
+			src_SP_l: 	inA = SP[7:0];
+			src_SP_h: 	inA = SP[15:8];
+			src_PC_l: 	inA = PC[7:0];
+			src_PC_h: 	inA = PC[15:8];
+			src_MEMD: 	inA = MDR;
+			src_MEMA: 	inA = MAR[15:8];
+			src_FLAGS:	inA = {flags_out, 4'b0};
+			
+			src_00:		inA = 8'h00;
+			src_08:		inA = 8'h08;
+			src_10:		inA = 8'h10;
+			src_18:		inA = 8'h18;
+			src_20:		inA = 8'h20;
+			src_28:		inA = 8'h28;
+			src_30:		inA = 8'h30;
+			src_38:		inA = 8'h38;
+			src_40:		inA = 8'h40;
+			src_48:		inA = 8'h48;
+			src_50:		inA = 8'h50;
+			src_58:		inA = 8'h58;
+			src_60:		inA = 8'h60;
+			
+			default:  	inA = 8'bx;
 		endcase
 	end
 	
 	always_comb begin
 		case (controls.alu_srcB)
-			src_NONE: inB = 8'bx;
-			src_REGA: inB = outA;
-			src_REGB: inB = outB;
-			src_SP_l: inB = SP[7:0];
-			src_SP_h: inB = SP[15:8];
-			src_PC_l: inB = PC[7:0];
-			src_PC_h: inB = PC[15:8];
-			src_MEMD: inB = MDR;
-			src_MEMA: inB = MAR[7:0];
-			src_FLAGS:inB = {flags_out, 4'b0};
-			default:  inB = 8'bx;
+			src_NONE: 	inB = 8'bx;
+			src_REGA: 	inB = outA;
+			src_REGB: 	inB = outB;
+			src_SP_l: 	inB = SP[7:0];
+			src_SP_h: 	inB = SP[15:8];
+			src_PC_l: 	inB = PC[7:0];
+			src_PC_h: 	inB = PC[15:8];
+			src_MEMD: 	inB = MDR;
+			src_MEMA: 	inB = MAR[7:0];
+			src_FLAGS:	inB = {flags_out, 4'b0};
+			
+			src_00:		inB = 8'h00;
+			src_08:		inB = 8'h08;
+			src_10:		inB = 8'h10;
+			src_18:		inB = 8'h18;
+			src_20:		inB = 8'h20;
+			src_28:		inB = 8'h28;
+			src_30:		inB = 8'h30;
+			src_38:		inB = 8'h38;
+			src_40:		inB = 8'h40;
+			src_48:		inB = 8'h48;
+			src_50:		inB = 8'h50;
+			src_58:		inB = 8'h58;
+			src_60:		inB = 8'h60;
+
+			default:  	inB = 8'bx;
 		endcase
 	end
 	
@@ -205,6 +236,6 @@ module datapath
 					  ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR)));
 	
 	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls), .int_clear (int_clear), .vblank_int (vlank_int), 
-					.lcdc_int (lcdc_int), .timer_int (timer_int), .serial_int (serial_int), .joypad_int (joypad_int));
+					.lcdc_int (lcdc_int), .timer_int (timer_int), .serial_int (serial_int), .joypad_int (joypad_int), .int_en (int_en));
 	
 endmodule: datapath
