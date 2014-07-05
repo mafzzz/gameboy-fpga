@@ -31,7 +31,18 @@
 */
 module top
 	(input logic clk,
-	input logic rst);
+	input logic rst,
+	
+	// Joypad signals (asserted low)
+	input logic joypad_up,
+	input logic joypad_down,
+	input logic joypad_left,
+	input logic joypad_right,
+	input logic joypad_a,
+	input logic joypad_b,
+	input logic joypad_start,
+	input logic joypad_select
+	);
 	
 	logic [7:0] regA, regB, regC, regD, regE, regF, regH, regL;
 	logic [15:0] mema;
@@ -40,7 +51,32 @@ module top
 	
 	logic			vblank_int, lcdc_int, timer_int, serial_int, joypad_int, int_clear;
 	
+	// To detect joypad edges
+	reg				prev_up, prev_down, prev_left, prev_right, prev_a, prev_b, prev_start, prev_select;
+	always_ff @(posedge clk, posedge rst) begin
+		if (rst) begin
+			prev_up <= 1'b1;
+			prev_down <= 1'b1;
+			prev_left <= 1'b1;
+			prev_right <= 1'b1;
+			prev_a <= 1'b1;
+			prev_b <= 1'b1;
+			prev_start <= 1'b1;
+			prev_select <= 1'b1;
+		end else begin
+			prev_up <= joypad_up;
+			prev_down <= joypad_down;
+			prev_left <= joypad_left;
+			prev_right <= joypad_right;
+			prev_a <= joypad_a;
+			prev_b <= joypad_b;
+			prev_start <= joypad_start;
+			prev_select <= joypad_select;
+		end
+	end
+	
 	control_reg_t regin, regout;
+	
 	
 	datapath	dp(.clk (clk), .rst (rst), .databus (memd), .MAR (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
 					.vblank_int (regout.interrupt_st[0]), .lcdc_int (regout.interrupt_st[1]), .timer_int (regout.interrupt_st[2]), 
@@ -61,7 +97,7 @@ module top
 			div_64 <= 1'b0;
 			div_256 <= 1'b0;
 			div_1024 <= 1'b0;
-			counter <= 10'b1;
+			counter <= 10'b0;
 		end else begin
 			div_16 <= counter[3:0] == 4'b0;
 			div_64 <= counter[5:0] == 6'b0;
@@ -72,22 +108,35 @@ module top
 	end
 	
 	// Interrupts
-	assign timer_int = (int_clear) ? 1'b0 : (regin.timer_count == 8'b0 && regout.timer_count == 8'hFF) | regout.interrupt_st[2];
-	
+	assign timer_int 	= (int_clear) ? 1'b0 : (regin.timer_count == regout.timer_modulo && regout.timer_count == 8'hFF) | regout.interrupt_st[2];
+	assign joypad_int	= (int_clear) ? 1'b0 : regout.interrupt_st[4] | 
+							((~joypad_up & prev_up) 	| (~joypad_down & prev_down) 	| (~joypad_left & prev_left) 	| (~joypad_right & prev_right) | 
+							 (~joypad_b & prev_b) 		| (~joypad_a & prev_a) 			| (~joypad_start & prev_start) 	| (~joypad_select & prev_select));
+
+
 	// Control register next state
 	always_comb begin
-		
-		regin.joypad = regout.joypad;
-		
+
+		regin.joypad[7:6] = 2'b0;
+		regin.joypad[5:4] = regout.joypad[5:4];
+		regin.joypad[3] = (regout.joypad[4] | joypad_start) & (regout.joypad[5] | joypad_down);
+		regin.joypad[2] = (regout.joypad[4] | joypad_select) & (regout.joypad[5] | joypad_up);
+		regin.joypad[1] = (regout.joypad[4] | joypad_b) & (regout.joypad[5] | joypad_left);
+		regin.joypad[0] = (regout.joypad[4] | joypad_a) & (regout.joypad[5] | joypad_right);
+
 		regin.serial_data = regout.serial_data;
 		regin.serial_control = regout.serial_control;
 		
 		regin.timer_divide = (div_256) ? regout.timer_divide + 1 : regout.timer_divide;
 		case (regout.timer_control[1:0])
-			2'b00: regin.timer_count = (div_1024) ? regout.timer_count + 1 : regout.timer_count;
-			2'b01: regin.timer_count = (div_16) ? regout.timer_count + 1 : regout.timer_count;
-			2'b10: regin.timer_count = (div_64) ? regout.timer_count + 1 : regout.timer_count;
-			2'b11: regin.timer_count = (div_256) ? regout.timer_count + 1 : regout.timer_count;
+			2'b00: regin.timer_count = (div_1024 && regout.timer_control[2]) ? 
+					((regout.timer_count == 8'hFF) ? regout.timer_modulo : (regout.timer_count + 1)) : regout.timer_count;
+			2'b01: regin.timer_count = (div_16 && regout.timer_control[2]) ? 
+					((regout.timer_count == 8'hFF) ? regout.timer_modulo : (regout.timer_count + 1)) : regout.timer_count;
+			2'b10: regin.timer_count = (div_64 && regout.timer_control[2]) ? 
+					((regout.timer_count == 8'hFF) ? regout.timer_modulo : (regout.timer_count + 1)) : regout.timer_count;
+			2'b11: regin.timer_count = (div_256 && regout.timer_control[2]) ? 
+					((regout.timer_count == 8'hFF) ? regout.timer_modulo : (regout.timer_count + 1)) : regout.timer_count;
 		endcase
 		regin.timer_control = regout.timer_control;
 		regin.timer_modulo = regout.timer_modulo;
@@ -103,7 +152,7 @@ module top
 		regin.lcd_v_cp = regout.lcd_v_cp;
 		
 		regin.bg_pal = regout.bg_pal;
-		regin.obj_pal0 = regout.obj_pal0;
+		regin.obj_pal1 = regout.obj_pal0;
 		regin.obj_pal1 = regout.obj_pal1;
 		regin.win_y = regout.win_y;
 		regin.win_x = regout.win_x;

@@ -33,6 +33,8 @@ module testbench();
 	logic	clk;
 	logic	rst;
 		
+	logic joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
+		
 	top DUT (.*);
 	vars	v ();
 	
@@ -54,17 +56,53 @@ module testbench();
 		forever @(posedge clk) v.cycles++;
 	
 	initial begin
-	
+		joypad_up = 1'b1;
+		joypad_down = 1'b1;
+		joypad_left = 1'b1;
+		joypad_right = 1'b1;
+		joypad_start = 1'b1;
+		joypad_select = 1'b1;
+		joypad_a = 1'b1;
+		joypad_b = 1'b1;
+		
 		if ($test$plusargs("debug"))
 			$monitor("State: %s			Iter: %d	| 	PC: %h 	IR: %s		(0x%h)	SP: %h	|Reset: %b \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Clock cycle (dec): %d    Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
 			DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, v.instruc.name, DUT.dp.IR, DUT.dp.SP, rst,
 			DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR, v.cycles,
-			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]); 	
-	
+			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]);
 
-		
-		#10000000;
-		$stop;
+		#100000;
+		joypad_a = 1'b0;
+		#100000;
+		joypad_a = 1'b1;
+		#100000;
+		joypad_b = 1'b0;
+		#100000;
+		joypad_left = 1'b0;
+		#100000;
+		joypad_b = 1'b1;
+		joypad_left = 1'b1;
+		#100000;
+		joypad_right = 1'b0;
+		#100000;
+		joypad_right = 1'b1;
+		#100000;
+		joypad_select = 1'b0;
+		#100000;
+		joypad_right = 1'b0;
+		#100000;
+		joypad_start = 1'b0;
+		joypad_select = 1'b1;
+		joypad_up = 1'b0;
+		#100000;
+		joypad_down = 1'b0;
+		#100000;
+		joypad_down = 1'b1;
+		#100000;
+		joypad_select = 1'b0;
+		joypad_left = 1'b0;
+		#100000;
+
 	end
 	
 endmodule: testbench
