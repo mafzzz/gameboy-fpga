@@ -71,38 +71,6 @@ module testbench();
 			DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR, v.cycles,
 			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]);
 
-		#100000;
-		joypad_a = 1'b0;
-		#100000;
-		joypad_a = 1'b1;
-		#100000;
-		joypad_b = 1'b0;
-		#100000;
-		joypad_left = 1'b0;
-		#100000;
-		joypad_b = 1'b1;
-		joypad_left = 1'b1;
-		#100000;
-		joypad_right = 1'b0;
-		#100000;
-		joypad_right = 1'b1;
-		#100000;
-		joypad_select = 1'b0;
-		#100000;
-		joypad_right = 1'b0;
-		#100000;
-		joypad_start = 1'b0;
-		joypad_select = 1'b1;
-		joypad_up = 1'b0;
-		#100000;
-		joypad_down = 1'b0;
-		#100000;
-		joypad_down = 1'b1;
-		#100000;
-		joypad_select = 1'b0;
-		joypad_left = 1'b0;
-		#100000;
-
 	end
 	
 endmodule: testbench

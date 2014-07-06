@@ -112,8 +112,10 @@ module top
 	assign joypad_int	= (int_clear) ? 1'b0 : regout.interrupt_st[4] | 
 							((~joypad_up & prev_up) 	| (~joypad_down & prev_down) 	| (~joypad_left & prev_left) 	| (~joypad_right & prev_right) | 
 							 (~joypad_b & prev_b) 		| (~joypad_a & prev_a) 			| (~joypad_start & prev_start) 	| (~joypad_select & prev_select));
-
-
+	assign lcdc_int		= 1'b0;
+	assign vblank_int	= 1'b0;
+	assign serial_int	= 1'b0;
+	
 	// Control register next state
 	always_comb begin
 
@@ -152,7 +154,7 @@ module top
 		regin.lcd_v_cp = regout.lcd_v_cp;
 		
 		regin.bg_pal = regout.bg_pal;
-		regin.obj_pal1 = regout.obj_pal0;
+		regin.obj_pal0 = regout.obj_pal0;
 		regin.obj_pal1 = regout.obj_pal1;
 		regin.win_y = regout.win_y;
 		regin.win_x = regout.win_x;

@@ -78,7 +78,7 @@ module memoryunit
 	/*** MEMORY BANKS ***/
 	
 	// ROM
-	SRAM_BANK #(.start (16'h0000), .size (16'h4000), .init ("ROM0.hex")) romb0(.databus (databus), .address (address[13:0]), .CS (CS_rom0), .OE (OE), .WE (WE), .clk (clk));
+	SRAM_BANK #(.start (16'h0000), .size (16'h4000), .init ("bootstrap.hex")) romb0(.databus (databus), .address (address[13:0]), .CS (CS_rom0), .OE (OE), .WE (WE), .clk (clk));
 	SRAM_BANK #(.start (16'h4000), .size (16'h4000), .init ("ROM1.hex")) romb1(.databus (databus), .address (address[13:0]), .CS (CS_rom1), .OE (OE), .WE (WE), .clk (clk));
 	
 	// VRAM
@@ -155,7 +155,9 @@ module IO_CONTROL_REGS
 			control_regs <= '0;
 			
 		else if (WE && CS) begin
-		
+			// Update registers not being written
+			control_regs <= regin;
+
 			// Next value by default is regin, set from peripheral components outside CPU
 			// For CPU controlled regs, set by address MUX:
 			case (address)
