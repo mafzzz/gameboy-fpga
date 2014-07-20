@@ -23,12 +23,23 @@
 `define synthesis
 
 module memoryunit 
-	(inout 		[7:0]		databus,
+	(
+	// CPU MEMORY OPERATIONS
+	inout 		[7:0]		databus,
 	input logic [15:0]		address,
-	input control_reg_t		regin, 
-	output control_reg_t	regout,
 	input logic 			OE,
 	input logic 			WE,
+	
+	// CONTROL REGISTERS
+	input control_reg_t		regin, 
+	output control_reg_t	regout,
+	
+	// DISPLAY MEMORY
+	input logic [12:0] disp_address,
+	input logic oe_oam,
+	input logic oe_vram,
+	output logic [7:0] disp_data,
+	
 	input logic 			clk,
 	input logic				rst);
 	
@@ -82,14 +93,16 @@ module memoryunit
 	SRAM_BANK #(.start (16'h4000), .size (16'h4000), .init ("ROM1.hex")) romb1(.databus (databus), .address (address[13:0]), .CS (CS_rom1), .OE (OE), .WE (WE), .clk (clk));
 	
 	// VRAM
-	SRAM_BANK #(.start (16'h8000), .size (16'h2000), .init ("")) vram(.databus (databus), .address (address[12:0]), .CS (CS_vram), .OE (OE), .WE (WE), .clk (clk));
-	
+	SRAM_BANK #(.start (16'h8000), .size (16'h2000), .init ("")) vram(.databus (databus), .address ((13{~oe_vram} & address[12:0]) | (13{oe_vram} & disp_address)),
+				.CS (CS_vram | oe_vram), .data_out (disp_data), .OE (OE | oe_vram), .WE (WE & ~oe_vram), .clk (clk));
+
 	// INTERNAL RAM
 	SRAM_BANK #(.start (16'hA000), .size (16'h2000), .init ("")) ramb0(.databus (databus), .address (address[12:0]), .CS (CS_ram0), .OE (OE), .WE (WE), .clk (clk));
 	SRAM_BANK #(.start (16'hC000), .size (16'h2000), .init ("")) ramb1(.databus (databus), .address (address[12:0]), .CS (CS_ram1), .OE (OE), .WE (WE), .clk (clk));
 	
 	// OAM
-	SRAM_BANK #(.start (16'hFE00), .size (16'h0100), .init ("")) oam(.databus (databus), .address (address[7:0]), .CS (CS_oam), .OE (OE), .WE (WE), .clk (clk));
+	SRAM_BANK #(.start (16'hFE00), .size (16'h0100), .init ("")) oam(.databus (databus), .address ((13{~oe_oam} & address[7:0]) | (13{oe_oam} & disp_address[7:0])),
+				.CS (CS_oam | oe_oam), .data_out (disp_data), .OE (OE | oe_oam), .WE (WE & ~oe_oam), .clk (clk));
 	
 	// HIGH RAM
 	SRAM_BANK #(.start (16'hFF80), .size (16'h0080), .init ("")) ramh(.databus (databus), .address (address[6:0]), .CS (CS_ramh), .OE (OE), .WE (WE), .clk (clk));
@@ -109,6 +122,7 @@ module SRAM_BANK
 	  parameter init   = "")
 	
 	(inout tri	[7:0]				databus,
+	output logic [7:0]				data_out,
 	input logic [$clog2(size)-1:0]	address,
 	input logic						CS,
 	input logic						OE,
@@ -122,6 +136,7 @@ module SRAM_BANK
 			mem[address] <= databus;
 	
 	assign databus = (OE && CS && ~WE) ? mem[address] : 8'bz;
+	assign data_out = (OE && CS && ~WE) ? mem[address] : 8'b0;
 	
 	initial
 		if (init != "")
@@ -164,64 +179,44 @@ module IO_CONTROL_REGS
 			
 				8'h00: 
 					control_regs.joypad <= {2'b0, databus[5:4], regin[3:0]};
-				
 				8'h01: 
 					control_regs.serial_data <= databus;
-				
 				8'h02: 
 					control_regs.serial_control <= databus;
-				
 				8'h04: 
 					control_regs.timer_divide <= 8'b0;
-				
 				8'h05: 
 					control_regs.timer_count <= 8'b0;
-				
 				8'h06: 
 					control_regs.timer_modulo <= databus;
-				
 				8'h07: 
 					control_regs.timer_control <= {5'b0, databus[2:0]};
-				
 				8'h0F: 
 					control_regs.interrupt_st <= regin;
-				
 				8'h40: 
 					control_regs.lcd_control <= databus;
-				
 				8'h41: 
 					control_regs.lcd_status <= {1'b0, databus[6:3], regin[2:0]};
-				
 				8'h42: 
 					control_regs.scroll_y <= databus;
-				
 				8'h43: 
 					control_regs.scroll_x <= databus;
-				
 				8'h44: 
 					control_regs.lcd_v <= regin;
-				
 				8'h45: 
 					control_regs.lcd_v_cp <= databus;
-				
 				8'h46: 
 					control_regs.dma <= databus;
-				
 				8'h47: 
 					control_regs.bg_pal <= databus;
-				
 				8'h48: 
 					control_regs.obj_pal0 <= databus;
-				
 				8'h49: 
 					control_regs.obj_pal1 <= databus;
-				
 				8'h4A: 
 					control_regs.win_y <= databus;
-				
 				8'h4B: 
 					control_regs.win_x <= databus;
-				
 				8'hFF: 
 					control_regs.interrupt_en <= databus;
 				
@@ -242,64 +237,44 @@ module IO_CONTROL_REGS
 			case (address)
 				8'h00: 
 					data = control_regs.joypad;
-				
 				8'h01: 
 					data = control_regs.serial_data;
-				
 				8'h02: 
 					data = control_regs.serial_control;				
-				
 				8'h04: 
 					data = control_regs.timer_divide;				
-				
 				8'h05: 
 					data = control_regs.timer_count;				
-				
 				8'h06: 
 					data = control_regs.timer_modulo;				
-				
 				8'h07: 
-					data = control_regs.timer_control;		
-				
+					data = control_regs.timer_control;
 				8'h0F: 
 					data = control_regs.interrupt_st;		
-				
 				8'h40: 
 					data = control_regs.lcd_control;				
-				
 				8'h41: 
 					data = control_regs.lcd_status;
-				
 				8'h42: 
 					data = control_regs.scroll_y;				
-				
 				8'h43: 
-					data = control_regs.scroll_x;			
-				
+					data = control_regs.scroll_x;	
 				8'h44: 
 					data = control_regs.lcd_v;
-				
 				8'h45: 
 					data = control_regs.lcd_v_cp;				
-				
 				8'h46: 
 					data = 8'b0;			
-				
 				8'h47: 
-					data = control_regs.bg_pal;				
-				
+					data = control_regs.bg_pal;	
 				8'h48: 
 					data = control_regs.obj_pal0;
-				
 				8'h49: 
 					data = control_regs.obj_pal1;			
-				
 				8'h4A: 
 					data = control_regs.win_y;			
-				
 				8'h4B: 
 					data = control_regs.win_x;				
-				
 				8'hFF: 
 					data = control_regs.interrupt_en;
 				

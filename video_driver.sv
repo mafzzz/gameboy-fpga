@@ -28,7 +28,26 @@
 *
 */
 module display
-	();
+	(
+	// CLOCK/RST
+	input logic clk_hdmi,
+	input logic rst,
+		
+	// READ GAMEBOY MEM SIGNALS
+	output logic [12:0] rd_address,
+	output logic oe_oam,
+	output logic oe_vram,
+	input logic [7:0] read_data,
+	
+	// CONTROL REGISTERS
+	input control_reg_t control,
+	
+	// HDMI SIGNALS
+	input logic HDMI_DE,
+	input logic HDMI_VSYNC,
+	input logic HDMI_HSYNC,
+	output logic [23:0] HDMI_DO,
+	);
 	
 	
 	

@@ -77,15 +77,18 @@ module top
 	
 	control_reg_t regin, regout;
 	
-	
-	datapath	dp(.clk (clk), .rst (rst), .databus (memd), .MAR (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
+	datapath	dp (.clk (clk), .rst (rst), .databus (memd), .MAR (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
 					.vblank_int (regout.interrupt_st[0]), .lcdc_int (regout.interrupt_st[1]), .timer_int (regout.interrupt_st[2]), 
 					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), .int_en (regout.interrupt_en), 
 					.int_clear (int_clear), .regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
-	memoryunit	mu(.clk (clk), .rst(rst), .address (mema), .databus (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout));
+	memoryunit	mu (.clk (clk), .rst(rst), .address (mema), .databus (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout), 
+					.disp_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .disp_data (disp_data));
 	
-	display		lcdc();
+	display		lcdc (.clk_hdmi (clk_hdmi), .rst (rst), .rd_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .read_data (disp_data), 
+					.HDMI_VSYNC (HDMI_VSYNC), .HDMI_HSYNC (HDMI_HSYNC), .HDMI_DE (HDMI_DE), .HDMI_DO (HDMI_DO));
+	
+	hdmi		hdmi_driver (.clk (clk_hdmi), .rst (rst), .hsync (HDMI_HSYNC), .vsync (HDMI_VSYNC), .de (HDMI_DE))
 	
 	// Timer clock divide
 	logic div_16, div_64, div_256, div_1024;
