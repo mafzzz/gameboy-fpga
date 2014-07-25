@@ -30,30 +30,42 @@
 */
 module testbench();
 
-	logic	clk;
+	logic	cpu_clk;
 	logic	rst;
 		
-	logic joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
-		
+	logic 		 joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
+	logic 		 HDMI_TX_DE;
+	logic 		 HDMI_TX_VS;
+	logic		 HDMI_TX_HS;
+	logic [23:0] HDMI_TX_D;
+	logic 		 HDMI_TX_CLK;
+
+	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
+	
 	top DUT (.*);
 	vars	v ();
 	
 	initial begin
 		rst <= '1;
-		clk <= '0;
+		cpu_clk <= '0;
+		HDMI_TX_CLK <= '0;
 		#10;
 		rst <= '0;
 	end
 
 	initial
-		//	4.19 MHz clock
-		forever #119.2 clk <= ~clk;
+		//	4.19 MHz cpu clock
+		forever #119.2 cpu_clk <= ~cpu_clk;
+
+	initial
+		//  27.027 MHz hdmi clock
+		forever #18.5 HDMI_TX_CLK <= ~HDMI_TX_CLK;
 	
 	initial
-		forever @(posedge clk) $cast(v.instruc, DUT.dp.IR);
+		forever @(posedge cpu_clk) $cast(v.instruc, DUT.dp.IR);
 	
 	initial
-		forever @(posedge clk) v.cycles++;
+		forever @(posedge cpu_clk) v.cycles++;
 	
 	initial begin
 		joypad_up = 1'b1;

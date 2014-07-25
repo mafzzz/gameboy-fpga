@@ -19,7 +19,8 @@
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
-`include "constants.sv"
+`define synthesis
+`include "top.sv"
 
 /* Module ChipInterface: Connects Cyclone V board ports to datapath
 *
@@ -69,6 +70,8 @@ module ChipInterface
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
 	logic [7:0] 		outa, outb;
 	
+	logic 		 joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
+	
 	// 00: AF    01: BC    10: DE    11: HL
 	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regB : ((SW[9] & ~SW[8]) ? regD : ((SW[9] & SW[8]) ? regH : '0)));
 	assign outb = (~SW[9] & ~SW[8]) ? regF : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regL : '0)));
@@ -78,11 +81,10 @@ module ChipInterface
 	sseg b_outh(outb[7:4], HEX1);
 	sseg b_outl(outb[3:0], HEX0);
 	
-	datapath dp(.clk (cpu_clk), .rst (rst), .regA (regA), .regB (regB), .regC (regC), 
-		.regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
+	top GameBoy (.*);
 	
 	/* ------------------------------------------------------------*/
-	/***  HDMI TX AND I2C INSTANTIATION ***/
+	/***  HDMI I2C INSTANTIATION ***/
 	/* ------------------------------------------------------------*/
 	reg [7:0] outA;
 	reg stop;
@@ -97,7 +99,6 @@ module ChipInterface
 	end
 	
 	i2c bus(.stop (stop), .clk (clk_reduced), .rst (rst), .outA (outA), .SDA (I2C_SDA), .SCL (I2C_SCL), .ACK (ack));
-	hdmi tx(.clk (HDMI_TX_CLK), .rst (rst), .hsync (HDMI_TX_HS), .vsync(HDMI_TX_VS), .de (HDMI_TX_DE), .data (HDMI_TX_D));
 
 endmodule: ChipInterface
 

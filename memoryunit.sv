@@ -47,6 +47,9 @@ module memoryunit
 	logic [7:0] CS_decoder;
 	assign {CS_ramh, CS_io, CS_oam, CS_ram1, CS_ram0, CS_vram, CS_rom1, CS_rom0} = CS_decoder;
 	
+	logic [7:0] data_out_oam, data_out_vram;
+	assign disp_data = (oe_oam) ? data_out_oam : ((oe_vram) ? data_out_vram : 8'bx);
+	
 	// Chip select decoder
 	always_comb begin
 		// 0x0000 <= address < 0x4000  [ROM_BANK_0]
@@ -89,23 +92,28 @@ module memoryunit
 	/*** MEMORY BANKS ***/
 	
 	// ROM
-	SRAM_BANK #(.start (16'h0000), .size (16'h4000), .init ("bootstrap.hex")) romb0(.databus (databus), .address (address[13:0]), .CS (CS_rom0), .OE (OE), .WE (WE), .clk (clk));
-	SRAM_BANK #(.start (16'h4000), .size (16'h4000), .init ("ROM1.hex")) romb1(.databus (databus), .address (address[13:0]), .CS (CS_rom1), .OE (OE), .WE (WE), .clk (clk));
+	SRAM_BANK #(.start (16'h0000), .size (16'h4000), .init ("ROM0.hex")) romb0(.databus (databus), .address (address[13:0]), .CS (CS_rom0), 
+				.OE (OE), .WE (WE), .clk (clk), .data_out ());
+	SRAM_BANK #(.start (16'h4000), .size (16'h4000), .init ("ROM1.hex")) romb1(.databus (databus), .address (address[13:0]), .CS (CS_rom1), 
+				.OE (OE), .WE (WE), .clk (clk), .data_out ());
 	
 	// VRAM
-	SRAM_BANK #(.start (16'h8000), .size (16'h2000), .init ("")) vram(.databus (databus), .address ((13{~oe_vram} & address[12:0]) | (13{oe_vram} & disp_address)),
-				.CS (CS_vram | oe_vram), .data_out (disp_data), .OE (OE | oe_vram), .WE (WE & ~oe_vram), .clk (clk));
+	SRAM_BANK #(.start (16'h8000), .size (16'h2000), .init ("")) vram(.databus (databus), .address ((~oe_vram) ? address[12:0] : disp_address),
+				.CS (CS_vram | oe_vram), .data_out (data_out_vram), .OE (OE | oe_vram), .WE (WE & ~oe_vram), .clk (clk));
 
 	// INTERNAL RAM
-	SRAM_BANK #(.start (16'hA000), .size (16'h2000), .init ("")) ramb0(.databus (databus), .address (address[12:0]), .CS (CS_ram0), .OE (OE), .WE (WE), .clk (clk));
-	SRAM_BANK #(.start (16'hC000), .size (16'h2000), .init ("")) ramb1(.databus (databus), .address (address[12:0]), .CS (CS_ram1), .OE (OE), .WE (WE), .clk (clk));
+	SRAM_BANK #(.start (16'hA000), .size (16'h2000), .init ("")) ramb0(.databus (databus), .address (address[12:0]), .CS (CS_ram0), 
+				.OE (OE), .WE (WE), .clk (clk), .data_out ());
+	SRAM_BANK #(.start (16'hC000), .size (16'h2000), .init ("")) ramb1(.databus (databus), .address (address[12:0]), .CS (CS_ram1), 
+				.OE (OE), .WE (WE), .clk (clk), .data_out ());
 	
 	// OAM
-	SRAM_BANK #(.start (16'hFE00), .size (16'h0100), .init ("")) oam(.databus (databus), .address ((13{~oe_oam} & address[7:0]) | (13{oe_oam} & disp_address[7:0])),
-				.CS (CS_oam | oe_oam), .data_out (disp_data), .OE (OE | oe_oam), .WE (WE & ~oe_oam), .clk (clk));
+	SRAM_BANK #(.start (16'hFE00), .size (16'h0100), .init ("")) oam(.databus (databus), .address ((~oe_vram) ? address[7:0] : disp_address[7:0]),
+				.CS (CS_oam | oe_oam), .data_out (data_out_oam), .OE (OE | oe_oam), .WE (WE & ~oe_oam), .clk (clk));
 	
 	// HIGH RAM
-	SRAM_BANK #(.start (16'hFF80), .size (16'h0080), .init ("")) ramh(.databus (databus), .address (address[6:0]), .CS (CS_ramh), .OE (OE), .WE (WE), .clk (clk));
+	SRAM_BANK #(.start (16'hFF80), .size (16'h0080), .init ("")) ramh(.databus (databus), .address (address[6:0]), .CS (CS_ramh), 
+				.OE (OE), .WE (WE), .clk (clk), .data_out ());
 
 	
 	/*** CONTROL REGISTER BANK ***/

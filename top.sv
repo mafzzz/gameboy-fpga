@@ -30,7 +30,7 @@
 *
 */
 module top
-	(input logic clk,
+	(input logic cpu_clk,
 	input logic rst,
 	
 	// Joypad signals (asserted low)
@@ -41,15 +41,41 @@ module top
 	input logic joypad_a,
 	input logic joypad_b,
 	input logic joypad_start,
-	input logic joypad_select
+	input logic joypad_select,
+	
+	// HDMI signals
+	output logic [23:0] HDMI_TX_D,
+	input logic 		HDMI_TX_CLK,
+	output logic 		HDMI_TX_DE,
+	output logic 		HDMI_TX_HS,
+	output logic 		HDMI_TX_VS,
+	
+	// Debug registers
+	output logic [7:0]		regA,
+	output logic [7:0]		regB,
+	output logic [7:0]		regC,
+	output logic [7:0]		regD,
+	output logic [7:0]		regE,
+	output logic [7:0]		regF,
+	output logic [7:0]		regH,
+	output logic [7:0]		regL
 	);
 	
-	logic [7:0] regA, regB, regC, regD, regE, regF, regH, regL;
+	logic clk;
+	assign clk = cpu_clk;
+	
 	logic [15:0] mema;
 	tri [7:0] memd;
 	logic RE, WE;
 	
+	logic [12:0] disp_address;
+	logic oe_oam, oe_vram;
+	logic [7:0] disp_data;
+	
 	logic			vblank_int, lcdc_int, timer_int, serial_int, joypad_int, int_clear;
+	
+	logic [7:0] 	lcd_v;
+	logic [1:0]		mode;
 	
 	// To detect joypad edges
 	reg				prev_up, prev_down, prev_left, prev_right, prev_a, prev_b, prev_start, prev_select;
@@ -85,10 +111,11 @@ module top
 	memoryunit	mu (.clk (clk), .rst(rst), .address (mema), .databus (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout), 
 					.disp_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .disp_data (disp_data));
 	
-	display		lcdc (.clk_hdmi (clk_hdmi), .rst (rst), .rd_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .read_data (disp_data), 
-					.HDMI_VSYNC (HDMI_VSYNC), .HDMI_HSYNC (HDMI_HSYNC), .HDMI_DE (HDMI_DE), .HDMI_DO (HDMI_DO));
+	display		lcdc (.clk_hdmi (HDMI_TX_CLK), .rst (rst), .rd_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .read_data (disp_data), 
+					.HDMI_VSYNC (HDMI_TX_VS), .HDMI_HSYNC (HDMI_TX_HS), .HDMI_DE (HDMI_TX_DE), .HDMI_DO (HDMI_TX_D), .control (regout), .vblank_int (vblank_int),
+					.lcdc_int (lcdc_int), .lcd_v (lcd_v), .mode (mode));
 	
-	hdmi		hdmi_driver (.clk (clk_hdmi), .rst (rst), .hsync (HDMI_HSYNC), .vsync (HDMI_VSYNC), .de (HDMI_DE))
+	hdmi		hdmi_driver (.clk (HDMI_TX_CLK), .rst (rst), .hsync (HDMI_TX_HS), .vsync (HDMI_TX_VS), .de (HDMI_TX_DE));
 	
 	// Timer clock divide
 	logic div_16, div_64, div_256, div_1024;
@@ -115,8 +142,8 @@ module top
 	assign joypad_int	= (int_clear) ? 1'b0 : regout.interrupt_st[4] | 
 							((~joypad_up & prev_up) 	| (~joypad_down & prev_down) 	| (~joypad_left & prev_left) 	| (~joypad_right & prev_right) | 
 							 (~joypad_b & prev_b) 		| (~joypad_a & prev_a) 			| (~joypad_start & prev_start) 	| (~joypad_select & prev_select));
-	assign lcdc_int		= 1'b0;
-	assign vblank_int	= 1'b0;
+//	assign lcdc_int		= 1'b0;
+//	assign vblank_int	= 1'b0;
 	assign serial_int	= 1'b0;
 	
 	// Control register next state
@@ -153,7 +180,7 @@ module top
 		
 		regin.scroll_y = regout.scroll_y;
 		regin.scroll_x = regout.scroll_x;
-		regin.lcd_v = regout.lcd_v;
+		regin.lcd_v = lcd_v;
 		regin.lcd_v_cp = regout.lcd_v_cp;
 		
 		regin.bg_pal = regout.bg_pal;
