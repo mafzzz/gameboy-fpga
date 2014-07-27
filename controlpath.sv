@@ -3504,10 +3504,10 @@ module control_path
 									control.alu_srcB	= src_SP_l;
 									control.alu_dest 	= dest_SP;
 									next_iteration 		= 3'd3;
+									control.write_en	= `TRUE;
 								end else 
 									next_iteration 		= 3'b0;
-								
-								control.write_en	= `TRUE;
+
 							end
 							CALL_NZ_N16: begin
 								if (~flags[3]) begin
@@ -3516,10 +3516,9 @@ module control_path
 									control.alu_srcB	= src_SP_l;
 									control.alu_dest 	= dest_SP;
 									next_iteration 		= 3'd3;
+									control.write_en	= `TRUE;
 								end else 
 									next_iteration 		= 3'b0;
-								
-								control.write_en	= `TRUE;
 							end
 							CALL_C_N16: begin
 								if (flags[0]) begin
@@ -3528,10 +3527,9 @@ module control_path
 									control.alu_srcB	= src_SP_l;
 									control.alu_dest 	= dest_SP;
 									next_iteration 		= 3'd3;
+									control.write_en	= `TRUE;
 								end else 
 									next_iteration 		= 3'b0;
-								
-								control.write_en	= `TRUE;
 							end
 							CALL_NC_N16: begin
 								if (~flags[0]) begin
@@ -3540,10 +3538,9 @@ module control_path
 									control.alu_srcB	= src_SP_l;
 									control.alu_dest 	= dest_SP;
 									next_iteration 		= 3'd3;
+									control.write_en	= `TRUE;
 								end else 
-									next_iteration 		= 3'b0;
-								
-								control.write_en	= `TRUE;
+									next_iteration 		= 3'b0;								
 							end
 							
 							// SUBROUTINE RETURNS

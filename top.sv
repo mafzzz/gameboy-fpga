@@ -103,17 +103,17 @@ module top
 	
 	control_reg_t regin, regout;
 	
-	datapath	dp (.clk (clk), .rst (rst), .databus (memd), .MAR (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
+	datapath	dp (.clk (clk), .rst (rst), .databus (memd), .address (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
 					.vblank_int (regout.interrupt_st[0]), .lcdc_int (regout.interrupt_st[1]), .timer_int (regout.interrupt_st[2]), 
 					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), .int_en (regout.interrupt_en), 
 					.int_clear (int_clear), .regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
-	memoryunit	mu (.clk (clk), .rst(rst), .address (mema), .databus (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout), 
+	memoryunit	mu (.clk (clk), .rst(rst), .cpu_address (mema), .data (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout), 
 					.disp_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .disp_data (disp_data));
 	
-	display		lcdc (.clk_hdmi (HDMI_TX_CLK), .rst (rst), .rd_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .read_data (disp_data), 
-					.HDMI_VSYNC (HDMI_TX_VS), .HDMI_HSYNC (HDMI_TX_HS), .HDMI_DE (HDMI_TX_DE), .HDMI_DO (HDMI_TX_D), .control (regout), .vblank_int (vblank_int),
-					.lcdc_int (lcdc_int), .lcd_v (lcd_v), .mode (mode));
+	display		lcdc (.clk_hdmi (HDMI_TX_CLK), .clk_cpu (clk), .rst (rst), .rd_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .read_data (disp_data), 
+					.HDMI_VSYNC (HDMI_TX_VS), .HDMI_HSYNC (HDMI_TX_HS), .HDMI_DE (HDMI_TX_DE), .HDMI_DO (HDMI_TX_D), .control (regout), .lcd_v (lcd_v), 
+					.mode (mode));
 	
 	hdmi		hdmi_driver (.clk (HDMI_TX_CLK), .rst (rst), .hsync (HDMI_TX_HS), .vsync (HDMI_TX_VS), .de (HDMI_TX_DE));
 	
@@ -136,14 +136,22 @@ module top
 			counter <= counter + 1;
 		end
 	end
-	
+
 	// Interrupts
 	assign timer_int 	= (int_clear) ? 1'b0 : (regin.timer_count == regout.timer_modulo && regout.timer_count == 8'hFF) | regout.interrupt_st[2];
+	
 	assign joypad_int	= (int_clear) ? 1'b0 : regout.interrupt_st[4] | 
 							((~joypad_up & prev_up) 	| (~joypad_down & prev_down) 	| (~joypad_left & prev_left) 	| (~joypad_right & prev_right) | 
 							 (~joypad_b & prev_b) 		| (~joypad_a & prev_a) 			| (~joypad_start & prev_start) 	| (~joypad_select & prev_select));
-//	assign lcdc_int		= 1'b0;
-//	assign vblank_int	= 1'b0;
+							 
+	assign lcdc_int		= (int_clear) ? 1'b0 : regout.interrupt_st[1] | 
+							((regout.lcd_status[6]) ? ~regout.lcd_status[2] && regin.lcd_status[2] : 1'b0) | 
+							((regout.lcd_status[5]) ? ~(regout.lcd_status[1:0] == 2'b10) && mode == 2'b10 : 1'b0) |
+							((regout.lcd_status[4]) ? ~(regout.lcd_status[1:0] == 2'b01) && mode == 2'b01 : 1'b0) |
+							((regout.lcd_status[3]) ? ~(regout.lcd_status[1:0] == 2'b00) && mode == 2'b00 : 1'b0);
+							
+	assign vblank_int	= (int_clear) ? 1'b0 : regout.interrupt_st[0] | (~(regout.lcd_status[1:0] == 2'b01) && mode == 2'b01);
+	
 	assign serial_int	= 1'b0;
 	
 	// Control register next state
@@ -176,7 +184,7 @@ module top
 		regin.interrupt_st = {3'b0, joypad_int, serial_int, timer_int, lcdc_int, vblank_int};
 		
 		regin.lcd_control = regout.lcd_control;
-		regin.lcd_status = regout.lcd_status;
+		regin.lcd_status = {1'b0, regout.lcd_status[6:3], regout.lcd_v == regout.lcd_v_cp, mode};
 		
 		regin.scroll_y = regout.scroll_y;
 		regin.scroll_x = regout.scroll_x;

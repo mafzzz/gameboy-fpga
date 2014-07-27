@@ -37,7 +37,7 @@ module datapath
 	output logic			WE,
 	output logic			RE,
 	inout tri 	 [7:0]		databus,
-	output reg   [15:0]		MAR,
+	output logic [15:0]		address,
 	
 	// Interrupt lines
 	input logic			vblank_int,
@@ -61,7 +61,7 @@ module datapath
 	reg [15:0] 			SP, PC;
 	reg [7:0]  			IR, MDR;
 	
-	logic [15:0]		SP_next, PC_next, MAR_next;
+	logic [15:0]		SP_next, PC_next, MAR_next, MAR;
 	logic [7:0]			IR_next, MDR_next;
 		
 	logic [15:0]		addr_out;
@@ -98,7 +98,7 @@ module datapath
 		end else begin
 			SP 	<=  SP_next;
 			PC 	<=  PC_next;
-			MAR <=  (controls.fetch) ? PC : MAR_next;
+			MAR <=  MAR_next;
 			IR  <=  IR_next;
 			MDR <=  MDR_next;
 		end
@@ -232,10 +232,11 @@ module datapath
 	alu				al	(.op_A (inA), .op_B (inB), .op_code (controls.alu_op), .curr_flags (flags_out), .next_flags (alu_flags), .alu_result (alu_output),
 		.addr_result (addr_out), .PC_inc_h (PC_inc_h), .PC_dec_h (PC_dec_h), .SP_inc_h (SP_inc_h), .SP_dec_h (SP_dec_h), .bit_num (controls.bit_num));
 	
-	assign MAR_next = (dest_en[13]) ? {8'hFF, alu_output} : ((dest_en[6]) ? addr_out : ((dest_en[10]) ? {MAR[15:8], alu_output[7:0]} : 
-					  ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR)));
+	assign MAR_next = (controls.fetch) ? PC : ((dest_en[13]) ? {8'hFF, alu_output} : ((dest_en[6]) ? addr_out : ((dest_en[10]) ? {MAR[15:8], alu_output[7:0]} : 
+					  ((dest_en[11]) ? {alu_output, MAR[7:0]} : MAR))));
+	assign address = MAR_next;
 	
-	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls), .int_clear (int_clear), .vblank_int (vlank_int), 
+	control_path	cp	(.op_code (IR), .rst (rst), .clk (clk), .flags (flags_out), .control (controls), .int_clear (int_clear), .vblank_int (vblank_int), 
 					.lcdc_int (lcdc_int), .timer_int (timer_int), .serial_int (serial_int), .joypad_int (joypad_int), .int_en (int_en));
 	
 endmodule: datapath
