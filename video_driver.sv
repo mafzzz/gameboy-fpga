@@ -38,6 +38,8 @@ module display
 	output reg [12:0] 	rd_address,
 	output logic 		oe_oam,
 	output logic 		oe_vram,
+	output logic 		ld_address_oam,
+	output logic		ld_address_vram,
 	input reg [7:0] 	read_data,
 	
 	// CONTROL REGISTERS
@@ -53,24 +55,30 @@ module display
 	);
 	
 	reg [7:0] row;
-	reg [8:0] col;
+	reg [7:0] col;
+	reg [4:0] render_col;
 	
 	reg [1:0] row_repeat, col_repeat;
-		
+	
 	// Double line buffers
-	reg [1:0] output_buffer [159:0];
-	reg [1:0] render_buffer [159:0];
+	reg [0:15] output_buffer [31:0];
+	reg [0:15] render_buffer [31:0];
+	
+	typedef enum logic [4:0] 	{s_WAIT = 5'b00_000, s_BACK_GET_LD_ADDR = 5'b00_001, s_BACK_GET_READ_INDEX = 5'b00_010, s_BACK_GET_LD_INDEX = 5'b00_011, 
+								s_BACK_GET_READ_PIXELS = 5'b00_100, s_BACK_GET_LD_PIXELS1 = 5'b00_101, s_BACK_GET_LD_PIXELS2 = 5'b00_110} draw_state_t;
+	
+	draw_state_t draw_state;
 	
 	always_comb begin
-		if (row == 8'd144 || col == 9'd159)
+		if (row == 8'd144 || col == 8'd159)
 			HDMI_DO = 24'h202020; 
-		else if (row > 8'd144 || col > 9'd159)
+		else if (row > 8'd144 || col > 8'd159)
 			HDMI_DO = 24'h236467; 
 		else begin
 			if (~control.lcd_control[7]) 
 				HDMI_DO = 24'h000000;
 			else begin
-				case (output_buffer[col])
+				case ({output_buffer[col[7:3]][{1'b1,col[2:0]}], output_buffer[col[7:3]][{1'b0,col[2:0]}]})
 					2'b00: HDMI_DO = 24'hC0B0B0;
 					2'b01: HDMI_DO = 24'h908080;
 					2'b10: HDMI_DO = 24'h605050;
@@ -82,21 +90,68 @@ module display
 	end
 
 	always_ff @(posedge clk_hdmi) begin
-		if (col == 9'd159 && col_repeat == 2'b10 && row_repeat == 2'b10)
+		if (col == 8'd159 && col_repeat == 2'b10 && row_repeat == 2'b10)
 			output_buffer <= render_buffer;
 		else
 			output_buffer <= output_buffer;
 	end
 	
-	always_ff @(posedge clk_hdmi, posedge rst) begin
+	always_ff @(posedge clk_cpu, posedge rst) begin
 		if (rst) begin
 			oe_vram <= `FALSE;
 			oe_oam <= `FALSE;
+			ld_address_oam <= `FALSE;
+			ld_address_vram <= `FALSE;
+			render_col <= 5'b0;
 			rd_address <= 13'b0;
-		end else if (row > (control.scroll_y - 8'd10) && row < (control.scroll_y + 8'd10) && col > 9'd30 && col < 9'd130) begin
-			render_buffer[col] = 2'b11;
+			draw_state <= s_WAIT;
 		end else begin
-			render_buffer[col] = 2'b00;
+			case (draw_state)
+				s_WAIT: begin
+					oe_vram <= `FALSE;
+					oe_oam <= `FALSE;
+					ld_address_oam <= `FALSE;
+					ld_address_vram <= `FALSE;
+					render_col <= 5'b0;
+					rd_address <= 13'b0;
+					draw_state <= (col == 8'd000 && row_repeat == 2'b00) ? s_BACK_GET_LD_ADDR : s_WAIT;
+				end
+				s_BACK_GET_LD_ADDR: begin
+					rd_address[9:0] <= control.scroll_x[7:3] + render_col + {{control.scroll_y + row} >> 2'd3, 5'b0};
+					rd_address[12:10] <= ((control.lcd_control[3]) ? 3'h7 : 3'h6);
+					ld_address_vram <= `TRUE;
+					draw_state <= s_BACK_GET_READ_INDEX;
+				end
+				s_BACK_GET_READ_INDEX: begin
+					oe_vram <= `TRUE;
+					ld_address_vram <= `FALSE;
+					draw_state <= s_BACK_GET_LD_INDEX;
+				end
+				s_BACK_GET_LD_INDEX: begin
+					oe_vram <= `FALSE;
+					ld_address_vram <= `TRUE;
+					rd_address <= ((control.lcd_control[4]) ? 13'h0000 : 13'h0800) + {read_data, row[2:0] + control.scroll_y[2:0], 1'b0};
+					draw_state <= s_BACK_GET_READ_PIXELS;
+				end
+				s_BACK_GET_READ_PIXELS: begin
+					oe_vram <= `TRUE;
+					ld_address_vram <= `TRUE;
+					rd_address <= rd_address + 1;
+					draw_state <= s_BACK_GET_LD_PIXELS1;
+				end
+				s_BACK_GET_LD_PIXELS1: begin
+					oe_vram <= `TRUE;
+					ld_address_vram <= `FALSE;
+					render_buffer[render_col][8:15] <= read_data;
+					draw_state <= s_BACK_GET_LD_PIXELS2;
+				end
+				s_BACK_GET_LD_PIXELS2: begin
+					oe_vram <= `FALSE;
+					render_buffer[render_col][0:7] <= read_data;
+					render_col <= render_col + 1;
+					draw_state <= (render_col == 5'h13) ? s_WAIT : s_BACK_GET_LD_ADDR;
+				end
+			endcase
 		end
 	end
 
@@ -113,26 +168,26 @@ module display
 			col_repeat <= 2'b0;
 		end else if (~control.lcd_control[7]) begin
 			row <= 8'd144;
-			col <= 9'd160;
+			col <= 8'd160;
 			row_repeat <= 2'b0;
 			col_repeat <= 2'b0;
 		end else if (~HDMI_VSYNC) begin
 			col_repeat <= 2'b0;
 			row_repeat <= 2'b0;
-			col <= 9'b0;
+			col <= 8'b0;
 			row <= 8'b0;
 		end else if (~HDMI_HSYNC) begin
 			col_repeat <= 2'b0;
 			row_repeat <= row_repeat;
-			col <= 9'b0;
+			col <= 8'b0;
 			row <= row;
 		end else if (HDMI_DE) begin
 
 			col_repeat <= (col_repeat == 2'b10) ? 2'b00 : col_repeat + 1;
-			row_repeat <= (col == 9'd159 && col_repeat == 2'b10) ? ((row_repeat == 2'b10) ? 2'b00 : row_repeat + 1) : row_repeat;
+			row_repeat <= (col == 8'd159 && col_repeat == 2'b10) ? ((row_repeat == 2'b10) ? 2'b00 : row_repeat + 1) : row_repeat;
 
-			col <= (col_repeat == 2'b10) ? ((col == 9'd160) ? col : col + 1) : col;
-			row <= (col_repeat == 2'b10 && row_repeat == 2'b10 && col == 9'd159) ? ((row == 8'd153) ? row : row + 1) : row;
+			col <= (col_repeat == 2'b10) ? ((col == 8'd160) ? col : col + 1) : col;
+			row <= (col_repeat == 2'b10 && row_repeat == 2'b10 && col == 8'd159) ? ((row == 8'd153) ? row : row + 1) : row;
 
 		end else begin
 			col_repeat <= col_repeat;

@@ -38,6 +38,8 @@ module memoryunit
 	input logic [12:0] disp_address,
 	input logic oe_oam,
 	input logic oe_vram,
+	input logic ld_disp_address_oam,
+	input logic ld_disp_address_vram,
 	output logic [7:0] disp_data,
 	
 	input logic 			clk,
@@ -65,8 +67,8 @@ module memoryunit
 			address_vram <= 16'b0;
 		end else begin
 			address <= cpu_address;
-			address_oam <= (oe_oam) ? disp_address : cpu_address;
-			address_vram <= (oe_vram) ? disp_address : cpu_address;
+			address_oam <= (ld_disp_address_oam) ? disp_address : cpu_address;
+			address_vram <= (ld_disp_address_vram) ? disp_address : cpu_address;
 		end
 	end
 	

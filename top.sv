@@ -68,15 +68,17 @@ module top
 	tri [7:0] memd;
 	logic RE, WE;
 	
-	logic [12:0] disp_address;
-	logic oe_oam, oe_vram;
-	logic [7:0] disp_data;
+	logic [12:0] 	disp_address;
+	logic 			oe_oam, oe_vram;
+	logic [7:0] 	disp_data;
+	logic 			ld_disp_address_vram;
+	logic 			ld_disp_address_oam;
 	
 	logic			vblank_int, lcdc_int, timer_int, serial_int, joypad_int, int_clear;
 	
 	logic [7:0] 	lcd_v;
 	logic [1:0]		mode;
-	
+		
 	// To detect joypad edges
 	reg				prev_up, prev_down, prev_left, prev_right, prev_a, prev_b, prev_start, prev_select;
 	always_ff @(posedge clk, posedge rst) begin
@@ -109,11 +111,12 @@ module top
 					.int_clear (int_clear), .regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
 	memoryunit	mu (.clk (clk), .rst(rst), .cpu_address (mema), .data (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout), 
-					.disp_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .disp_data (disp_data));
+					.disp_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .disp_data (disp_data), .ld_disp_address_oam (ld_disp_address_oam),
+					.ld_disp_address_vram (ld_disp_address_vram));
 	
 	display		lcdc (.clk_hdmi (HDMI_TX_CLK), .clk_cpu (clk), .rst (rst), .rd_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .read_data (disp_data), 
 					.HDMI_VSYNC (HDMI_TX_VS), .HDMI_HSYNC (HDMI_TX_HS), .HDMI_DE (HDMI_TX_DE), .HDMI_DO (HDMI_TX_D), .control (regout), .lcd_v (lcd_v), 
-					.mode (mode));
+					.mode (mode), .ld_address_vram (ld_disp_address_vram), .ld_address_oam (ld_disp_address_oam));
 	
 	hdmi		hdmi_driver (.clk (HDMI_TX_CLK), .rst (rst), .hsync (HDMI_TX_HS), .vsync (HDMI_TX_VS), .de (HDMI_TX_DE));
 	
