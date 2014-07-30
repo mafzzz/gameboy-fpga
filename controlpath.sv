@@ -4,7 +4,7 @@
 *   Copyright (C) 2014 Sohil Shah
 *
 *   This program is free software: you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License as published by
+*   it under the terms of the GNU Public License as published by
 *   the Free Software Foundation, either version 3 of the License, or
 *   (at your option) any later version.
 *
@@ -2147,6 +2147,26 @@ module control_path
 								end
 							end
 
+							// RESETS
+							RST_0, RST_8, RST_10, RST_18, RST_20, RST_28, RST_30, RST_38: begin
+								if (iteration == 3'b0) begin
+									control.alu_dest = dest_SP;
+									control.alu_op	 = alu_DECL;
+									control.alu_srcA = src_SP_h;
+									control.alu_srcB = src_SP_l;
+								end else if (iteration == 3'd2) begin
+									control.alu_op		= alu_AB;
+									control.alu_srcA	= src_SP_h;
+									control.alu_srcB	= src_SP_l;
+									control.alu_dest 	= dest_MEMA;
+								end else if (iteration == 3'd3) begin
+									control.alu_op		= alu_B;
+									control.alu_srcB	= src_00;
+									control.alu_dest	= dest_PC_h;
+									control.write_en	= `TRUE;
+								end
+							end
+							
 							EI: begin
 								enable_interrupts 	= `TRUE;
 							end
@@ -2693,11 +2713,17 @@ module control_path
 								control.alu_dest	= dest_PC_l;
 							end
 							
+							RST_0, RST_8, RST_10, RST_18, RST_20, RST_28, RST_30, RST_38: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_PC_h;
+								control.alu_dest 	= dest_MEMD;
+							end
+							
 							default: begin
 								// DO NOTHING
 							end
 						endcase
-					end
+					
 				end
 
 				/*	State = WRITE
@@ -3048,6 +3074,14 @@ module control_path
 								next_iteration 		= 3'b1;
 							end
 
+							RST_0, RST_8, RST_10, RST_18, RST_20, RST_28, RST_30, RST_38: begin
+								control.alu_op		= alu_AB;
+								control.alu_srcA	= src_SP_h;
+								control.alu_srcB	= src_SP_l;
+								control.alu_dest 	= dest_MEMA;
+								next_iteration 		= 3'b1;
+							end
+							
 							PREFIX: begin
 								next_prefix = `TRUE;
 							end
@@ -3361,6 +3395,15 @@ module control_path
 								next_iteration 		= 3'd2;
 							end
 
+							RST_0, RST_8, RST_10, RST_18, RST_20, RST_28, RST_30, RST_38: begin
+								control.alu_dest = dest_SP;
+								control.alu_op	 = alu_DECL;
+								control.alu_srcA = src_SP_h;
+								control.alu_srcB = src_SP_l;
+								control.write_en = `TRUE;
+								next_iteration 		= 3'd2;
+							end
+							
 							default: begin
 								next_iteration		= 3'b0;
 							end
@@ -3589,6 +3632,14 @@ module control_path
 								next_iteration 		= 3'd3;
 							end
 							
+							RST_0, RST_8, RST_10, RST_18, RST_20, RST_28, RST_30, RST_38: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_PC_l;
+								control.alu_dest 	= dest_MEMD;
+								
+								next_iteration 		= 3'd3;
+							end
+							
 							default: begin
 								next_iteration		= 3'b0;
 							end
@@ -3649,6 +3700,63 @@ module control_path
 								next_iteration		= 3'd4;
 							end
 
+							// RESET
+							RST_00: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_00;
+								control.alu_dest	= dest_PC_l;
+								
+								next_iteration		= 3'b0;
+							end
+							RST_08: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_08;
+								control.alu_dest	= dest_PC_l;
+								
+								next_iteration		= 3'b0;
+							end
+							RST_10: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_10;
+								control.alu_dest	= dest_PC_l;
+								
+								next_iteration		= 3'b0;
+							end
+							RST_18: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_18;
+								control.alu_dest	= dest_PC_l;
+								
+								next_iteration		= 3'b0;
+							end
+							RST_20: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_20;
+								control.alu_dest	= dest_PC_l;
+								
+								next_iteration		= 3'b0;
+							end
+							RST_28: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_28;
+								control.alu_dest	= dest_PC_l;
+								
+								next_iteration		= 3'b0;
+							end
+							RST_30: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_30;
+								control.alu_dest	= dest_PC_l;
+								
+								next_iteration		= 3'b0;
+							end
+							RST_38: begin
+								control.alu_op		= alu_B;
+								control.alu_srcB	= src_38;
+								control.alu_dest	= dest_PC_l;
+								
+								next_iteration		= 3'b0;
+							end							
 							
 							default: begin
 								next_iteration		= 3'b0;

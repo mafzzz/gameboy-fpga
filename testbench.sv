@@ -30,7 +30,7 @@
 */
 module testbench();
 
-	logic	cpu_clk;
+	logic	cpu_clk, video_clk;
 	logic	rst;
 		
 	logic 		 joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
@@ -44,6 +44,8 @@ module testbench();
 	
 	top DUT (.*);
 	vars	v ();
+
+	assign video_clk = cpu_clk;
 	
 	initial begin
 		rst <= '1;

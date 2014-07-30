@@ -309,7 +309,18 @@ typedef struct packed {
 	reg [7:0]		obj_pal1;
 	reg [7:0]		win_y;
 	reg [7:0]		win_x;
+	reg				dmg_disable;
 	reg [7:0]		interrupt_en;
 } control_reg_t;
+
+typedef enum logic [4:0] {
+	s_WAIT 					= 5'b00_000, 
+	s_BACK_GET_LD_ADDR 		= 5'b00_001, 
+	s_BACK_GET_READ_INDEX	= 5'b00_010, 
+	s_BACK_GET_LD_INDEX 	= 5'b00_011, 
+	s_BACK_GET_READ_PIXELS 	= 5'b00_100, 
+	s_BACK_GET_LD_PIXELS1 	= 5'b00_101, 
+	s_BACK_GET_LD_PIXELS2 	= 5'b00_110
+} draw_state_t;
 
 `endif

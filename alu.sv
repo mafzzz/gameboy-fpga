@@ -334,7 +334,7 @@ module alu
 				next_flags[1] = 1'b1;
 				next_flags[0] = curr_flags[0];
 			end
-			
+
 			// Sets bit at bit_num
 			alu_SET: begin
 				alu_result = op_B;
@@ -343,7 +343,7 @@ module alu
 				addr_result = 16'bx;
 				next_flags = curr_flags;
 			end
-			
+
 			// Resets bit at bit_num
 			alu_RES: begin
 				alu_result = op_B;

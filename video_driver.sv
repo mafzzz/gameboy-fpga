@@ -59,16 +59,13 @@ module display
 	reg [4:0] render_col;
 	
 	reg [1:0] row_repeat, col_repeat;
-	
+		
 	// Double line buffers
 	reg [0:15] output_buffer [31:0];
 	reg [0:15] render_buffer [31:0];
-	
-	typedef enum logic [4:0] 	{s_WAIT = 5'b00_000, s_BACK_GET_LD_ADDR = 5'b00_001, s_BACK_GET_READ_INDEX = 5'b00_010, s_BACK_GET_LD_INDEX = 5'b00_011, 
-								s_BACK_GET_READ_PIXELS = 5'b00_100, s_BACK_GET_LD_PIXELS1 = 5'b00_101, s_BACK_GET_LD_PIXELS2 = 5'b00_110} draw_state_t;
-	
+		
 	draw_state_t draw_state;
-	
+		
 	always_comb begin
 		if (row == 8'd144 || col == 8'd159)
 			HDMI_DO = 24'h202020; 
@@ -106,6 +103,7 @@ module display
 			rd_address <= 13'b0;
 			draw_state <= s_WAIT;
 		end else begin
+			
 			case (draw_state)
 				s_WAIT: begin
 					oe_vram <= `FALSE;
@@ -114,7 +112,7 @@ module display
 					ld_address_vram <= `FALSE;
 					render_col <= 5'b0;
 					rd_address <= 13'b0;
-					draw_state <= (col == 8'd000 && row_repeat == 2'b00) ? s_BACK_GET_LD_ADDR : s_WAIT;
+					draw_state <= (col == 8'd000 && row_repeat == 2'b00 && control.lcd_control[7]) ? s_BACK_GET_LD_ADDR : s_WAIT;
 				end
 				s_BACK_GET_LD_ADDR: begin
 					rd_address[9:0] <= control.scroll_x[7:3] + render_col + {{control.scroll_y + row} >> 2'd3, 5'b0};
@@ -164,11 +162,6 @@ module display
 		if (rst) begin
 			row <= 8'b0;
 			col <= 9'b0;
-			row_repeat <= 2'b0;
-			col_repeat <= 2'b0;
-		end else if (~control.lcd_control[7]) begin
-			row <= 8'd144;
-			col <= 8'd160;
 			row_repeat <= 2'b0;
 			col_repeat <= 2'b0;
 		end else if (~HDMI_VSYNC) begin

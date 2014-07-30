@@ -33,7 +33,7 @@ module ChipInterface
 	/* ------------------------------------------------------------*/
 	(
 	// buttons/leds
-	input logic [1:0]	KEY,
+	input logic [3:0]	KEY,
 	input logic [9:0]	SW,
 	output logic [6:0]	HEX0, HEX1, HEX2, HEX3,
 	
@@ -55,17 +55,20 @@ module ChipInterface
 	/* ------------------------------------------------------------*/
 
 	logic cpu_clk, clk_out;
-	logic clk_lock;		
+	logic clk_lock, video_clk;		
 	logic rst;
 
 	// Altera PLL module for 4.19 MHz clock
 	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (HDMI_TX_CLK), .outclk_1 (clk_out));
-	assign cpu_clk = (SW[0]) ? KEY[1] : clk_out;
+	assign video_clk = (SW[0]) ? 1'b0 : clk_out;
+	assign cpu_clk = (SW[1]) ? KEY[3] : video_clk;
 	
 	/* ------------------------------------------------------------*/
 	/***  CPU CORE INTANTIATION ***/
 	/* ------------------------------------------------------------*/
+	logic cpu_rst;
 	assign rst = ~KEY[0];
+	assign cpu_rst = rst | ~KEY[1];
 	
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
 	logic [7:0] 		outa, outb;
@@ -73,8 +76,8 @@ module ChipInterface
 	logic 		 joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
 	
 	// 00: AF    01: BC    10: DE    11: HL
-	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regB : ((SW[9] & ~SW[8]) ? regD : ((SW[9] & SW[8]) ? regH : '0)));
-	assign outb = (~SW[9] & ~SW[8]) ? regF : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regL : '0)));
+	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regB : ((SW[9] & ~SW[8]) ? regD : ((SW[9] & SW[8]) ? regH : 8'b0)));
+	assign outb = (~SW[9] & ~SW[8]) ? regF : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regL : 8'b0)));
 	
 	sseg a_outh(outa[7:4], HEX3);
 	sseg a_outl(outa[3:0], HEX2);
@@ -93,7 +96,7 @@ module ChipInterface
 	reg clk_reduced;
 	reg ack;
 	// Divide 4.19 MHz clk by 11 to give 381 kHz I2C logic driver. 
-	always @(posedge cpu_clk) begin
+	always @(posedge video_clk) begin
 		counter = (counter == 4'hA) ? 4'h0 : counter + 4'h1;
 		clk_reduced = (stop) ? 1'b0 : ((counter == 4'h0) ? ~clk_reduced : clk_reduced);
 	end
