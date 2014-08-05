@@ -55,25 +55,31 @@ module ChipInterface
 	/* ------------------------------------------------------------*/
 
 	logic cpu_clk, clk_out;
-	logic clk_lock, video_clk;		
+	logic clk_lock;		
 	logic rst;
 
 	// Altera PLL module for 4.19 MHz clock
 	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (HDMI_TX_CLK), .outclk_1 (clk_out));
-	assign video_clk = (SW[0]) ? 1'b0 : clk_out;
-	assign cpu_clk = (SW[1]) ? KEY[3] : video_clk;
+	assign cpu_clk = (SW[0]) ? 1'b0 : clk_out;
 	
 	/* ------------------------------------------------------------*/
 	/***  CPU CORE INTANTIATION ***/
 	/* ------------------------------------------------------------*/
-	logic cpu_rst;
 	assign rst = ~KEY[0];
-	assign cpu_rst = rst | ~KEY[1];
 	
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
 	logic [7:0] 		outa, outb;
 	
 	logic 		 joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
+	
+	assign joypad_a = 1'b1;
+	assign joypad_b = 1'b1;
+	assign joypad_select = 1'b1;
+	assign joypad_start = 1'b1;
+	assign joypad_down = 1'b1;
+	assign joypad_up = 1'b1;
+	assign joypad_left = 1'b1;
+	assign joypad_right = 1'b1;
 	
 	// 00: AF    01: BC    10: DE    11: HL
 	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regB : ((SW[9] & ~SW[8]) ? regD : ((SW[9] & SW[8]) ? regH : 8'b0)));
@@ -96,7 +102,7 @@ module ChipInterface
 	reg clk_reduced;
 	reg ack;
 	// Divide 4.19 MHz clk by 11 to give 381 kHz I2C logic driver. 
-	always @(posedge video_clk) begin
+	always @(posedge cpu_clk) begin
 		counter = (counter == 4'hA) ? 4'h0 : counter + 4'h1;
 		clk_reduced = (stop) ? 1'b0 : ((counter == 4'h0) ? ~clk_reduced : clk_reduced);
 	end
