@@ -51,6 +51,8 @@ module top
 	output logic 		HDMI_TX_VS,
 	
 	// Debug registers
+	output logic corruption,
+	output logic [15:0]		PC,
 	output logic [7:0]		regA,
 	output logic [7:0]		regB,
 	output logic [7:0]		regC,
@@ -80,7 +82,7 @@ module top
 	
 	logic [7:0] 	lcd_v;
 	logic [1:0]		mode;
-		
+			
 	// To detect joypad edges
 	reg				prev_up, prev_down, prev_left, prev_right, prev_a, prev_b, prev_start, prev_select;
 	always_ff @(posedge clk, posedge rst) begin
@@ -106,16 +108,16 @@ module top
 	end
 	
 	control_reg_t regin, regout;
-		
+
 	datapath	dp (.clk (clk), .rst (rst), .databus (memd), .address (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
 					.vblank_int (regout.interrupt_st[0]), .lcdc_int (regout.interrupt_st[1]), .timer_int (regout.interrupt_st[2]), 
 					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), .int_en (regout.interrupt_en), .int_clear (int_clear), 
-					.regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
+					.regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL), .PC (PC));
 	
 	memoryunit	mu (.clk (clk), .rst(rst), .cpu_address (mema), .data (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout), 
 					.disp_address_oam (disp_address_oam), .disp_address_vram (disp_address_vram), .oe_oam (oe_oam), .oe_vram (oe_vram), 
 					.disp_data_oam (disp_data_oam), .disp_data_vram (disp_data_vram), .ld_disp_address_oam (ld_disp_address_oam), 
-					.ld_disp_address_vram (ld_disp_address_vram));
+					.ld_disp_address_vram (ld_disp_address_vram), .corruption (corruption));
 	
 	display		lcdc 	(.clk_hdmi (HDMI_TX_CLK), .clk_cpu (clk), .rst (rst), .rd_address_oam (disp_address_oam), .rd_address_vram (disp_address_vram),
 						.oe_oam (oe_oam), .oe_vram (oe_vram), .read_data_oam (disp_data_oam), .read_data_vram (disp_data_vram), .HDMI_VSYNC (HDMI_TX_VS), 

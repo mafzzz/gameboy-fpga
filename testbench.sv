@@ -32,7 +32,7 @@ module testbench();
 
 	logic	cpu_clk, video_clk;
 	logic	rst;
-		
+	
 	logic 		 joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
 	logic 		 HDMI_TX_DE;
 	logic 		 HDMI_TX_VS;
@@ -41,7 +41,8 @@ module testbench();
 	logic 		 HDMI_TX_CLK;
 
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
-	
+	logic [15:0] 		PC;
+	logic 				corruption;
 	top DUT (.*);
 	vars	v ();
 
@@ -67,7 +68,7 @@ module testbench();
 		forever @(posedge cpu_clk) $cast(v.instruc, DUT.dp.IR);
 	
 	initial
-		forever @(posedge cpu_clk) v.cycles++;
+		forever @(posedge cpu_clk) v.cycles <= v.cycles + 1'b1;
 		
 	int mcd;
 	string filename;
@@ -97,6 +98,22 @@ module testbench();
 		end
 		
 	end
+		
+	initial begin
+		v.cksm <= 1'b0;
+		forever @(posedge cpu_clk) begin
+			v.cksm <= v.cksm + DUT.dp.PC;
+			if (v.cycles > 32'h01871100 && v.cycles <= 32'h01871200) begin
+				$display("STOP POINT!! cksm: %h, cycles: %h", v.cksm, v.cycles);
+				$display("********************************************");
+				$display("State: %s			Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP: %h	| \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+				DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, v.instruc.name, DUT.dp.IR, DUT.dp.SP, 
+				DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR,
+				DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]); 
+				$display("********************************************\n");
+			end
+		end
+	end
 	
 	initial begin
 		joypad_up = 1'b1;
@@ -115,32 +132,15 @@ module testbench();
 			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]);
 
 		repeat (10)
-			#1500000000;
+			#700000000;
 		
-		#400000000 joypad_right <= 1'b0;
-		#500000000 joypad_right <= 1'b1;
-		#400000000 joypad_left <= 1'b0;
-		#500000000 joypad_left <= 1'b1;
-		#500000000 joypad_right <= 1'b0;
-		#300000000 joypad_right <= 1'b1;
-		#300000000 joypad_right <= 1'b0;
-		#100000000 joypad_right <= 1'b1;
-		#200000000 joypad_left <= 1'b0;
-		#100000000 joypad_left <= 1'b1;
-		#300000000 joypad_start <= 1'b0;
-		#300000000 joypad_start <= 1'b1;
-		#400000000 joypad_down <= 1'b0;
-		#500000000 joypad_down <= 1'b1;
-		#400000000 joypad_up <= 1'b0;
-		#500000000 joypad_up <= 1'b1;
-		#500000000 joypad_down <= 1'b0;
-		#300000000 joypad_down <= 1'b1;
-		#300000000 joypad_down <= 1'b0;
-		#100000000 joypad_down <= 1'b1;
-		#200000000 joypad_left <= 1'b0;
-		#100000000 joypad_left <= 1'b1;
-		#300000000 joypad_start <= 1'b0;
-		#300000000 joypad_start <= 1'b1;
+		rst <= 1'b1;
+		#100;
+		rst <= 1'b0;
+		
+		repeat (10)
+			#700000000;
+		
 		$stop;
 
 	end
@@ -151,4 +151,5 @@ endmodule: testbench
 module vars();
 	std_instruction_t	instruc;
 	int cycles;
+	reg [15:0] cksm;
 endmodule: vars

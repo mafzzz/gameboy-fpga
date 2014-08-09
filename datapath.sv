@@ -49,6 +49,7 @@ module datapath
 	output logic		int_clear,
 	
 	// Register window (for debugging)
+	output logic [15:0]		PC,
 	output logic [7:0]		regA,
 	output logic [7:0]		regB,
 	output logic [7:0]		regC,
@@ -58,7 +59,7 @@ module datapath
 	output logic [7:0]		regH,
 	output logic [7:0]		regL);
 	
-	reg [15:0] 			SP, PC;
+	reg [15:0] 			SP;
 	reg [7:0]  			IR, MDR;
 	
 	logic [15:0]		SP_next, PC_next, MAR_next, MAR;

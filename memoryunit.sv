@@ -44,6 +44,8 @@ module memoryunit
 	output logic [7:0] disp_data_oam,
 	output logic [7:0] disp_data_vram,
 	
+	output logic corruption,
+	
 	input logic 			clk,
 	input logic				rst);
 	
@@ -65,7 +67,10 @@ module memoryunit
 	reg [15:0] address, address_oam, address_vram;
 	
 	reg 		dmg_rom_disable;
-		
+	
+	logic corruption1, corruption2;
+	assign corruption = corruption1 | corruption2;
+	
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) 
 			dmg_rom_disable <= `FALSE;
@@ -133,10 +138,10 @@ module memoryunit
 	// ROM
 	SRAM_BANK #(.start (16'h0000), .size (16'h0100), .init ("bootstrap.hex")) dmg(.databus (databus), .address (address[7:0]), .CS (CS_dmg), 
 				.OE (OE), .WE (`FALSE), .clk (clk));
-	SRAM_BANK #(.start (16'h0000), .size (16'h4000), .init ("rom_tennis0.hex")) romb0(.databus (databus), .address (address[13:0]), .CS (CS_rom0), 
-				.OE (OE), .WE (WE), .clk (clk));
-	SRAM_BANK #(.start (16'h4000), .size (16'h4000), .init ("rom_tennis1.hex")) romb1(.databus (databus), .address (address[13:0]), .CS (CS_rom1), 
-				.OE (OE), .WE (WE), .clk (clk));
+	SRAM_BANK #(.start (16'h0000), .size (16'h4000), .init ("ROM0.hex")) romb0(.databus (databus), .address (address[13:0]), .CS (CS_rom0), 
+				.OE (OE), .WE (WE), .clk (clk), .corruption (corruption1));
+	SRAM_BANK #(.start (16'h4000), .size (16'h4000), .init ("ROM1.hex")) romb1(.databus (databus), .address (address[13:0]), .CS (CS_rom1), 
+				.OE (OE), .WE (WE), .clk (clk), .corruption (corruption2));
 
 	// VRAM
 	SRAM_DUAL_BANK #(.start (16'h8000), .size (16'h2000), .init ("")) vram(.address (address_vram[12:0]), .write_data (data_in_vram),
@@ -173,7 +178,8 @@ module SRAM_BANK
 	input logic						CS,
 	input logic						OE,
 	input logic						WE,
-	input logic						clk);
+	input logic						clk,
+	output logic					corruption);
 	
 	reg [7:0]			mem [16'h0000 : size - 1];
 	
@@ -186,6 +192,24 @@ module SRAM_BANK
 	initial
 		if (init != "")
 			$readmemh(init, mem);
+			
+	initial
+		corruption <= `FALSE;
+
+	always @(posedge clk) begin
+		if (address != 16'h2000 && WE && CS) begin
+			corruption <= `TRUE;
+			`ifndef synthesis
+			$display("ERROR: BAD WRITE!! ADDRESS: 0x%h", start + address);
+			$display("********************************************");
+			$display("State: %s			Iter: %d	| 	PC: %h 	IR: %s	(0x%h)		SP: %h	| \n	Registers {A B C D E H L} : {%h %h %h %h %h %h %h}   MAR: %h		MDR: %h	\n	Condition codes {Z N H C} : {%b %b %b %b}\n\n", 
+			DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, v.instruc.name, DUT.dp.IR, DUT.dp.SP, 
+			DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR,
+			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]); 
+			$display("********************************************\n");
+			`endif
+		end
+	end
 			
 endmodule: SRAM_BANK
 
@@ -326,7 +350,7 @@ module IO_CONTROL_REGS
 				8'h0F: 
 					data = control_regs.interrupt_st;		
 				8'h40: 
-					data = control_regs.lcd_control;				
+					data = control_regs.lcd_control;
 				8'h41: 
 					data = control_regs.lcd_status;
 				8'h42: 

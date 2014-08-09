@@ -68,9 +68,7 @@ module display
 		
 	// OAM data line buffer
 	reg [13:0] oam_data_buffer [9:0];
-	
-	reg render_enable;
-	
+		
 	draw_state_t draw_state;
 		
 	always_comb begin
@@ -79,7 +77,7 @@ module display
 		else if (row > 8'd144 || col > 8'd159)
 			HDMI_DO = 24'h236467; 
 		else begin
-			if (~render_enable) 
+			if (~control.lcd_control[7]) 
 				HDMI_DO = 24'hC0B0B0;
 			else begin
 				case ({output_buffer[col[7:3]][{1'b1,col[2:0]}], output_buffer[col[7:3]][{1'b0,col[2:0]}]})
@@ -122,7 +120,7 @@ module display
 					render_col <= 5'b0;
 					rd_address_vram <= 13'b0;
 					rd_address_oam <= 8'h00;
-					draw_state <= (col == 8'b00 & HDMI_HSYNC & render_enable && row_repeat == 2'b00) ? 
+					draw_state <= (col == 8'b00 & HDMI_HSYNC & control.lcd_control[7] && row_repeat == 2'b00) ? 
 									((control.lcd_control[1]) ? s_OAM_LD_ADDR : s_BACK_LD_ADDR) : s_WAIT;
 				end
 				
@@ -214,13 +212,11 @@ module display
 			col <= 9'b0;
 			row_repeat <= 2'b0;
 			col_repeat <= 2'b0;
-			render_enable <= `FALSE;
 		end else if (~HDMI_VSYNC) begin
 			col_repeat <= 2'b0;
 			row_repeat <= 2'b0;
 			col <= 8'b0;
 			row <= 8'b0;
-			render_enable <= control.lcd_control[7];
 		end else if (~HDMI_HSYNC) begin
 			col_repeat <= 2'b0;
 			row_repeat <= row_repeat;
@@ -248,7 +244,7 @@ module display
 	//		* 10 -> OE_OAM
 	//		* 11 -> OE_VRAM/OE_OAM
 	always_comb begin
-		if (~render_enable | row > 8'd143 | ~HDMI_VSYNC)
+		if (~control.lcd_control[7] | row > 8'd143 | ~HDMI_VSYNC)
 			mode = 2'b01;
 		else if (draw_state == s_WAIT)
 			mode = 2'b00;

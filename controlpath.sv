@@ -95,7 +95,7 @@ module control_path
 		
 		control.reg_selA 		= reg_UNK;
 		control.reg_selB 		= reg_UNK;
-		control.alu_op   		= alu_UNK;
+		control.alu_op   		= alu_NOP;
 		control.alu_srcA		= src_UNK;
 		control.alu_srcB		= src_UNK;	
 		control.alu_dest		= dest_NONE;
@@ -2167,6 +2167,10 @@ module control_path
 								end
 							end
 							
+							PREFIX: begin
+								// Do nothing
+							end
+							
 							EI: begin
 								enable_interrupts 	= `TRUE;
 							end
@@ -2207,6 +2211,7 @@ module control_path
 							end
 							
 							default: begin
+								$display("ERROR OPCODE: %d", op_code);
 								// DO NOTHING
 							end
 						endcase
