@@ -2167,6 +2167,10 @@ module control_path
 								end
 							end
 							
+							PREFIX: begin
+								// Do nothing
+							end
+							
 							EI: begin
 								enable_interrupts 	= `TRUE;
 							end
@@ -2207,6 +2211,7 @@ module control_path
 							end
 							
 							default: begin
+								$display("ERROR OPCODE: %d", op_code);
 								// DO NOTHING
 							end
 						endcase

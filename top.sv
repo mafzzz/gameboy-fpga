@@ -51,6 +51,8 @@ module top
 	output logic 		HDMI_TX_VS,
 	
 	// Debug registers
+	output logic corruption,
+	output logic [15:0]		PC,
 	output logic [7:0]		regA,
 	output logic [7:0]		regB,
 	output logic [7:0]		regC,
@@ -78,7 +80,7 @@ module top
 	
 	logic [7:0] 	lcd_v;
 	logic [1:0]		mode;
-		
+			
 	// To detect joypad edges
 	reg				prev_up, prev_down, prev_left, prev_right, prev_a, prev_b, prev_start, prev_select;
 	always_ff @(posedge clk, posedge rst) begin

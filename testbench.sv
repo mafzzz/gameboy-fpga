@@ -41,6 +41,7 @@ module testbench();
 	logic 		 HDMI_TX_CLK;
 
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
+
 	top DUT (.*);
 	vars	v ();
 
@@ -96,7 +97,7 @@ module testbench();
 		end
 		
 	end
-		
+
 	initial begin
 		joypad_up = 1'b1;
 		joypad_down = 1'b1;

@@ -42,6 +42,8 @@ module memoryunit
 	input logic ld_disp_address_vram,
 	output logic [7:0] disp_data,
 	
+	output logic corruption,
+	
 	input logic 			clk,
 	input logic				rst);
 	
@@ -169,7 +171,8 @@ module SRAM_BANK
 	input logic						CS,
 	input logic						OE,
 	input logic						WE,
-	input logic						clk);
+	input logic						clk,
+	output logic					corruption);
 	
 	reg [7:0]			mem [16'h0000 : size - 1];
 	
@@ -322,7 +325,7 @@ module IO_CONTROL_REGS
 				8'h0F: 
 					data = control_regs.interrupt_st;		
 				8'h40: 
-					data = control_regs.lcd_control;				
+					data = control_regs.lcd_control;
 				8'h41: 
 					data = control_regs.lcd_status;
 				8'h42: 

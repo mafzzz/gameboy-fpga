@@ -84,7 +84,7 @@ module alu
 				addr_result = 16'bx;
 				next_flags[2] = 1'b0;
 			end
-			
+
 			// Signed addition for JR, B is signed, for PC only
 			alu_ADS_PC: begin
 				addr_result = 16'bx;

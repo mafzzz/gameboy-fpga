@@ -60,16 +60,25 @@ module ChipInterface
 
 	// Altera PLL module for 4.19 MHz clock
 	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (HDMI_TX_CLK), .outclk_1 (clk_out));
+<<<<<<< HEAD
 	assign cpu_clk = clk_out;
+=======
+	assign cpu_clk = (SW[0] | cycles == 32'h01871134) ? 1'b0 : clk_out;
+>>>>>>> debug
 	
 	/* ------------------------------------------------------------*/
 	/***  CPU CORE INTANTIATION ***/
 	/* ------------------------------------------------------------*/
+<<<<<<< HEAD
 	logic cpu_rst;
 	assign rst = ~KEY[0];
+=======
+	assign rst = (~KEY[0]);
+>>>>>>> debug
 	
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
 	logic [7:0] 		outa, outb;
+	logic [15:0] 		PC;
 	
 	logic 		 joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
 	
@@ -82,14 +91,29 @@ module ChipInterface
 	assign joypad_start = KEY[3];
 	assign joypad_select = KEY[2];
 	
+	reg [31:0] cycles;
+	reg [15:0] cksm;
+	always @(posedge cpu_clk, posedge rst) begin
+		if (rst) begin
+			cycles <= 32'b0;
+			cksm <= 16'b0;
+		end else begin
+			cksm <= cksm + PC;
+			cycles <= cycles + 1'b1;
+		end
+	end
+	
 	// 00: AF    01: BC    10: DE    11: HL
-	assign outa = (~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regB : ((SW[9] & ~SW[8]) ? regD : ((SW[9] & SW[8]) ? regH : 8'b0)));
-	assign outb = (~SW[9] & ~SW[8]) ? regF : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regL : 8'b0)));
+	assign outa = SW[6] ? PC[15:8] : SW[7] ? cksm[15:8] : ((~SW[9] & ~SW[8]) ? regA : ((~SW[9] & SW[8]) ? regB : ((SW[9] & ~SW[8]) ? regD : ((SW[9] & SW[8]) ? regH : 8'b0))));
+	assign outb = SW[6] ? PC[7:0] : SW[7] ? cksm[7:0] : ((~SW[9] & ~SW[8]) ? regF : ((~SW[9] & SW[8]) ? regC : ((SW[9] & ~SW[8]) ? regE : ((SW[9] & SW[8]) ? regL : 8'b0))));
 	
 	sseg a_outh(outa[7:4], HEX3);
 	sseg a_outl(outa[3:0], HEX2);
 	sseg b_outh(outb[7:4], HEX1);
 	sseg b_outl(outb[3:0], HEX0);
+	
+	logic corruption;
+	logic dmg;
 	
 	top GameBoy (.*);
 	
