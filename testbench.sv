@@ -32,7 +32,7 @@ module testbench();
 
 	logic	cpu_clk, video_clk;
 	logic	rst;
-		
+	
 	logic 		 joypad_up, joypad_down, joypad_right, joypad_left, joypad_a, joypad_b, joypad_start, joypad_select;
 	logic 		 HDMI_TX_DE;
 	logic 		 HDMI_TX_VS;
@@ -41,7 +41,6 @@ module testbench();
 	logic 		 HDMI_TX_CLK;
 
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
-	
 	top DUT (.*);
 	vars	v ();
 
@@ -56,8 +55,8 @@ module testbench();
 	end
 
 	initial
-		//	4.19 MHz cpu clock
-		forever #119.2 cpu_clk <= ~cpu_clk;
+		//	4.50 MHz cpu clock
+		forever #111 cpu_clk <= ~cpu_clk;
 
 	initial
 		//  27.027 MHz hdmi clock
@@ -67,8 +66,37 @@ module testbench();
 		forever @(posedge cpu_clk) $cast(v.instruc, DUT.dp.IR);
 	
 	initial
-		forever @(posedge cpu_clk) v.cycles++;
-	
+		forever @(posedge cpu_clk) v.cycles <= v.cycles + 1'b1;
+		
+	int mcd;
+	string filename;
+	int frame;
+	int done;
+	initial begin
+		frame = 0;
+		done = `FALSE;
+
+		if ($test$plusargs("render")) begin
+			forever @(posedge HDMI_TX_CLK) begin
+				if (done == `TRUE && HDMI_TX_VS) begin
+					done = `FALSE;
+					$sformat(filename, "%0d", frame);
+					mcd = $fopen({"render/frame_", filename, ".bmp"}, "wb");
+					// BMP Header
+					$fwrite(mcd, "%u%u%u%u%u%u%u%u%u%u%u%u%u%c%c", 32'hc6c94D42, 32'h0000000F, 32'h00360000, 32'h00280000, 32'h02D00000, 32'hFE200000, 32'h0001FFFF, 
+																 32'h00000018, 32'hC90C0000, 32'h0B130090, 32'h0B130000, 32'h00000000, 32'h00000000, 8'h00, 8'h00);
+					frame++;
+				end else if (HDMI_TX_DE) begin
+					$fwrite(mcd, "%c%c%c", HDMI_TX_D[7:0], HDMI_TX_D[15:8], HDMI_TX_D[23:16]);
+				end else if (~HDMI_TX_VS) begin
+					$fclose(mcd);
+					done = `TRUE;
+				end
+			end
+		end
+		
+	end
+		
 	initial begin
 		joypad_up = 1'b1;
 		joypad_down = 1'b1;
@@ -85,6 +113,25 @@ module testbench();
 			DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR, v.cycles,
 			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]);
 
+		repeat(20)
+			#700000000;
+		
+		joypad_start <= 1'b0;
+		#10000000;
+		joypad_start <= 1'b1;
+		#50000000;
+		joypad_start <= 1'b0;
+		#10000000;
+		joypad_start <= 1'b1;
+		#50000000;
+		joypad_start <= 1'b0;
+		#10000000;
+		joypad_start <= 1'b1;
+		
+		repeat(10)
+			#500000000;
+		$stop;
+		
 	end
 	
 endmodule: testbench
@@ -93,4 +140,5 @@ endmodule: testbench
 module vars();
 	std_instruction_t	instruc;
 	int cycles;
+	reg [15:0] cksm;
 endmodule: vars

@@ -200,8 +200,8 @@ typedef enum op_code_t {
 	XOR_A_B 	= 8'hA8, XOR_A_C 	= 8'hA9, XOR_A_D 	= 8'hAA, XOR_A_E 	= 8'hAB, XOR_A_H 		= 8'hAC, XOR_A_L 	= 8'hAD, XOR_A_HLA 	= 8'hAE, XOR_A_A 	= 8'hAF,
 	OR_A_B 		= 8'hB0, OR_A_C 	= 8'hB1, OR_A_D 	= 8'hB2, OR_A_E 	= 8'hB3, OR_A_H 		= 8'hB4, OR_A_L 	= 8'hB5, OR_A_HLA 	= 8'hB6, OR_A_A 	= 8'hB7,
 	CP_A_B 		= 8'hB8, CP_A_C 	= 8'hB9, CP_A_D 	= 8'hBA, CP_A_E 	= 8'hBB, CP_A_H 		= 8'hBC, CP_A_L 	= 8'hBD, CP_A_HLA 	= 8'hBE, CP_A_A 	= 8'hBF,
-	RET_NZ 		= 8'hC0, POP_BC 	= 8'hC1, JP_NZ_N16 	= 8'hC2, JP_N16 	= 8'hC3, CALL_NZ_N16	= 8'hC4, PUSH_BC 	= 8'hC5, ADD_A_N8 	= 8'hC6, RST_0 		= 8'hC7,
-	RET_Z 		= 8'hC8, RET 		= 8'hC9, JP_Z_N16 	= 8'hCA, PREFIX 	= 8'hCB, CALL_Z_N16 	= 8'hCC, CALL_N16 	= 8'hCD, ADC_A_N8 	= 8'hCE, RST_8 		= 8'hCF,
+	RET_NZ 		= 8'hC0, POP_BC 	= 8'hC1, JP_NZ_N16 	= 8'hC2, JP_N16 	= 8'hC3, CALL_NZ_N16	= 8'hC4, PUSH_BC 	= 8'hC5, ADD_A_N8 	= 8'hC6, RST_0		= 8'hC7,
+	RET_Z 		= 8'hC8, RET 		= 8'hC9, JP_Z_N16 	= 8'hCA, PREFIX 	= 8'hCB, CALL_Z_N16 	= 8'hCC, CALL_N16 	= 8'hCD, ADC_A_N8 	= 8'hCE, RST_8		= 8'hCF,
 	RET_NC 		= 8'hD0, POP_DE 	= 8'hD1, JP_NC_N16	= 8'hD2, UNUSED1 	= 8'hD3, CALL_NC_N16	= 8'hD4, PUSH_DE 	= 8'hD5, SUB_A_N8 	= 8'hD6, RST_10 	= 8'hD7,
 	RET_C 		= 8'hD8, RETI 		= 8'hD9, JP_C_N16 	= 8'hDA, UNUSED2 	= 8'hDB, CALL_C_N16 	= 8'hDC, UNUSED3 	= 8'hDD, SBC_A_N8 	= 8'hDE, RST_18 	= 8'hDF,
 	LDH_N8A_A 	= 8'hE0, POP_HL 	= 8'hE1, LD_CA_A 	= 8'hE2, UNUSED4 	= 8'hE3, UNUSED5 		= 8'hE4, PUSH_HL 	= 8'hE5, AND_A_N8 	= 8'hE6, RST_20 	= 8'hE7,
@@ -314,13 +314,25 @@ typedef struct packed {
 } control_reg_t;
 
 typedef enum logic [4:0] {
-	s_WAIT 					= 5'b00_000, 
-	s_BACK_GET_LD_ADDR 		= 5'b00_001, 
-	s_BACK_GET_READ_INDEX	= 5'b00_010, 
-	s_BACK_GET_LD_INDEX 	= 5'b00_011, 
-	s_BACK_GET_READ_PIXELS 	= 5'b00_100, 
-	s_BACK_GET_LD_PIXELS1 	= 5'b00_101, 
-	s_BACK_GET_LD_PIXELS2 	= 5'b00_110
+	s_WAIT				= 5'b00_000, 
+	
+	// OAM SEARCH
+	s_OAM_LD_ADDR		= 5'b00_001,
+	s_OAM_READ_BLK		= 5'b00_010,
+	s_OAM_INSPECT_BLK	= 5'b00_011,
+	s_OAM_BUFF_BLK		= 5'b00_100,
+
+	// BACKGROUND RENDER
+	s_BACK_LD_ADDR 		= 5'b00_101, 
+	s_BACK_READ_INDEX	= 5'b00_110, 
+	s_BACK_LD_INDEX 	= 5'b00_111, 
+	s_BACK_READ_PIXELS 	= 5'b01_000, 
+	s_BACK_LD_PIXELS1 	= 5'b01_001, 
+	s_BACK_LD_PIXELS2 	= 5'b01_010
+	
+	// WINDOW RENDER
+	
+	// SPRITE RENDER
 } draw_state_t;
 
 `endif
