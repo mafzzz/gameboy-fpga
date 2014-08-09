@@ -56,8 +56,8 @@ module testbench();
 	end
 
 	initial
-		//	4.50 MHz cpu clock
-		forever #111 cpu_clk <= ~cpu_clk;
+		//	4.19 MHz cpu clock
+		forever #119.2 cpu_clk <= ~cpu_clk;
 
 	initial
 		//  27.027 MHz hdmi clock
@@ -68,35 +68,6 @@ module testbench();
 	
 	initial
 		forever @(posedge cpu_clk) v.cycles++;
-		
-	int mcd;
-	string filename;
-	int frame;
-	int done;
-	initial begin
-		frame = 0;
-		done = `FALSE;
-
-		if ($test$plusargs("render")) begin
-			forever @(posedge HDMI_TX_CLK) begin
-				if (done == `TRUE && HDMI_TX_VS) begin
-					done = `FALSE;
-					$sformat(filename, "%0d", frame);
-					mcd = $fopen({"render/frame_", filename, ".bmp"}, "wb");
-					// BMP Header
-					$fwrite(mcd, "%u%u%u%u%u%u%u%u%u%u%u%u%u%c%c", 32'hc6c94D42, 32'h0000000F, 32'h00360000, 32'h00280000, 32'h02D00000, 32'hFE200000, 32'h0001FFFF, 
-																 32'h00000018, 32'hC90C0000, 32'h0B130090, 32'h0B130000, 32'h00000000, 32'h00000000, 8'h00, 8'h00);
-					frame++;
-				end else if (HDMI_TX_DE) begin
-					$fwrite(mcd, "%c%c%c", HDMI_TX_D[7:0], HDMI_TX_D[15:8], HDMI_TX_D[23:16]);
-				end else if (~HDMI_TX_VS) begin
-					$fclose(mcd);
-					done = `TRUE;
-				end
-			end
-		end
-		
-	end
 	
 	initial begin
 		joypad_up = 1'b1;
@@ -113,35 +84,6 @@ module testbench();
 			DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, v.instruc.name, DUT.dp.IR, DUT.dp.SP, rst,
 			DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR, v.cycles,
 			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]);
-
-		repeat (10)
-			#1500000000;
-		
-		#400000000 joypad_right <= 1'b0;
-		#500000000 joypad_right <= 1'b1;
-		#400000000 joypad_left <= 1'b0;
-		#500000000 joypad_left <= 1'b1;
-		#500000000 joypad_right <= 1'b0;
-		#300000000 joypad_right <= 1'b1;
-		#300000000 joypad_right <= 1'b0;
-		#100000000 joypad_right <= 1'b1;
-		#200000000 joypad_left <= 1'b0;
-		#100000000 joypad_left <= 1'b1;
-		#300000000 joypad_start <= 1'b0;
-		#300000000 joypad_start <= 1'b1;
-		#400000000 joypad_down <= 1'b0;
-		#500000000 joypad_down <= 1'b1;
-		#400000000 joypad_up <= 1'b0;
-		#500000000 joypad_up <= 1'b1;
-		#500000000 joypad_down <= 1'b0;
-		#300000000 joypad_down <= 1'b1;
-		#300000000 joypad_down <= 1'b0;
-		#100000000 joypad_down <= 1'b1;
-		#200000000 joypad_left <= 1'b0;
-		#100000000 joypad_left <= 1'b1;
-		#300000000 joypad_start <= 1'b0;
-		#300000000 joypad_start <= 1'b1;
-		$stop;
 
 	end
 	

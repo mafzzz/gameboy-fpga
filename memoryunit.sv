@@ -35,14 +35,12 @@ module memoryunit
 	output control_reg_t	regout,
 	
 	// DISPLAY MEMORY
-	input logic [7:0] disp_address_oam,
-	input logic [12:0] disp_address_vram,
+	input logic [12:0] disp_address,
 	input logic oe_oam,
 	input logic oe_vram,
 	input logic ld_disp_address_oam,
 	input logic ld_disp_address_vram,
-	output logic [7:0] disp_data_oam,
-	output logic [7:0] disp_data_vram,
+	output logic [7:0] disp_data,
 	
 	input logic 			clk,
 	input logic				rst);
@@ -52,12 +50,10 @@ module memoryunit
 	assign {CS_ramh, CS_io, CS_oam, CS_ram1, CS_ram0, CS_vram, CS_rom1, CS_rom0, CS_dmg} = CS_decoder;
 	
 	logic [7:0] data_out_oam, data_out_vram, data_in_oam, data_in_vram;
-	
+	assign disp_data = (oe_oam) ? data_out_oam : ((oe_vram) ? data_out_vram : 8'bx);
 	assign data_in_oam = (CS_oam & WE) ? data : 8'bx;
 	assign data_in_vram = (CS_vram & WE) ? data : 8'bx;
-	assign disp_data_oam = (oe_oam) ? data_out_oam : 8'bx;
-	assign disp_data_vram = (oe_vram) ? data_out_vram : 8'bx;
-
+	
 	tri [7:0] databus;
 	assign data = (OE) ? (CS_oam) ? data_out_oam : (CS_vram) ? data_out_vram : databus : 8'bz;
 	assign databus = (~OE && WE) ? data : 8'bz;
@@ -65,7 +61,7 @@ module memoryunit
 	reg [15:0] address, address_oam, address_vram;
 	
 	reg 		dmg_rom_disable;
-		
+	
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) 
 			dmg_rom_disable <= `FALSE;
@@ -80,8 +76,8 @@ module memoryunit
 			address_vram <= 16'b0;
 		end else begin
 			address <= cpu_address;
-			address_oam <= (ld_disp_address_oam) ? disp_address_oam : cpu_address;
-			address_vram <= (ld_disp_address_vram) ? disp_address_vram : cpu_address;
+			address_oam <= (ld_disp_address_oam) ? disp_address : cpu_address;
+			address_vram <= (ld_disp_address_vram) ? disp_address : cpu_address;
 		end
 	end
 	
@@ -107,8 +103,8 @@ module memoryunit
 		else if (address < 16'hC000)
 			CS_decoder = 9'b0000_10000;
 			
-		// 0xC000 <= address < 0xE000  [RAM_BANK_1]  0xE000 <= address < 0xFE00  [RAM_BANK_1_ECHO]
-		else if (address < 16'hE000 || address < 16'hFE00)
+		// 0xC000 <= address < 0xE000  [RAM_BANK_1]
+		else if (address < 16'hE000)
 			CS_decoder = 9'b0001_00000;
 			
 		// 0xFE00 <= address < 0xFEA0  [OAM]
@@ -133,9 +129,9 @@ module memoryunit
 	// ROM
 	SRAM_BANK #(.start (16'h0000), .size (16'h0100), .init ("bootstrap.hex")) dmg(.databus (databus), .address (address[7:0]), .CS (CS_dmg), 
 				.OE (OE), .WE (`FALSE), .clk (clk));
-	SRAM_BANK #(.start (16'h0000), .size (16'h4000), .init ("rom_tennis0.hex")) romb0(.databus (databus), .address (address[13:0]), .CS (CS_rom0), 
+	SRAM_BANK #(.start (16'h0000), .size (16'h4000), .init ("ROM0.hex")) romb0(.databus (databus), .address (address[13:0]), .CS (CS_rom0), 
 				.OE (OE), .WE (WE), .clk (clk));
-	SRAM_BANK #(.start (16'h4000), .size (16'h4000), .init ("rom_tennis1.hex")) romb1(.databus (databus), .address (address[13:0]), .CS (CS_rom1), 
+	SRAM_BANK #(.start (16'h4000), .size (16'h4000), .init ("ROM1.hex")) romb1(.databus (databus), .address (address[13:0]), .CS (CS_rom1), 
 				.OE (OE), .WE (WE), .clk (clk));
 
 	// VRAM
@@ -147,7 +143,7 @@ module memoryunit
 				.OE (OE), .WE (WE), .clk (clk));
 	SRAM_BANK #(.start (16'hC000), .size (16'h2000), .init ("")) ramb1(.databus (databus), .address (address[12:0]), .CS (CS_ram1), 
 				.OE (OE), .WE (WE), .clk (clk));
-
+	
 	// OAM
 	SRAM_DUAL_BANK #(.start (16'hFE00), .size (16'h0100), .init ("")) oam(.address (address_oam[7:0]), .write_data (data_in_oam),
 				.CS (CS_oam), .read_data (data_out_oam), .OE (oe_oam | OE), .WE (WE), .clk (clk));

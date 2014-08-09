@@ -35,14 +35,12 @@ module display
 	input logic 		rst,
 	
 	// READ GAMEBOY MEM SIGNALS
-	output reg [7:0] 	rd_address_oam,
-	output reg [12:0] 	rd_address_vram,
+	output reg [12:0] 	rd_address,
 	output logic 		oe_oam,
 	output logic 		oe_vram,
 	output logic 		ld_address_oam,
 	output logic		ld_address_vram,
-	input reg [7:0] 	read_data_oam,
-	input reg [7:0]		read_data_vram,
+	input reg [7:0] 	read_data,
 	
 	// CONTROL REGISTERS
 	input control_reg_t control,
@@ -62,15 +60,10 @@ module display
 	
 	reg [1:0] row_repeat, col_repeat;
 		
-	// Double line draw buffers
+	// Double line buffers
 	reg [0:15] output_buffer [31:0];
 	reg [0:15] render_buffer [31:0];
 		
-	// OAM data line buffer
-	reg [13:0] oam_data_buffer [9:0];
-	
-	reg render_enable;
-	
 	draw_state_t draw_state;
 		
 	always_comb begin
@@ -79,15 +72,15 @@ module display
 		else if (row > 8'd144 || col > 8'd159)
 			HDMI_DO = 24'h236467; 
 		else begin
-			if (~render_enable) 
-				HDMI_DO = 24'hC0B0B0;
+			if (~control.lcd_control[7]) 
+				HDMI_DO = 24'h000000;
 			else begin
 				case ({output_buffer[col[7:3]][{1'b1,col[2:0]}], output_buffer[col[7:3]][{1'b0,col[2:0]}]})
 					2'b00: HDMI_DO = 24'hC0B0B0;
 					2'b01: HDMI_DO = 24'h908080;
 					2'b10: HDMI_DO = 24'h605050;
 					2'b11: HDMI_DO = 24'h302020;
-					default: HDMI_DO = 24'h981254;
+					default: HDMI_DO = 24'h000000;
 				endcase
 			end
 		end
@@ -107,97 +100,54 @@ module display
 			ld_address_oam <= `FALSE;
 			ld_address_vram <= `FALSE;
 			render_col <= 5'b0;
-			rd_address_oam <= 8'b0;
-			rd_address_vram <= 13'b0;
+			rd_address <= 13'b0;
 			draw_state <= s_WAIT;
 		end else begin
-
+			
 			case (draw_state)
-				// IDLE STATE
 				s_WAIT: begin
 					oe_vram <= `FALSE;
 					oe_oam <= `FALSE;
 					ld_address_oam <= `FALSE;
 					ld_address_vram <= `FALSE;
 					render_col <= 5'b0;
-					rd_address_vram <= 13'b0;
-					rd_address_oam <= 8'h00;
-					draw_state <= (col == 8'b00 & HDMI_HSYNC & render_enable && row_repeat == 2'b00) ? 
-									((control.lcd_control[1]) ? s_OAM_LD_ADDR : s_BACK_LD_ADDR) : s_WAIT;
+					rd_address <= 13'b0;
+					draw_state <= (col == 8'd000 && row_repeat == 2'b00 && control.lcd_control[7]) ? s_BACK_GET_LD_ADDR : s_WAIT;
 				end
-				
-				// OAM SEARCH
-				s_OAM_LD_ADDR: begin
-					rd_address_oam <= 8'h9C;
-					ld_address_oam <= `TRUE;
-					draw_state <= s_OAM_READ_BLK;
-				end
-				s_OAM_READ_BLK: begin
-					oe_oam <= `TRUE;
-					ld_address_oam <= `TRUE;
-					rd_address_oam <= rd_address_oam + 1'b1;
-					draw_state <= s_OAM_INSPECT_BLK;
-				end
-				s_OAM_INSPECT_BLK: begin
-					oe_oam <= `TRUE;
-					ld_address_oam <= `TRUE;
-					rd_address_oam <= rd_address_oam - 3'h5;
-					
-					// y-coordinate read
-					draw_state <= (((read_data_oam - 5'd16) >> 2'd3) == row[7:3]) ? s_OAM_BUFF_BLK : ((rd_address_oam == 8'h01) ? s_BACK_LD_ADDR : s_OAM_READ_BLK);
-				end
-				s_OAM_BUFF_BLK: begin
-					oe_oam <= `FALSE;
-					ld_address_oam <= `FALSE;
-					render_col <= (render_col == 5'h9 || rd_address_oam == 8'h9C) ? 5'h0 : render_col + 1;
-					
-					// x-coordinate read
-					oam_data_buffer[render_col] <= {read_data_oam - 5'd8, rd_address_oam[7:2]};
-					draw_state <= (rd_address_oam == 8'h9C) ? s_BACK_LD_ADDR : s_OAM_READ_BLK;
-				end
-				
-				// BACKGROUND RENDER
-				s_BACK_LD_ADDR: begin
-					oe_oam <= `FALSE;
-					ld_address_oam <= `FALSE;
-					
-					rd_address_vram[9:0] <= control.scroll_x[7:3] + render_col + {{control.scroll_y + row} >> 2'd3, 5'b0};
-					rd_address_vram[12:10] <= ((control.lcd_control[3]) ? 3'h7 : 3'h6);
+				s_BACK_GET_LD_ADDR: begin
+					rd_address[9:0] <= control.scroll_x[7:3] + render_col + {{control.scroll_y + row} >> 2'd3, 5'b0};
+					rd_address[12:10] <= ((control.lcd_control[3]) ? 3'h7 : 3'h6);
 					ld_address_vram <= `TRUE;
-					draw_state <= s_BACK_READ_INDEX;
+					draw_state <= s_BACK_GET_READ_INDEX;
 				end
-				s_BACK_READ_INDEX: begin
+				s_BACK_GET_READ_INDEX: begin
 					oe_vram <= `TRUE;
 					ld_address_vram <= `FALSE;
-					draw_state <= s_BACK_LD_INDEX;
+					draw_state <= s_BACK_GET_LD_INDEX;
 				end
-				s_BACK_LD_INDEX: begin
+				s_BACK_GET_LD_INDEX: begin
 					oe_vram <= `FALSE;
 					ld_address_vram <= `TRUE;
-					rd_address_vram <= ((control.lcd_control[4]) ? 13'h0000 : 13'h0800) + {read_data_vram, row[2:0] + control.scroll_y[2:0], 1'b0};
-					draw_state <= s_BACK_READ_PIXELS;
+					rd_address <= ((control.lcd_control[4]) ? 13'h0000 : 13'h0800) + {read_data, row[2:0] + control.scroll_y[2:0], 1'b0};
+					draw_state <= s_BACK_GET_READ_PIXELS;
 				end
-				s_BACK_READ_PIXELS: begin
+				s_BACK_GET_READ_PIXELS: begin
 					oe_vram <= `TRUE;
 					ld_address_vram <= `TRUE;
-					rd_address_vram <= rd_address_vram + 1;
-					draw_state <= s_BACK_LD_PIXELS1;
+					rd_address <= rd_address + 1;
+					draw_state <= s_BACK_GET_LD_PIXELS1;
 				end
-				s_BACK_LD_PIXELS1: begin
+				s_BACK_GET_LD_PIXELS1: begin
 					oe_vram <= `TRUE;
 					ld_address_vram <= `FALSE;
-					render_buffer[render_col][8:15] <= read_data_vram;
-					draw_state <= s_BACK_LD_PIXELS2;
+					render_buffer[render_col][8:15] <= read_data;
+					draw_state <= s_BACK_GET_LD_PIXELS2;
 				end
-				s_BACK_LD_PIXELS2: begin
+				s_BACK_GET_LD_PIXELS2: begin
 					oe_vram <= `FALSE;
-					render_buffer[render_col][0:7] <= read_data_vram;
+					render_buffer[render_col][0:7] <= read_data;
 					render_col <= render_col + 1;
-					draw_state <= (render_col == 5'h13) ? s_WAIT : s_BACK_LD_ADDR;
-				end
-				
-				default: begin
-					draw_state <= s_WAIT;
+					draw_state <= (render_col == 5'h13) ? s_WAIT : s_BACK_GET_LD_ADDR;
 				end
 			endcase
 		end
@@ -214,13 +164,11 @@ module display
 			col <= 9'b0;
 			row_repeat <= 2'b0;
 			col_repeat <= 2'b0;
-			render_enable <= `FALSE;
 		end else if (~HDMI_VSYNC) begin
 			col_repeat <= 2'b0;
 			row_repeat <= 2'b0;
 			col <= 8'b0;
 			row <= 8'b0;
-			render_enable <= control.lcd_control[7];
 		end else if (~HDMI_HSYNC) begin
 			col_repeat <= 2'b0;
 			row_repeat <= row_repeat;
@@ -241,20 +189,19 @@ module display
 			row <= row;
 		end
 	end
-
+	
 	// Video driver current mode:
 	// 		* 00 -> HSYNC
 	//		* 01 -> VSYNC
 	//		* 10 -> OE_OAM
 	//		* 11 -> OE_VRAM/OE_OAM
 	always_comb begin
-		if (~render_enable | row > 8'd143 | ~HDMI_VSYNC)
+		if (row > 8'd143)
 			mode = 2'b01;
-		else if (draw_state == s_WAIT)
+		else if (col > 8'd159 && row_repeat == 2'b00)
 			mode = 2'b00;
-		else if (draw_state == s_OAM_LD_ADDR || draw_state == s_OAM_READ_BLK || draw_state == s_OAM_INSPECT_BLK || draw_state == s_OAM_BUFF_BLK)
-			mode = 2'b10;
-		else
+
+		else 
 			mode = 2'b11;
 	end
 	

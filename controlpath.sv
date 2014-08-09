@@ -2723,7 +2723,7 @@ module control_path
 								// DO NOTHING
 							end
 						endcase
-					end
+					
 				end
 
 				/*	State = WRITE
@@ -3701,14 +3701,14 @@ module control_path
 							end
 
 							// RESET
-							RST_0: begin
+							RST_00: begin
 								control.alu_op		= alu_B;
 								control.alu_srcB	= src_00;
 								control.alu_dest	= dest_PC_l;
 								
 								next_iteration		= 3'b0;
 							end
-							RST_8: begin
+							RST_08: begin
 								control.alu_op		= alu_B;
 								control.alu_srcB	= src_08;
 								control.alu_dest	= dest_PC_l;
