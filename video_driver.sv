@@ -150,7 +150,7 @@ module display
 					render_col <= (render_col == 5'h9 || rd_address_oam == 8'h9C) ? 5'h0 : render_col + 1;
 					
 					// x-coordinate read
-					oam_data_buffer[render_col] <= {read_data_oam - 5'd8, rd_address_oam[7:2]};
+					oam_data_buffer[render_col] <= {read_data_oam - 8'd8, rd_address_oam[7:2]};
 					draw_state <= (rd_address_oam == 8'h9C) ? s_BACK_LD_ADDR : s_OAM_READ_BLK;
 				end
 				

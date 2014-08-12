@@ -51,8 +51,6 @@ module top
 	output logic 		HDMI_TX_VS,
 	
 	// Debug registers
-	output logic corruption,
-	output logic [15:0]		PC,
 	output logic [7:0]		regA,
 	output logic [7:0]		regB,
 	output logic [7:0]		regC,
@@ -70,9 +68,11 @@ module top
 	tri [7:0] memd;
 	logic RE, WE;
 	
-	logic [12:0] 	disp_address;
+	logic [7:0] 	disp_address_oam;
+	logic [12:0] 	disp_address_vram;
 	logic 			oe_oam, oe_vram;
-	logic [7:0] 	disp_data;
+	logic [7:0] 	disp_data_oam;
+	logic [7:0] 	disp_data_vram;
 	logic 			ld_disp_address_vram;
 	logic 			ld_disp_address_oam;
 	
@@ -106,19 +106,21 @@ module top
 	end
 	
 	control_reg_t regin, regout;
-	
+
 	datapath	dp (.clk (clk), .rst (rst), .databus (memd), .address (mema), .RE (RE), .WE (WE), .regA (regA), .regB (regB), 
 					.vblank_int (regout.interrupt_st[0]), .lcdc_int (regout.interrupt_st[1]), .timer_int (regout.interrupt_st[2]), 
-					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), .int_en (regout.interrupt_en), 
-					.int_clear (int_clear), .regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
+					.serial_int (regout.interrupt_st[3]), .joypad_int (regout.interrupt_st[4]), .int_en (regout.interrupt_en), .int_clear (int_clear), 
+					.regC (regC), .regD (regD), .regE (regE), .regF (regF), .regH (regH), .regL (regL));
 	
 	memoryunit	mu (.clk (clk), .rst(rst), .cpu_address (mema), .data (memd), .OE (RE), .WE (WE), .regin (regin), .regout (regout), 
-					.disp_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), .disp_data (disp_data), .ld_disp_address_oam (ld_disp_address_oam),
+					.disp_address_oam (disp_address_oam), .disp_address_vram (disp_address_vram), .oe_oam (oe_oam), .oe_vram (oe_vram), 
+					.disp_data_oam (disp_data_oam), .disp_data_vram (disp_data_vram), .ld_disp_address_oam (ld_disp_address_oam), 
 					.ld_disp_address_vram (ld_disp_address_vram));
 	
-	display		lcdc (.clk_hdmi (HDMI_TX_CLK), .clk_cpu (clk), .rst (rst), .rd_address (disp_address), .oe_oam (oe_oam), .oe_vram (oe_vram), 
-						.read_data (disp_data), .HDMI_VSYNC (HDMI_TX_VS), .HDMI_HSYNC (HDMI_TX_HS), .HDMI_DE (HDMI_TX_DE), .HDMI_DO (HDMI_TX_D), 
-						.control (regout), .lcd_v (lcd_v), .mode (mode), .ld_address_vram (ld_disp_address_vram), .ld_address_oam (ld_disp_address_oam));
+	display		lcdc 	(.clk_hdmi (HDMI_TX_CLK), .clk_cpu (clk), .rst (rst), .rd_address_oam (disp_address_oam), .rd_address_vram (disp_address_vram),
+						.oe_oam (oe_oam), .oe_vram (oe_vram), .read_data_oam (disp_data_oam), .read_data_vram (disp_data_vram), .HDMI_VSYNC (HDMI_TX_VS), 
+						.HDMI_HSYNC (HDMI_TX_HS), .HDMI_DE (HDMI_TX_DE), .HDMI_DO (HDMI_TX_D), .control (regout), .lcd_v (lcd_v), .mode (mode), 
+						.ld_address_vram (ld_disp_address_vram), .ld_address_oam (ld_disp_address_oam));
 	
 	hdmi		hdmi_driver (.clk (HDMI_TX_CLK), .rst (rst), .hsync (HDMI_TX_HS), .vsync (HDMI_TX_VS), .de (HDMI_TX_DE));
 	
@@ -164,10 +166,10 @@ module top
 
 		regin.joypad[7:6] = 2'b0;
 		regin.joypad[5:4] = regout.joypad[5:4];
-		regin.joypad[3] = (regout.joypad[4] | joypad_start) & (regout.joypad[5] | joypad_down);
-		regin.joypad[2] = (regout.joypad[4] | joypad_select) & (regout.joypad[5] | joypad_up);
-		regin.joypad[1] = (regout.joypad[4] | joypad_b) & (regout.joypad[5] | joypad_left);
-		regin.joypad[0] = (regout.joypad[4] | joypad_a) & (regout.joypad[5] | joypad_right);
+		regin.joypad[3] = (regout.joypad[5] | joypad_start) & (regout.joypad[4] | joypad_down);
+		regin.joypad[2] = (regout.joypad[5] | joypad_select) & (regout.joypad[4] | joypad_up);
+		regin.joypad[1] = (regout.joypad[5] | joypad_b) & (regout.joypad[4] | joypad_left);
+		regin.joypad[0] = (regout.joypad[5] | joypad_a) & (regout.joypad[4] | joypad_right);
 
 		regin.serial_data = regout.serial_data;
 		regin.serial_control = regout.serial_control;

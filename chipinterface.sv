@@ -60,21 +60,15 @@ module ChipInterface
 
 	// Altera PLL module for 4.19 MHz clock
 	clock ck (.refclk (CLOCK_50_B5B), .rst (rst), .outclk_0 (HDMI_TX_CLK), .outclk_1 (clk_out));
-<<<<<<< HEAD
+
 	assign cpu_clk = clk_out;
-=======
-	assign cpu_clk = (SW[0] | cycles == 32'h01871134) ? 1'b0 : clk_out;
->>>>>>> debug
+
 	
 	/* ------------------------------------------------------------*/
 	/***  CPU CORE INTANTIATION ***/
 	/* ------------------------------------------------------------*/
-<<<<<<< HEAD
-	logic cpu_rst;
+
 	assign rst = ~KEY[0];
-=======
-	assign rst = (~KEY[0]);
->>>>>>> debug
 	
 	logic [7:0]			regA, regB, regC, regD, regE, regF, regH, regL;
 	logic [7:0] 		outa, outb;
@@ -111,10 +105,7 @@ module ChipInterface
 	sseg a_outl(outa[3:0], HEX2);
 	sseg b_outh(outb[7:4], HEX1);
 	sseg b_outl(outb[3:0], HEX0);
-	
-	logic corruption;
-	logic dmg;
-	
+
 	top GameBoy (.*);
 	
 	/* ------------------------------------------------------------*/

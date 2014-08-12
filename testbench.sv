@@ -98,6 +98,12 @@ module testbench();
 		
 	end
 
+	initial
+		while (`TRUE) begin
+			$display("Current time: %d ms", $time / 1000000);
+			#10000000;
+		end
+	
 	initial begin
 		joypad_up = 1'b1;
 		joypad_down = 1'b1;
@@ -113,7 +119,7 @@ module testbench();
 			DUT.dp.cp.curr_state.name, DUT.dp.cp.iteration, DUT.dp.PC, v.instruc.name, DUT.dp.IR, DUT.dp.SP, rst,
 			DUT.dp.regA, DUT.dp.regB, DUT.dp.regC, DUT.dp.regD, DUT.dp.regE, DUT.dp.regH, DUT.dp.regL, DUT.dp.MAR, DUT.dp.MDR, v.cycles,
 			DUT.dp.regF[3], DUT.dp.regF[2], DUT.dp.regF[1], DUT.dp.regF[0]);
-
+	
 		repeat(20)
 			#700000000;
 		
