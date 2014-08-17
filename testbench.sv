@@ -97,12 +97,6 @@ module testbench();
 		end
 		
 	end
-
-	initial
-		while (`TRUE) begin
-			$display("Current time: %d ms", $time / 1000000);
-			#10000000;
-		end
 	
 	initial begin
 		joypad_up = 1'b1;
@@ -124,21 +118,22 @@ module testbench();
 			#700000000;
 		
 		joypad_start <= 1'b0;
-		#10000000;
+		#100000000;
 		joypad_start <= 1'b1;
-		#50000000;
+		#1000000000;
 		joypad_start <= 1'b0;
-		#10000000;
+		#100000000;
 		joypad_start <= 1'b1;
-		#50000000;
+		#1000000000;
 		joypad_start <= 1'b0;
-		#10000000;
+		#100000000;
 		joypad_start <= 1'b1;
-		
-		repeat(10)
-			#500000000;
-		$stop;
-		
+		#1000000000;
+		joypad_start <= 1'b1;
+		#100000000;
+		joypad_start <= 1'b0;
+		#1000000000;
+		joypad_down <= 1'b0;
 	end
 	
 endmodule: testbench

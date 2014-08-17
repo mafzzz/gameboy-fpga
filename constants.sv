@@ -335,4 +335,14 @@ typedef enum logic [4:0] {
 	// SPRITE RENDER
 } draw_state_t;
 
+typedef enum logic [2:0] {
+	s_DMA_WAIT			= 3'b000,
+	s_DMA_ADDRESS_INIT	= 3'b001,
+	s_DMA_ADDRESS_READ	= 3'b010,
+	s_DMA_DATA_READ		= 3'b011,
+	s_DMA_ADDRESS_WRITE = 3'b100,
+	s_DMA_DATA_WRITE	= 3'b101
+	
+} dma_state_t;
+
 `endif

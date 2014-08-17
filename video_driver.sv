@@ -72,7 +72,7 @@ module display
 	draw_state_t draw_state;
 		
 	always_comb begin
-		if ((row == 8'd0 && col < 8'd159) || row == 8'd144 || col == 8'd159)
+		if ((row == 8'd0 && col < 8'd160) || (row == 8'd144 && col < 8'd160))
 			HDMI_DO = 24'h202020; 
 		else if (row > 8'd144 || col > 8'd159)
 			HDMI_DO = 24'h236467; 
@@ -184,12 +184,12 @@ module display
 				s_BACK_LD_PIXELS1: begin
 					oe_vram <= `TRUE;
 					ld_address_vram <= `FALSE;
-					render_buffer[render_col][8:15] <= read_data_vram;
+					render_buffer[render_col][8:15] <= (control.lcd_control[0]) ? read_data_vram : 8'b0;
 					draw_state <= s_BACK_LD_PIXELS2;
 				end
 				s_BACK_LD_PIXELS2: begin
 					oe_vram <= `FALSE;
-					render_buffer[render_col][0:7] <= read_data_vram;
+					render_buffer[render_col][0:7] <= (control.lcd_control[0]) ? read_data_vram : 8'b0;
 					render_col <= render_col + 1;
 					draw_state <= (render_col == 5'h13) ? s_WAIT : s_BACK_LD_ADDR;
 				end
