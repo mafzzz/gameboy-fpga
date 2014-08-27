@@ -19,11 +19,13 @@
 *	Contact Sohil Shah at sohils@cmu.edu with all questions. 
 **************************************************************************/
 
+`ifndef CONSTANTS
+
+`define CONSTANTS
 `define TRUE 	1'b1
 `define	FALSE 	1'b0
 
-`ifndef CONSTANTS
-`define CONSTANTS
+`timescale 1ns/100ps
 
 /*	Constants file
 *

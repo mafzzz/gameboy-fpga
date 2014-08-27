@@ -21,8 +21,6 @@
 
 `include "top.sv"
 
-`timescale 1ns/100ps
-
 /* 	Module Testbench: Testing environment for the design
 *
 *	Generates clock, reset, peripheral signals. Testing for any individual modules. 

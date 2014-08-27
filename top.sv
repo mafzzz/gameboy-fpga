@@ -204,7 +204,7 @@ module top
 		regin.win_y = regout.win_y;
 		regin.win_x = regout.win_x;
 		
-		regin.dma = 8'b0;
+		regin.dma = regout.dma;
 		
 		regin.dmg_disable = regout.dmg_disable;
 		regin.interrupt_en = regout.interrupt_en;

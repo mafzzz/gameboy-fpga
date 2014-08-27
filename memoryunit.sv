@@ -106,7 +106,7 @@ module memoryunit
 					address_dma_in <= 16'bx;
 					address_dma_oam <= 16'bx;
 					data_dma <= 8'bx;
-					
+
 					dma_state <= (address == 16'hFF46 && WE) ? s_DMA_ADDRESS_INIT : s_DMA_WAIT;
 				end
 				
@@ -125,8 +125,8 @@ module memoryunit
 				s_DMA_DATA_READ: begin
 					dma_read <= `TRUE;
 					dma_write <= `FALSE;
-					ld_address_dma <= `FALSE;
-					ld_address_dma_oam <= `FALSE;
+					ld_address_dma <= `TRUE;
+					ld_address_dma_oam <= `TRUE;
 					
 					dma_state <= s_DMA_ADDRESS_WRITE;
 				end
@@ -134,12 +134,11 @@ module memoryunit
 				s_DMA_ADDRESS_WRITE: begin
 					dma_read <= `FALSE;
 					dma_write <= `FALSE;
-					ld_address_dma <= `FALSE;
+					ld_address_dma <= `TRUE;
 					ld_address_dma_oam <= `TRUE;
 
 					address_dma_oam <= address_dma_oam + 1'b1;
 					data_dma <= data_out_dma;
-					
 					dma_state <= s_DMA_DATA_WRITE;
 				end
 				
@@ -147,7 +146,7 @@ module memoryunit
 					dma_read <= `FALSE;
 					dma_write <= `TRUE;
 					ld_address_dma <= `TRUE;
-					ld_address_dma_oam <= `FALSE;
+					ld_address_dma_oam <= `TRUE;
 					
 					address_dma_in <= address_dma_in + 1'b1;
 					
@@ -237,18 +236,18 @@ module memoryunit
 	// OAM
 	SRAM_DUAL_BANK #(.start (16'hFE00), .size (16'h0100), .init ("")) oam(.address (address_oam[7:0]), .write_data (data_in_oam),
 				.dma_write (dma_write), .data_in_dma (data_dma), .CS (CS_oam), .read_data (data_out_oam), .OE (oe_oam | OE), .WE (WE), .clk (clk));
-	
+
 	// HIGH RAM
 	SRAM_BANK #(.start (16'hFF80), .size (16'h0080), .init ("")) ramh(.databus (databus), .address (address[6:0]), .CS (CS_ramh), 
-				.dma_read (`FALSE), .data_out_dma (data_out_dma), .OE (OE), .WE (WE), .clk (clk));
+				.dma_read (`FALSE), .data_out_dma (databus), .OE (OE), .WE (WE), .clk (clk));
 	
 	/*** CONTROL REGISTER BANK ***/
 	IO_CONTROL_REGS #(.start (16'hFF00), .size (16'h0100)) io(.databus (databus), .address (address[7:0]), .regout (regout), .regin (regin),
 		.CS (CS_io), .OE (OE), .WE (WE), .clk (clk), .rst (rst));
 
-	assign data = (OE) ? (CS_oam) ? data_out_oam : (CS_vram) ? data_out_vram : 
-						(OE && (CS_decoder[0] | CS_decoder[1] | CS_decoder[2] | CS_decoder[4] 
-						| CS_decoder[5])) ? data_out_dma : databus : 8'bz;
+	assign data = (OE) ? (CS_oam) ? data_out_oam : (CS_vram) ? data_out_vram : (CS_decoder[0] | CS_decoder[1] | CS_decoder[2] | CS_decoder[4] 
+						| CS_decoder[5]) ? data_out_dma : databus : 8'bz;
+						
 	assign databus = (~OE && WE) ? data : 8'bz;	
 	
 endmodule: memoryunit
