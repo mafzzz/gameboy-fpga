@@ -120,7 +120,7 @@ module display
 	      render_col <= 5'b0;
 	      rd_address_vram <= 13'b0;
 	      rd_address_oam <= 8'h00;
-	      draw_state <= (col == 8'b00 & HDMI_HSYNC & control.lcd_control[7] && row_repeat == 2'b00) ? 
+	      draw_state <= (mode == 2'b00 & col == 8'b00 & HDMI_HSYNC & control.lcd_control[7] & row_repeat == 2'b00) ? 
 			    ((control.lcd_control[1]) ? s_OAM_LD_ADDR : s_BACK_LD_ADDR) : s_WAIT;
 	   end
 	   
